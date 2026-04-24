@@ -86,3 +86,4 @@ Para saber como criar *Componentes* ou *Rotas*, você deve seguir rigorosamente 
 
 - ➡ [Padrões do Back-end / Prisma](./apps/backend/docs/agent-skills/backend-patterns.md)
 - ➡ [Padrões do Front-end / React](./apps/frontend/docs/agent-skills/frontend-patterns.md)
+- ➡ [Padrões de Deploy](./scripts/deploy-skills.md)

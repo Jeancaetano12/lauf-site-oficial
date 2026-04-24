@@ -29,34 +29,15 @@ bash scripts/deploy.sh
 
 ## 3. Preparando o Terreno (Primeira vez na VPS)
 
-Se esta for a primeira vez que você está subindo a aplicação no servidor, o script não fará tudo sozinho. Cumpra o roteiro inicial de preparação:
+Se esta for a primeira vez que você está configurando a VPS, boa parte do processo manual foi automatizado!
 
-1. **Requisitos Essenciais:** Instale o Node.js (v20+), Git, Nginx e Docker na sua VPS.
-2. **Globais do NPM:** Instale o gerenciador de processos PM2 de forma global (`npm install -g pm2`).
-3. **Repositório:** Faça o `git clone` do repositório no seu servidor.
-4. **Iniciando o Banco:** Suba o banco de dados Postgres usando seu container (`docker-compose up -d`).
-5. **Iniciando a API no PM2:** Execute os passos de inicialização do backend apenas essa primeira vez manualmente:
-   ```bash
-   cd apps/backend
-   npm install
-   npx prisma migrate deploy
-   npm run build
-   pm2 start dist/src/main.js --name "lauf-backend"
-   ```
-6. **Configuração do Nginx (Proxy Reverso):**
-   Edite a configuração do Nginx (normalmente em `/etc/nginx/sites-available/default`) para:
-   - Apontar o seu diretório raiz (root) para a pasta compilada estática: `root /caminho/do/seu/projeto/apps/frontend/dist;`
-   - Configurar o bloco `location /api/` que funcione como um **Proxy Reverso** (redirecionamento silencioso). Isso diz para o Nginx pegar chamadas da web para a API e enviá-las para a porta 3000 do PM2 localmente:
-     ```nginx
-     location /api/ {
-         proxy_pass http://localhost:3000;
-         proxy_http_version 1.1;
-         proxy_set_header Upgrade $http_upgrade;
-         proxy_set_header Connection 'upgrade';
-         proxy_set_header Host $host;
-         proxy_cache_bypass $http_upgrade;
-     }
-     ```
-   - Lembre-se de reiniciar o Nginx após a configuração (`sudo systemctl restart nginx`).
+**SOLICITE** o documento **`vps-setup-guide.md`** a um dos responsáveis pelo projeto para ter acesso ao roteiro detalhado de `setup da VPS`.
+A preparação inicial agora se resume a:
 
-Após essa preparação inicial, o seu dia a dia se resume puramente em aprovar as alterações na branch principal e rodar `bash scripts/deploy.sh` na VPS!
+1. Executar o script **`setup-vps.sh`** para instalar automaticamente todas as dependências da máquina (Node.js, Docker, Nginx, PM2, Certbot, etc.).
+2. Clonar o repositório utilizando uma chave SSH.
+3. Configurar as variáveis de ambiente (`.env`).
+4. Iniciar a infraestrutura primária (Banco de Dados, compilar a API no PM2 e fazer o build do Frontend).
+5. Configurar o Nginx e gerar o certificado HTTPS gratuitamente com o Certbot.
+
+Após essa preparação inicial (detalhada no guia), o seu dia a dia de atualizações da aplicação se resume puramente em garantir que as alterações estejam na branch `main` e rodar `bash scripts/deploy.sh` na raiz do projeto na VPS!
