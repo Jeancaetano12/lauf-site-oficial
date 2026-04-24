@@ -9,6 +9,7 @@ lerna-debug.log*
 
 dist
 dist-ssr
+scripts/vps-setup-guide.md
 *.local
 
 .env

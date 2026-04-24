@@ -41,7 +41,7 @@ Se esta for a primeira vez que você está subindo a aplicação no servidor, o 
    npm install
    npx prisma migrate deploy
    npm run build
-   pm2 start dist/main.js --name "lauf-backend"
+   pm2 start dist/src/main.js --name "lauf-backend"
    ```
 6. **Configuração do Nginx (Proxy Reverso):**
    Edite a configuração do Nginx (normalmente em `/etc/nginx/sites-available/default`) para:

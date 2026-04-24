@@ -34,9 +34,9 @@ cd ../..
 
 # 6. Reiniciar o serviço do Backend no PM2
 # Certifique-se de que o backend foi iniciado a primeira vez com: 
-# pm2 start apps/backend/dist/main.js --name "lauf-backend"
+# pm2 start apps/backend/dist/src/main.js --name "lauf-backend"
 echo "🔄 Reiniciando o Backend (PM2)..."
-pm2 restart lauf-backend || echo "⚠️ PM2 não encontrou o processo 'lauf-backend'. Se for a primeira vez, inicie com: pm2 start apps/backend/dist/main.js --name lauf-backend"
+pm2 restart lauf-backend || echo "⚠️ PM2 não encontrou o processo 'lauf-backend'. Se for a primeira vez, inicie com: pm2 start apps/backend/dist/src/main.js --name lauf-backend"
 
 echo "✅ Deploy concluído com sucesso!"
 echo "Lembre-se: O Frontend (pasta apps/frontend/dist) já deve estar sendo servido pelo seu Nginx."
