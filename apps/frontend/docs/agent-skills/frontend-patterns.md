@@ -20,3 +20,9 @@ O front-end é montado utilizando **Vite, TypeScript, TailwindCSS e React**.
 - **Estilos**: Qualquer componentização de UI, layouts fluidos e estilizações devem ser montados a base das classes utilitárias do TailwindCSS configuradas pela extensão padrão `@tailwindcss/postcss`. Evite criar arquivos locais extensos de `.css` a menos que seja um design estritamente customizável ou impossível via Tailwind.
 - Utilize extensões de compilação avançadas do react (React Compiler) para abstrair hooks desnecessários em memoização no escopo deste template, mantendo código performático.
 - Não rode comandos como *npx create-* ou instalações desnecessárias que quebrem os scripts globais, pois os artefatos de dev/build estão integrados ao script Workspaces do Monorepo instalado e hospedado na pasta raiz do repositório.
+
+## 4. Deployment e Produção (Environment VPS)
+- O Container ou Servidor que hospera o frontend não precisa e NÃO DEVE instalar o NodeJS em produção. 
+- Realize o `npm run build` durante uma esteira CI/CD ou localmente.
+- O resultado originado na pasta `dist` será constituido apenas por HTML, CSS e JS enxutos.
+- Copie apenas a pasta `dist` para o servidor alvo e preencha uma configuração de `Nginx` servindo os arquivos estáticos na porta 80/443. Isso reduz o custo de RAM consumindo apenas megabytes.

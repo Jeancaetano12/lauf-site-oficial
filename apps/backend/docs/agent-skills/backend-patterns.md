@@ -32,3 +32,8 @@ Não crie rotas "soltas" utilizando express cru. **Tudo** funciona em módulos. 
 ## 3. Respostas da API
 - O Back-end deve sempre retornar JSON em caso de sucesso (com uso do nest isso é automático).
 - Garanta que objetos sensíveis (ex: senhas do `Usuario`) sejam removidos do objeto retornado pelo Service antes de chegar ao Controller.
+
+## 4. Deployment e Produção (Environment VPS)
+- O Container `Node` não deve incluir pacotes de desenvolvimento (`devDependencies`) para poupar RAM. Rode `npm ci --omit=dev` após o processo de `npm run build` na geração de containers/zip de deploy.
+- Utilize sempre `npx prisma migrate deploy` em ambiente de produção para rodar com rapidez em vez de iniciar processos interativos pesados.
+- Na VPS, evite iniciar via `npm start`. Execute diretamente a build transpilada via `node dist/main.js`. Em VPS de 1GB de RAM ou menos, instanciar vários workers via PM2 pode ser prejudicial. Preferencialmente instancie um single-thread com `node` ou garanta o limite usando contêineres Alpine Docker controlados de forma minuciosa.
