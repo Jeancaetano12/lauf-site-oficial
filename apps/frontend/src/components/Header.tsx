@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import "../../public/icone2.png";
+import icone2 from "../assets/icone2.png";
 
 export default function Header() {
     const [activeSection, setActiveSection] = useState('inicio');
@@ -36,7 +36,7 @@ export default function Header() {
     return (
         <nav className="sticky top-0 z-50 bg-brand-white/90 backdrop-blur-md flex items-center justify-between px-8 py-2 border-b border-brand-gray-medium">
             <div className="cursor-pointer md:flex gap-2 content-normal items-center" onClick={() => scrollTo('inicio')}>
-                <img src="/icone2.png" alt="Logo LAUF" className="object-contain" width={60} height={60} />
+                <img src={icone2} alt="Logo LAUF" className="object-contain" width={60} height={60} />
                 <span className="font-bold text-xl text-brand-black">LAUF</span>
             </div>
 
@@ -46,7 +46,7 @@ export default function Header() {
                         key={item}
                         onClick={() => scrollTo(item)}
                         className={`capitalize font-medium px-6 py-2 rounded-full transition-all duration-300 ${activeSection === item
-                            ? "bg-gradient-to-r from-brand-purple to-brand-purple-hover text-white shadow-md shadow-brand-purple/20 scale-105"
+                            ? "bg-linear-to-r from-brand-purple to-brand-purple-hover text-white shadow-md shadow-brand-purple/20 scale-105"
                             : "text-brand-text hover:text-brand-purple hover:bg-brand-gray-medium"
                             }`}
                     >
