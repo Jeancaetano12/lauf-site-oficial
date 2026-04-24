@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+:root {
+  /* Paleta Principal */
+  --brand-purple: #6b21a8;       /* Purple 800 */
+  --brand-purple-hover: #581c87; /* Purple 900 */
+  --brand-black: #0f172a;        /* Slate 950 (Preto azulado, mais moderno) */
+  --brand-white: #ffffff;
+  --brand-gray-light: #f8fafc;   /* Slate 50 */
+  --brand-gray-medium: #e2e8f0;  /* Slate 200 */
+  --brand-text: #334155;         /* Slate 700 */
+}
+
+@theme inline {
+  --color-brand-purple: var(--brand-purple);
+  --color-brand-purple-hover: var(--brand-purple-hover);
+  --color-brand-black: var(--brand-black);
+  --color-brand-white: var(--brand-white);
+  --color-brand-gray-light: var(--brand-gray-light);
+  --color-brand-gray-medium: var(--brand-gray-medium);
+  
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background-color: var(--brand-white);
+  color: var(--brand-text);
+  font-family: var(--font-sans);
+}
