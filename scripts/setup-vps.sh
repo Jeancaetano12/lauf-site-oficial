@@ -20,7 +20,7 @@ sudo apt install -y git curl unzip nginx software-properties-common
 
 echo "🟢 3. Instalando Node.js (v20) e NPM..."
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
+sudo apt install -y nodejs npm
 
 echo "⚙️ 4. Instalando o PM2 globalmente..."
 sudo npm install -g pm2
