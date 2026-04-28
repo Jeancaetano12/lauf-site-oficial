@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,11 +9,67 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Curso {
+  ANALISE_E_DESENVOLVIMENTO_DE_SISTEMAS
+  BANCO_DE_DADOS
+  CIENCIAS_AERONAUTICAS
+  ENGENHARIA_DA_COMPUTACAO
+  GESTAO_DA_TECNOLOGIA_DA_INFORMACAO
+  JOGOS_DIGITAIS
+  SEGURANCA_DA_INFORMACAO
+}
+
+enum Cargo {
+  ALUNO
+  PROFESSOR
+  MONITOR
+  COORDENADOR
+}
+
+enum StatusSolicitacao {
+  PENDENTE
+  APROVADA
+  REJEITADA
+}
+
+model SolicitacaoInscricao {
+  id              String            @id @default(uuid())
+  nome            String
+  email           String            @unique
+  matricula       String            @unique
+  curso           Curso
+  cargoPretendido Cargo
+  status          StatusSolicitacao @default(PENDENTE)
+
+  // Link gerado tem validade
+  tokenRegistro         String?   @unique
+  tokenRegistroExpiraEm DateTime?
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+}
+
 model Usuario {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id        String @id @default(uuid())
+  email     String @unique
   nome      String
-  matricula String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  matricula String @unique
+  curso     Curso
+  senha     String
+  cargo     Cargo  @default(ALUNO)
+
+  sessoes Sessao[]
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+}
+
+model Sessao {
+  id           String   @id @default(uuid())
+  refreshToken String   @unique
+  usuarioId    String
+  usuario      Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  valido       Boolean  @default(true)
+  expiraEm     DateTime
+  criadoEm     DateTime @default(now())
 }
