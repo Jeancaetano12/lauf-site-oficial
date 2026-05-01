@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e # Aborta o script no primeiro erro encontrado, evitando builds incompletos
 
 # Script de Deploy Simplificado para VPS
 # Este script deve ser executado na raiz do projeto na VPS sempre que houver atualização na branch main.
@@ -15,8 +16,9 @@ echo "📦 Instalando dependências..."
 npm install
 
 # 3. Build do Banco de Dados (Prisma)
-echo "🗄️ Atualizando banco de dados (Prisma Migrate Deploy)..."
+echo "🗄️ Atualizando banco de dados (Prisma Generate e Migrate)..."
 cd apps/backend
+npx prisma generate
 npx prisma migrate deploy
 cd ../..
 
@@ -33,10 +35,9 @@ npm run build
 cd ../..
 
 # 6. Reiniciar o serviço do Backend no PM2
-# Certifique-se de que o backend foi iniciado a primeira vez com: 
-# pm2 start apps/backend/dist/src/main.js --name "lauf-backend"
+# pm2 reload garante um recarregamento com "zero downtime".
 echo "🔄 Reiniciando o Backend (PM2)..."
-pm2 restart lauf-backend || echo "⚠️ PM2 não encontrou o processo 'lauf-backend'. Se for a primeira vez, inicie com: pm2 start apps/backend/dist/src/main.js --name lauf-backend"
+pm2 reload lauf-backend || pm2 start apps/backend/dist/src/main.js --name "lauf-backend" || echo "⚠️ PM2 não conseguiu reiniciar ou iniciar o backend."
 
 echo "✅ Deploy concluído com sucesso!"
 echo "Lembre-se: O Frontend (pasta apps/frontend/dist) já deve estar sendo servido pelo seu Nginx."
