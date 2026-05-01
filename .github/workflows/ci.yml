@@ -1,0 +1,47 @@
+name: CI Pipeline
+
+# Dispara a action sempre que um Pull Request for aberto para a branch "main" ou quando houver push direto nela
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: Validar Código (Build e Testes)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 Instalar Dependências (Monorepo)
+        run: npm install
+
+      - name: 🗄️ Gerar Prisma Client
+        run: |
+          cd apps/backend
+          npx prisma generate
+
+      - name: 🏗️ Build do Backend (NestJS)
+        run: |
+          cd apps/backend
+          npm run build
+
+      - name: 🎨 Build do Frontend (Vite)
+        run: |
+          cd apps/frontend
+          npm run build
+
+      - name: 🧪 Rodar Testes Unitários (Backend)
+        run: |
+          cd apps/backend
+          npm run test
