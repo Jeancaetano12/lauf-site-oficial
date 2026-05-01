@@ -42,6 +42,8 @@ A utilização de Enums no banco ajuda a restringir os dados inseridos a um conj
 - `curso` (Enum: Curso): Curso vinculado do usuário.
 - `senha` (String): Armazena a hash gerada a partir da senha (nunca o texto limpo).
 - `cargo` (Enum: Cargo): Nível de permissão (Aluno, Professor, etc.). Padrão `ALUNO`.
+- `tokenRecuperacaoSenha` (String?): Hash aleatória de uso único para validação da recuperação de senha.
+- `tokenRecuperacaoExpiraEm` (DateTime?): Data de validade do link de recuperação (segurança recomendada de 1 hora).
 - `criadoEm` / `atualizadoEm`: Logs de auditoria do sistema.
 
 ### 2.3. Sessao

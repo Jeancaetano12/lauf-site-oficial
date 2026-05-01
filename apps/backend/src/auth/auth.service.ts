@@ -49,6 +49,7 @@ export class AuthService {
           nome: dto.nome,
           email: dto.email,
           matricula: dto.matricula,
+          telefone: dto.telefone,
           curso: dto.curso,
           cargoPretendido: dto.cargoPretendido,
         },
@@ -65,6 +66,7 @@ export class AuthService {
         nome: dto.nome,
         email: dto.email,
         matricula: dto.matricula,
+        telefone: dto.telefone,
         curso: dto.curso,
         cargoPretendido: dto.cargoPretendido,
       },
@@ -183,6 +185,7 @@ export class AuthService {
         nome: solicitacao.nome,
         email: solicitacao.email,
         matricula: solicitacao.matricula,
+        telefone: solicitacao.telefone,
         curso: solicitacao.curso,
         cargo: solicitacao.cargoPretendido,
         senha: hashSenha,
@@ -201,6 +204,71 @@ export class AuthService {
       message: 'Cadastro concluído com sucesso.',
       usuario: userWithoutPassword,
     };
+  }
+
+  async solicitarRecuperacaoSenha(email: string, matricula: string) {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { email, matricula },
+    });
+
+    if (!usuario) {
+      this.logger.log(`[DEBUG] Usuario com o email ${email} e matricula ${matricula} nao foi encontrado para recuperar senha`);
+      // Retornamos mensagem de sucesso para não revelar se o email existe ou não (segurança)
+      return { message: 'Se o e-mail existir, um link de recuperação foi enviado.' };
+    }
+
+    const tokenRecuperacaoSenha = randomBytes(32).toString('hex');
+    const tokenRecuperacaoExpiraEm = new Date();
+    tokenRecuperacaoExpiraEm.setHours(tokenRecuperacaoExpiraEm.getHours() + 1); // Expira em 1 hora
+
+    await this.prisma.usuario.update({
+      where: { id: usuario.id },
+      data: {
+        tokenRecuperacaoSenha,
+        tokenRecuperacaoExpiraEm,
+      },
+    });
+
+    // TODO: Usar MailModule para enviar link de recuperação
+
+    this.logger.log(`[DEBUG] Solicitacao de recuperacao de senha gerada para o email: ${email}`);
+    return { message: 'Se o e-mail existir, um link de recuperação foi enviado.', tokenGerado: tokenRecuperacaoSenha };
+  }
+
+  async redefinirSenha(tokenRecuperacaoSenha: string, novaSenha: string) {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { tokenRecuperacaoSenha },
+    });
+
+    if (!usuario) {
+      this.logger.log(`[DEBUG] Tentativa falha de redefinir senha. Token invalido.`);
+      throw new NotFoundException('Token inválido ou expirado.');
+    }
+
+    if (usuario.tokenRecuperacaoExpiraEm && usuario.tokenRecuperacaoExpiraEm < new Date()) {
+      this.logger.log(`[DEBUG] Tentativa falha de redefinir senha. Token expirado.`);
+      throw new BadRequestException('O token de recuperação expirou.');
+    }
+
+    const hashSenha = await bcrypt.hash(novaSenha, 10);
+
+    // Segurança: Deslogar o usuário de todos os aparelhos
+    await this.prisma.sessao.deleteMany({
+      where: { usuarioId: usuario.id },
+    });
+
+    // Atualiza a senha e inutiliza o token
+    await this.prisma.usuario.update({
+      where: { id: usuario.id },
+      data: {
+        senha: hashSenha,
+        tokenRecuperacaoSenha: null,
+        tokenRecuperacaoExpiraEm: null,
+      },
+    });
+
+    this.logger.log(`[DEBUG] Senha redefinida e sessoes revogadas com sucesso para o ID: ${usuario.id}`);
+    return { message: 'Senha redefinida com sucesso. Faça login novamente.' };
   }
 
   private async gerarTokensESessao(usuarioId: string, matricula: string, cargo: string, email: string) {

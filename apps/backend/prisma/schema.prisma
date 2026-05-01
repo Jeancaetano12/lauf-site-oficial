@@ -60,6 +60,9 @@ model Usuario {
   senha     String
   cargo     Cargo  @default(ALUNO)
 
+  tokenRecuperacaoSenha    String?   @unique
+  tokenRecuperacaoExpiraEm DateTime?
+
   sessoes Sessao[]
 
   criadoEm     DateTime @default(now())
