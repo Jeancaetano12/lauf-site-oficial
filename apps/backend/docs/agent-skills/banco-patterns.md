@@ -21,6 +21,7 @@ A utilização de Enums no banco ajuda a restringir os dados inseridos a um conj
 - `nome` (String): Nome completo.
 - `email` (String): E-mail de contato, obrigatório para receber o link.
 - `matricula` (String): Validação de vínculo institucional.
+- `telefone` (String): Telefone de contato.
 - `curso` (Enum: Curso): O curso do ingressante.
 - `cargoPretendido` (Enum: Cargo): Informa se o usuário atuará como Aluno ou Professor.
 - `status` (Enum: StatusSolicitacao): Padrão `PENDENTE`. Controla a aprovação.
@@ -37,6 +38,7 @@ A utilização de Enums no banco ajuda a restringir os dados inseridos a um conj
 - `email` (String): E-mail da conta de acesso.
 - `nome` (String): Nome do usuário.
 - `matricula` (String): Utilizada no momento de login (RF03).
+- `telefone` (String): Telefone de contato.
 - `curso` (Enum: Curso): Curso vinculado do usuário.
 - `senha` (String): Armazena a hash gerada a partir da senha (nunca o texto limpo).
 - `cargo` (Enum: Cargo): Nível de permissão (Aluno, Professor, etc.). Padrão `ALUNO`.

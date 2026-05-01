@@ -14,6 +14,10 @@ export class SolicitarInscricaoDto {
   @IsNotEmpty({ message: 'A matrícula é obrigatória.' })
   matricula: string;
 
+  @IsString({ message: 'O telefone deve ser uma string' })
+  @IsNotEmpty({ message: 'O telefone é obrigatório' })
+  telefone: string;
+
   @IsEnum(Curso, { message: 'Curso inválido.' })
   @IsNotEmpty({ message: 'O curso é obrigatório.' })
   curso: Curso;

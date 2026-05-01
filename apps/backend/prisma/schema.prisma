@@ -37,6 +37,7 @@ model SolicitacaoInscricao {
   nome            String
   email           String            @unique
   matricula       String            @unique
+  telefone        String            @unique
   curso           Curso
   cargoPretendido Cargo
   status          StatusSolicitacao @default(PENDENTE)
@@ -54,6 +55,7 @@ model Usuario {
   email     String @unique
   nome      String
   matricula String @unique
+  telefone  String @unique
   curso     Curso
   senha     String
   cargo     Cargo  @default(ALUNO)
