@@ -17,30 +17,33 @@ export class AuthService {
   ) { }
 
   async solicitarInscricao(dto: SolicitarInscricaoDto) {
-    const existingSolicitacao = await this.prisma.solicitacaoInscricao.findFirst({
+    const solicitacaoExistente = await this.prisma.solicitacaoInscricao.findFirst({
       where: {
         OR: [{ email: dto.email }, { matricula: dto.matricula }],
       },
       select: { status: true }
     });
 
-    if (existingSolicitacao && existingSolicitacao.status === 'PENDENTE') {
+    if (solicitacaoExistente && solicitacaoExistente.status === 'PENDENTE') {
+      this.logger.log(`[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} barrado pois já existe uma solicitação pendente`)
       throw new BadRequestException('Já existe uma solicitação com este e-mail ou matrícula.');
     }
 
-    if (existingSolicitacao && existingSolicitacao.status === 'APROVADA') {
-      const existingUser = await this.prisma.usuario.findUnique({
+    if (solicitacaoExistente && solicitacaoExistente.status === 'APROVADA') {
+      const usuarioExistente = await this.prisma.usuario.findUnique({
         where: { matricula: dto.matricula }
       })
 
-      if (existingUser) {
+      if (usuarioExistente) {
+        this.logger.log(`[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} foi barrado porque já é usuário`)
         throw new BadRequestException('Já existe um usuário cadastrado com esta matrícula.');
       } else {
+        this.logger.log(`[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} foi barrado porque já está aprovado`)
         throw new BadRequestException('Já existe uma solicitação aprovada com esta matrícula.');
       }
     }
 
-    if (existingSolicitacao && existingSolicitacao.status === 'REJEITADA') {
+    if (solicitacaoExistente && solicitacaoExistente.status === 'REJEITADA') {
       const solicitacao2 = await this.prisma.solicitacaoInscricao.create({
         data: {
           nome: dto.nome,
@@ -53,7 +56,7 @@ export class AuthService {
 
       // TODO: Disparar envio de e-mail usando o MailModule futuramente
 
-      this.logger.log(`Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} solicitou inscrição novamente`)
+      this.logger.log(`[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} solicitou inscrição novamente`)
       return { message: 'Solicitação enviada novamente.', id: solicitacao2.id };
     }
 
@@ -69,7 +72,7 @@ export class AuthService {
 
     // TODO: Disparar envio de e-mail usando o MailModule futuramente
 
-    this.logger.log(`Solicitação de inscrição criada com sucesso. ID: ${solicitacao.id}`);
+    this.logger.log(`[DEBUG] Solicitacao de inscricao criada com sucesso. ID: ${solicitacao.id}`);
     return { message: 'Solicitação criada com sucesso.', id: solicitacao.id };
   }
 
@@ -79,10 +82,12 @@ export class AuthService {
     });
 
     if (!solicitacao) {
+      this.logger.log(`[DEBUG] Solicitacao de inscricao com o id ${id} nao foi encontrada para aprovacao`);
       throw new NotFoundException('Solicitação não encontrada.');
     }
 
     if (solicitacao.status !== 'PENDENTE') {
+      this.logger.log(`[DEBUG] Solicitacao de inscricao com o id ${id} ja foi processada`);
       throw new BadRequestException('Esta solicitação já foi processada.');
     }
 
@@ -114,10 +119,12 @@ export class AuthService {
     });
 
     if (!solicitacao) {
+      this.logger.log(`[DEBUG] Solicitacao de inscricao com o id ${id} nao foi encontrada para rejeicao`);
       throw new NotFoundException('Solicitação não encontrada.')
     }
 
     if (solicitacao.status === 'APROVADA') {
+      this.logger.log(`[DEBUG] Solicitacao de inscricao com o id ${id} ja foi aprovada`);
       throw new BadRequestException('Esta solicitação já foi aprovada.');
     }
 
@@ -141,11 +148,13 @@ export class AuthService {
     });
 
     if (!usuario) {
+      this.logger.log(`[DEBUG] Usuario com a matricula ${dto.matricula} nao foi encontrado para login`);
       throw new UnauthorizedException('Credenciais inválidas.');
     }
 
     const senhaCorreta = await bcrypt.compare(dto.senha, usuario.senha);
     if (!senhaCorreta) {
+      this.logger.log(`[DEBUG] Usuario com a matricula ${dto.matricula} inseriu senha incorreta`);
       throw new UnauthorizedException('Credenciais inválidas.');
     }
 
@@ -158,10 +167,12 @@ export class AuthService {
     });
 
     if (!solicitacao) {
+      this.logger.log(`[DEBUG] Usuario com o token de registro ${dto.tokenRegistro} nao foi encontrado para concluir cadastro`);
       throw new NotFoundException('Token de registro inválido ou não encontrado.');
     }
 
     if (solicitacao.tokenRegistroExpiraEm && solicitacao.tokenRegistroExpiraEm < new Date()) {
+      this.logger.log(`[DEBUG] Usuario com o token de registro ${dto.tokenRegistro} inseriu token de registro expirado`);
       throw new BadRequestException('O token de registro expirou.');
     }
 
@@ -210,7 +221,7 @@ export class AuthService {
         expiraEm: dataExpiracao,
       },
     });
-
+    this.logger.log(`[DEBUG] Tokens gerados com sucesso para o usuario com matricula: ${matricula}, email: ${email}, cargo: ${cargo}`)
     return {
       accessToken,
       refreshToken,

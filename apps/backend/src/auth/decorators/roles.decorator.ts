@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
 import { Cargo } from '@prisma/client';
 
-export const ROLES_KEY = 'roles';
-export const Roles = (...roles: Cargo[]) => SetMetadata(ROLES_KEY, roles);
+export const CARGOS_KEY = 'cargos';
+export const Cargos = (...cargos: Cargo[]) => SetMetadata(CARGOS_KEY, cargos);

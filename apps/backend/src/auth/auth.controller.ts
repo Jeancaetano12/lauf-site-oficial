@@ -12,33 +12,33 @@ export class AuthController {
 
   @Post('solicitar-inscricao')
   async solicitarInscricao(@Body() dto: SolicitarInscricaoDto) {
-    this.logger.log('Solicitação de inscrição recebida com os seguintes dados: ', dto.matricula, dto.email);
+    this.logger.log('[DEBUG] Solicitação de inscrição recebida com os seguintes dados: ', dto.matricula, dto.email);
     return this.authService.solicitarInscricao(dto);
   }
 
   @Patch('solicitacoes/:id/aprovar')
   async aprovarSolicitacao(@Param('id') id: string) {
-    this.logger.log(`Aprovação de solicitação recebida para o ID: ${id}`);
+    this.logger.log('[DEBUG] Aprovação de solicitação recebida para o ID: ', id);
     return this.authService.aprovarSolicitacao(id);
   }
 
   @Patch('solicitacoes/:id/rejeitar')
   async rejeitarSolicitacao(@Param('id') id: string) {
-    this.logger.log(`Rejeição de solicitação recebida para o ID: ${id}`);
+    this.logger.log('[DEBUG] Rejeição de solicitação recebida para o ID: ', id);
     return this.authService.rejeitarSolicitacao(id);
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginDto) {
-    this.logger.log('Login recebido com os seguintes dados: ', dto.matricula);
+    this.logger.log('[DEBUG] Login recebido com os seguintes dados: ', dto.matricula);
     return this.authService.login(dto);
   }
 
   @Post('concluir-cadastro')
   @HttpCode(HttpStatus.OK)
   async concluirCadastro(@Body() dto: ConcluirCadastroDto) {
-    this.logger.log('Conclusão de cadastro recebida com os seguintes dados: ', dto.tokenRegistro);
+    this.logger.log('[DEBUG] Conclusão de cadastro recebida com os seguintes dados: ', dto.tokenRegistro);
     return this.authService.concluirCadastro(dto);
   }
 }
