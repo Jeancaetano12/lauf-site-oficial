@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { RedefinirSenhaDto } from './dto/redefinir-senha.dto';
 
 // Mock do AuthService
 // Como já testamos todas as lógicas no arquivo auth.service.spec.ts,
@@ -76,11 +77,11 @@ describe('AuthController', () => {
   });
 
   it('deve chamar o metodo de redefinirSenha do service', async () => {
-    const dto: any = { token: 'token', novaSenha: 'novaSenha' };
+    const dto: RedefinirSenhaDto = { tokenRecuperacaoSenha: 'token', novaSenha: 'novaSenha' };
 
     const resultado = await controller.redefinirSenha(dto);
 
-    expect(authService.redefinirSenha).toHaveBeenCalledWith(dto.token, dto.novaSenha);
+    expect(authService.redefinirSenha).toHaveBeenCalledWith(dto.tokenRecuperacaoSenha, dto.novaSenha);
     expect(resultado).toEqual({ message: 'Senha redefinida' });
   });
 });

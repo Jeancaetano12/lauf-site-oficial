@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Curso } from '@prisma/client';
+import { MailService } from '../mail/mail.service';
 
 jest.mock('bcrypt', () => ({
   hash: jest.fn(),
@@ -35,6 +36,16 @@ const mockJwtService = {
   sign: jest.fn().mockReturnValue('meu-token-jwt-falso'),
 };
 
+// Criamos um Mock do MailService
+const mockMailService = {
+  enviarEmailConfirmacaoSolicitacao: jest.fn().mockResolvedValue({}),
+  enviarEmailAprovacao: jest.fn().mockResolvedValue({}),
+  enviarEmailRecuperacaoSenha: jest.fn().mockResolvedValue({}),
+  enviarEmailRecuperacaoSenhaSucesso: jest.fn().mockResolvedValue({}),
+  enviarEmailRejeicao: jest.fn().mockResolvedValue({}),
+  enviarEmailLogin: jest.fn().mockResolvedValue({}),
+};
+
 describe('AuthService', () => {
   let service: AuthService;
 
@@ -44,6 +55,7 @@ describe('AuthService', () => {
         AuthService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: JwtService, useValue: mockJwtService },
+        { provide: MailService, useValue: mockMailService },
       ],
     }).compile();
 
@@ -69,6 +81,7 @@ describe('AuthService', () => {
 
       expect(mockPrismaService.solicitacaoInscricao.findFirst).toHaveBeenCalled();
       expect(mockPrismaService.solicitacaoInscricao.create).toHaveBeenCalled();
+      expect(mockMailService.enviarEmailConfirmacaoSolicitacao).toHaveBeenCalled();
       expect(resultado.message).toBe('Solicitação criada com sucesso.');
       expect(resultado.id).toBe('id-solicitacao');
     });
@@ -98,6 +111,7 @@ describe('AuthService', () => {
       const resultado = await service.solicitarInscricao(dto);
 
       expect(mockPrismaService.solicitacaoInscricao.create).toHaveBeenCalled();
+      expect(mockMailService.enviarEmailConfirmacaoSolicitacao).toHaveBeenCalled();
       expect(resultado.message).toBe('Solicitação enviada novamente.');
       expect(resultado.id).toBe('id-solicitacao');
     })
@@ -111,6 +125,7 @@ describe('AuthService', () => {
       const resultado = await service.aprovarSolicitacao('id-1');
 
       expect(mockPrismaService.solicitacaoInscricao.update).toHaveBeenCalled();
+      expect(mockMailService.enviarEmailAprovacao).toHaveBeenCalled();
       expect(resultado.message).toBe('Solicitação aprovada.');
       expect(resultado.tokenGerado).toBeDefined(); // Garante que o token hex foi criado
     });
@@ -188,6 +203,7 @@ describe('AuthService', () => {
       const resultado = await service.login({ matricula: '01548379', senha: '01548379' });
 
       expect(resultado.accessToken).toBe('meu-token-jwt-falso');
+      expect(mockMailService.enviarEmailLogin).toHaveBeenCalled();
       expect(resultado.refreshToken).toBeDefined();
     });
 
@@ -223,6 +239,7 @@ describe('AuthService', () => {
           }),
         }),
       );
+      expect(mockMailService.enviarEmailRecuperacaoSenha).toHaveBeenCalled();
       expect(resultado.message).toBe('Se o e-mail existir, um link de recuperação foi enviado.');
       expect(resultado.tokenGerado).toBeDefined();
     });
@@ -295,7 +312,8 @@ describe('AuthService', () => {
             tokenRecuperacaoExpiraEm: null,
           }),
         }),
-      );
+      )
+      expect(mockMailService.enviarEmailRecuperacaoSenhaSucesso).toHaveBeenCalled();
       expect(resultado.message).toBe('Senha redefinida com sucesso. Faça login novamente.');
     });
 

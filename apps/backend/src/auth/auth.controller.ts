@@ -6,6 +6,7 @@ import { ConcluirCadastroDto } from './dto/concluir-cadastro.dto';
 import { RecuperarSenhaDto } from './dto/recuperar-senha.dto';
 import { CargosGuard } from './guards/roles.guard';
 import { Cargos } from './decorators/roles.decorator';
+import { RedefinirSenhaDto } from './dto/redefinir-senha.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -45,7 +46,7 @@ export class AuthController {
   @Post('concluir-cadastro')
   @HttpCode(HttpStatus.OK)
   async concluirCadastro(@Body() dto: ConcluirCadastroDto) {
-    this.logger.log('[DEBUG] Conclusão de cadastro recebida com os seguintes dados: ', dto.tokenRegistro);
+    this.logger.log('[DEBUG] Conclusão de cadastro recebida para o tokenRegistro: ', dto.tokenRegistro);
     return this.authService.concluirCadastro(dto);
   }
 
@@ -58,8 +59,8 @@ export class AuthController {
 
   @Post('redefinir-senha')
   @HttpCode(HttpStatus.OK)
-  async redefinirSenha(@Body() dto: any) {
-    this.logger.log('[DEBUG] Redefinição de senha recebida com os seguintes dados: ', dto.token);
-    return this.authService.redefinirSenha(dto.token, dto.novaSenha);
+  async redefinirSenha(@Body() dto: RedefinirSenhaDto) {
+    this.logger.log('[DEBUG] Redefinição de senha recebida com os seguintes dados: ', dto.tokenRecuperacaoSenha);
+    return this.authService.redefinirSenha(dto.tokenRecuperacaoSenha, dto.novaSenha);
   }
 }
