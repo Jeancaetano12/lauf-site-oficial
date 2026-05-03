@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import * as bcrypt from 'bcrypt';
 import { SolicitarInscricaoDto } from './dto/solicitar-inscricao.dto';
+import { RecuperarSenhaDto } from './dto/recuperar-senha.dto';
 import { LoginDto } from './dto/login.dto';
 import { ConcluirCadastroDto } from './dto/concluir-cadastro.dto';
 import { randomBytes } from 'crypto';
@@ -247,19 +248,20 @@ export class AuthService {
 
     // Remover senha do objeto retornado
     const { senha, ...userWithoutPassword } = usuario;
+    this.logger.log(`[DEBUG] Usuario com a matricula ${usuario.matricula} concluiu cadastro com sucesso`);
     return {
       message: 'Cadastro concluído com sucesso.',
       usuario: userWithoutPassword,
     };
   }
 
-  async solicitarRecuperacaoSenha(email: string, matricula: string) {
+  async solicitarRecuperacaoSenha(dto: RecuperarSenhaDto) {
     const usuario = await this.prisma.usuario.findUnique({
-      where: { email, matricula },
+      where: { email: dto.email, matricula: dto.matricula },
     });
 
     if (!usuario) {
-      this.logger.log(`[DEBUG] Usuario com o email ${email} e matricula ${matricula} nao foi encontrado para recuperar senha`);
+      this.logger.log(`[DEBUG] Usuario com o email ${dto.email} e matricula ${dto.matricula} nao foi encontrado para recuperar senha`);
       // Retornamos mensagem de sucesso para não revelar se o email existe ou não (segurança)
       return { message: 'Se o e-mail existir, um link de recuperação foi enviado.' };
     }
@@ -276,7 +278,7 @@ export class AuthService {
       },
     });
 
-    this.logger.log(`[DEBUG] Solicitacao de recuperacao de senha gerada para o email: ${email}, Disparando email...`);
+    this.logger.log(`[DEBUG] Solicitacao de recuperacao de senha gerada para o email: ${dto.email}, Disparando email...`);
     const emailRecuperacaoSenha = await this.mailService.enviarEmailRecuperacaoSenha(usuario.email, tokenRecuperacaoSenha);
 
     if (emailRecuperacaoSenha === 0) {
@@ -291,8 +293,21 @@ export class AuthService {
       throw new InternalServerErrorException('Não foi possível enviar o e-mail de recuperação de senha. Tente novamente mais tarde.');
     }
 
-    this.logger.log(`[DEBUG] Solicitacao de recuperacao de senha gerada para o email: ${email}`);
+    this.logger.log(`[DEBUG] Solicitacao de recuperacao de senha gerada para o email: ${dto.email}`);
     return { message: 'Se o e-mail existir, um link de recuperação foi enviado.', tokenGerado: tokenRecuperacaoSenha };
+  }
+
+  async logOff(usuarioId: string) {
+    this.logger.log(`[DEBUG] Realizando LogOff do usuario com o ID: ${usuarioId}`);
+    const sessoes = await this.prisma.sessao.deleteMany({
+      where: { usuarioId: usuarioId },
+    });
+    if (sessoes.count === 0) {
+      this.logger.log(`[DEBUG] Usuario com o ID ${usuarioId} nao tem sessoes ativas`);
+      return { message: 'Usuario nao tem sessoes ativas' };
+    }
+    this.logger.log(`[DEBUG] LogOff realizado com sucesso para o usuario com o ID: ${usuarioId}`);
+    return { message: 'LogOff realizado com sucesso' };
   }
 
   async redefinirSenha(tokenRecuperacaoSenha: string, novaSenha: string) {

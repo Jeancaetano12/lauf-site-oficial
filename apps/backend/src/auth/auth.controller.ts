@@ -4,6 +4,7 @@ import { SolicitarInscricaoDto } from './dto/solicitar-inscricao.dto';
 import { LoginDto } from './dto/login.dto';
 import { ConcluirCadastroDto } from './dto/concluir-cadastro.dto';
 import { RecuperarSenhaDto } from './dto/recuperar-senha.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CargosGuard } from './guards/roles.guard';
 import { Cargos } from './decorators/roles.decorator';
 import { RedefinirSenhaDto } from './dto/redefinir-senha.dto';
@@ -21,7 +22,7 @@ export class AuthController {
   }
 
   @Patch('solicitacoes/:id/aprovar')
-  @UseGuards(CargosGuard)
+  @UseGuards(JwtAuthGuard, CargosGuard)
   @Cargos('COORDENADOR')
   async aprovarSolicitacao(@Param('id') id: string) {
     this.logger.log('[DEBUG] Aprovação de solicitação recebida para o ID: ', id);
@@ -29,7 +30,7 @@ export class AuthController {
   }
 
   @Patch('solicitacoes/:id/rejeitar')
-  @UseGuards(CargosGuard)
+  @UseGuards(JwtAuthGuard, CargosGuard)
   @Cargos('COORDENADOR')
   async rejeitarSolicitacao(@Param('id') id: string) {
     this.logger.log('[DEBUG] Rejeição de solicitação recebida para o ID: ', id);
@@ -54,7 +55,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async solicitarRecuperacaoSenha(@Body() dto: RecuperarSenhaDto) {
     this.logger.log('[DEBUG] Solicitação de recuperação de senha recebida com os seguintes dados: ', dto.email, dto.matricula);
-    return this.authService.solicitarRecuperacaoSenha(dto.email, dto.matricula);
+    return this.authService.solicitarRecuperacaoSenha(dto);
   }
 
   @Post('redefinir-senha')
@@ -62,5 +63,12 @@ export class AuthController {
   async redefinirSenha(@Body() dto: RedefinirSenhaDto) {
     this.logger.log('[DEBUG] Redefinição de senha recebida com os seguintes dados: ', dto.tokenRecuperacaoSenha);
     return this.authService.redefinirSenha(dto.tokenRecuperacaoSenha, dto.novaSenha);
+  }
+
+  @Post('logoff')
+  @HttpCode(HttpStatus.OK)
+  async logoff(@Body('usuarioId') usuarioId: string) {
+    this.logger.log('[DEBUG] Logoff recebido com os seguintes dados: ', usuarioId);
+    return this.authService.logOff(usuarioId);
   }
 }

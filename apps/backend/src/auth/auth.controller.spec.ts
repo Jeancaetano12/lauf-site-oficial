@@ -19,6 +19,7 @@ const mockAuthService = {
   concluirCadastro: jest.fn().mockResolvedValue({ message: 'Cadastro concluido' }),
   solicitarRecuperacaoSenha: jest.fn().mockResolvedValue({ message: 'Email enviado' }),
   redefinirSenha: jest.fn().mockResolvedValue({ message: 'Senha redefinida' }),
+  logOff: jest.fn().mockResolvedValue({ message: 'Logoff realizado' }),
 };
 
 describe('AuthController', () => {
@@ -84,7 +85,7 @@ describe('AuthController', () => {
 
     const resultado = await controller.solicitarRecuperacaoSenha(dto);
 
-    expect(authService.solicitarRecuperacaoSenha).toHaveBeenCalledWith(dto.email, dto.matricula);
+    expect(authService.solicitarRecuperacaoSenha).toHaveBeenCalledWith(dto);
     expect(resultado).toEqual({ message: 'Email enviado' });
   });
 
@@ -95,5 +96,13 @@ describe('AuthController', () => {
 
     expect(authService.redefinirSenha).toHaveBeenCalledWith(dto.tokenRecuperacaoSenha, dto.novaSenha);
     expect(resultado).toEqual({ message: 'Senha redefinida' });
+  });
+
+  it('deve chamar o metodo de logoff do service', async () => {
+    const usuarioId = 'user-id-123';
+
+    await controller.logoff(usuarioId);
+
+    expect(authService.logOff).toHaveBeenCalledWith(usuarioId);
   });
 });

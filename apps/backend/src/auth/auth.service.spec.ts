@@ -226,7 +226,7 @@ describe('AuthService', () => {
       });
       mockPrismaService.usuario.update = jest.fn().mockResolvedValue({});
 
-      const resultado = await service.solicitarRecuperacaoSenha('joao@teste.com', '01548379');
+      const resultado = await service.solicitarRecuperacaoSenha({ email: 'joao@teste.com', matricula: '01548379' });
 
       expect(mockPrismaService.usuario.findUnique).toHaveBeenCalledWith({
         where: { email: 'joao@teste.com', matricula: '01548379' },
@@ -249,7 +249,7 @@ describe('AuthService', () => {
       // O service não revela se o e-mail existe ou não — comportamento esperado por segurança
       mockPrismaService.usuario.findUnique.mockResolvedValue(null);
 
-      const resultado = await service.solicitarRecuperacaoSenha('naoexiste@teste.com', '00000000');
+      const resultado = await service.solicitarRecuperacaoSenha({ email: 'naoexiste@teste.com', matricula: '00000000' });
 
       expect(mockPrismaService.usuario.findUnique).toHaveBeenCalled();
       expect(resultado.message).toBe('Se o e-mail existir, um link de recuperação foi enviado.');
@@ -267,7 +267,7 @@ describe('AuthService', () => {
       });
       mockPrismaService.usuario.update = jest.fn().mockResolvedValue({});
 
-      await service.solicitarRecuperacaoSenha('joao@teste.com', '01548379');
+      await service.solicitarRecuperacaoSenha({ email: 'joao@teste.com', matricula: '01548379' });
 
       const chamada = mockPrismaService.usuario.update.mock.calls[0][0];
       const expiracao: Date = chamada.data.tokenRecuperacaoExpiraEm;
@@ -374,6 +374,26 @@ describe('AuthService', () => {
       const dadosSalvos = mockPrismaService.usuario.update.mock.calls[0][0].data;
       expect(dadosSalvos.senha).toBe('senha-hasheada');
       expect(dadosSalvos.senha).not.toBe('novaSenha123');
+    });
+  });
+
+  describe('logOff', () => {
+    it('deve deslogar o usuario com sucesso', async () => {
+      mockPrismaService.sessao.deleteMany = jest.fn().mockResolvedValue({ count: 1 });
+      const resultado = await service.logOff('user-id');
+      expect(mockPrismaService.sessao.deleteMany).toHaveBeenCalledWith({
+        where: { usuarioId: 'user-id' },
+      });
+      expect(resultado.message).toBe('LogOff realizado com sucesso');
+    });
+
+    it('deve retornar mensagem de erro quando usuario nao tem sessoes ativas', async () => {
+      mockPrismaService.sessao.deleteMany = jest.fn().mockResolvedValue({ count: 0 });
+      const resultado = await service.logOff('user-id');
+      expect(mockPrismaService.sessao.deleteMany).toHaveBeenCalledWith({
+        where: { usuarioId: 'user-id' },
+      });
+      expect(resultado.message).toBe('Usuario nao tem sessoes ativas');
     });
   });
 });

@@ -48,3 +48,8 @@ Sempre que a funcionalidade envolver segurança e controle de acesso, atente-se 
   - Rotas exclusivas por Cargo (ex: funcionalidade administrativa) devem incluir o `@UseGuards(JwtAuthGuard, RolesGuard)` seguido do decorador `@Roles(Cargo.COORDENADOR, Cargo.PROFESSOR)` informando o Array de cargos permitidos.
 - **Identificação do Usuário Logado**: Ao invés de trafegar IDs expostos ou resgatar tudo do zero, utilize o custom decorator `@CurrentUser()`, que extrai do token os dados `id`, `matricula`, `email` e `cargo` de forma segura.
 - **Validação Global**: As requisições são protegidas globalmente pelo `ValidationPipe` do NestJS. Sendo assim, toda entrada de dados no Controller (`@Body()`) deve possuir uma classe DTO rigorosamente validada pelos decoradores do `class-validator` (ex: `@IsString()`, `@IsNotEmpty()`, `@IsEmail()`).
+
+### 5.1 Considerações sobre o modulo de Autenticação:
+- Os disparos de emails solicitado nos requisitos funcionais estão implementados e escritos em um modulo próprio `MailService`, que já foi integrado ao sistema.
+- Sempre que for necessário enviar um email, utilize o `MailService` já disponível.
+- O `MailService` está configurado para utilizar o SMTP da google, limitado a 500 envios por dia.
