@@ -6,6 +6,7 @@ import { BadRequestException, NotFoundException, UnauthorizedException } from '@
 import * as bcrypt from 'bcrypt';
 import { Curso } from '@prisma/client';
 import { MailService } from '../mail/mail.service';
+import { SolicitarInscricaoDto } from './dto/solicitar-inscricao.dto';
 
 jest.mock('bcrypt', () => ({
   hash: jest.fn(),
@@ -73,7 +74,7 @@ describe('AuthService', () => {
       // Simular retorno da criação
       mockPrismaService.solicitacaoInscricao.create.mockResolvedValue({ id: 'id-solicitacao' });
 
-      const dto = {
+      const dto: SolicitarInscricaoDto = {
         nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO' as any
       };
 
@@ -89,7 +90,7 @@ describe('AuthService', () => {
     it('deve rejeitar se ja existir uma solicitacao PENDENTE', async () => {
       mockPrismaService.solicitacaoInscricao.findFirst.mockResolvedValue({ status: 'PENDENTE' });
 
-      const dto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO' as any };
+      const dto: SolicitarInscricaoDto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO' as any };
 
       await expect(service.solicitarInscricao(dto)).rejects.toThrow(BadRequestException);
     });
@@ -97,7 +98,7 @@ describe('AuthService', () => {
     it('deve rejeitar se ja existir uma solicitacao APROVADA', async () => {
       mockPrismaService.solicitacaoInscricao.findFirst.mockResolvedValue({ status: 'APROVADA' });
 
-      const dto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO' as any };
+      const dto: SolicitarInscricaoDto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO' as any };
 
       await expect(service.solicitarInscricao(dto)).rejects.toThrow(BadRequestException);
     });
@@ -106,7 +107,7 @@ describe('AuthService', () => {
       mockPrismaService.solicitacaoInscricao.findFirst.mockResolvedValue({ status: 'REJEITADA' });
       mockPrismaService.solicitacaoInscricao.create.mockResolvedValue({ id: 'id-solicitacao' });
 
-      const dto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO' as any };
+      const dto: SolicitarInscricaoDto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO' as any };
 
       const resultado = await service.solicitarInscricao(dto);
 
@@ -276,6 +277,7 @@ describe('AuthService', () => {
       expect(diferencaMs).toBeGreaterThan(59 * 60 * 1000);
       expect(diferencaMs).toBeLessThanOrEqual(61 * 60 * 1000);
     });
+
   });
 
   describe('redefinirSenha', () => {
@@ -325,7 +327,7 @@ describe('AuthService', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('deve rejeitar se o token estiver expirado', async () => {
+    it('deve rejeitar se o token estiver expirado e limpá-lo do banco', async () => {
       const dataPassada = new Date();
       dataPassada.setHours(dataPassada.getHours() - 1); // 1 hora no passado
 
@@ -334,10 +336,21 @@ describe('AuthService', () => {
         tokenRecuperacaoSenha: 'token-expirado',
         tokenRecuperacaoExpiraEm: dataPassada,
       });
+      mockPrismaService.usuario.update = jest.fn().mockResolvedValue({});
 
       await expect(
         service.redefinirSenha('token-expirado', 'novaSenha123'),
       ).rejects.toThrow(BadRequestException);
+
+      expect(mockPrismaService.usuario.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'user-id' },
+          data: expect.objectContaining({
+            tokenRecuperacaoSenha: null,
+            tokenRecuperacaoExpiraEm: null,
+          }),
+        }),
+      );
     });
 
     it('deve hashear a nova senha antes de salvar', async () => {

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsString, MinLength } from "class-validator";
 
 export class RedefinirSenhaDto {
     @IsString({ message: 'O tokenRecuperacaoSenha deve ser uma string.' })
@@ -7,5 +7,6 @@ export class RedefinirSenhaDto {
 
     @IsString({ message: 'A senha deve ser uma string.' })
     @IsNotEmpty({ message: 'A senha é obrigatória.' })
+    @MinLength(6, { message: 'A senha deve ter no mínimo 6 caracteres.' })
     novaSenha: string;
 }

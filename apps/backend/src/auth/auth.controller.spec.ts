@@ -2,6 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { RedefinirSenhaDto } from './dto/redefinir-senha.dto';
+import { SolicitarInscricaoDto } from './dto/solicitar-inscricao.dto';
+import { LoginDto } from './dto/login.dto';
+import { ConcluirCadastroDto } from './dto/concluir-cadastro.dto';
+import { RecuperarSenhaDto } from './dto/recuperar-senha.dto';
 
 // Mock do AuthService
 // Como já testamos todas as lógicas no arquivo auth.service.spec.ts,
@@ -41,7 +45,7 @@ describe('AuthController', () => {
   });
 
   it('deve chamar o metodo de solicitarInscricao do service', async () => {
-    const dto: any = { nome: 'Teste', matricula: '123', };
+    const dto: SolicitarInscricaoDto = { nome: 'Teste', matricula: '12345678', email: 'teste@teste.com', telefone: '85989694059', curso: 'ENGENHARIA_DA_COMPUTACAO', cargoPretendido: 'COORDENADOR' };
 
     const resultado = await controller.solicitarInscricao(dto);
 
@@ -58,8 +62,16 @@ describe('AuthController', () => {
     expect(authService.aprovarSolicitacao).toHaveBeenCalledWith(id);
   });
 
+  it('deve chamar o metodo de rejeitarSolicitacao do service', async () => {
+    const id = 'ID-Rejeitado';
+
+    await controller.rejeitarSolicitacao(id);
+
+    expect(authService.rejeitarSolicitacao).toHaveBeenCalledWith(id);
+  });
+
   it('deve chamar o metodo de login do service', async () => {
-    const dto: any = { matricula: '123', senha: '123' };
+    const dto: LoginDto = { matricula: '12345678', senha: '[PASSWORD]' };
 
     const resultado = await controller.login(dto);
 
@@ -68,7 +80,7 @@ describe('AuthController', () => {
   });
 
   it('deve chamar o metodo de solicitarRecuperacaoSenha do service', async () => {
-    const dto: any = { email: 'teste@teste.com', matricula: '123' };
+    const dto: RecuperarSenhaDto = { email: 'teste@teste.com', matricula: '12345678' };
 
     const resultado = await controller.solicitarRecuperacaoSenha(dto);
 

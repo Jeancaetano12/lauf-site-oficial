@@ -305,8 +305,15 @@ export class AuthService {
       throw new NotFoundException('Token inválido ou expirado.');
     }
 
-    if (usuario.tokenRecuperacaoExpiraEm && usuario.tokenRecuperacaoExpiraEm < new Date()) {
+    if (!usuario.tokenRecuperacaoExpiraEm || usuario.tokenRecuperacaoExpiraEm < new Date()) {
       this.logger.log(`[DEBUG] Tentativa falha de redefinir senha. Token expirado.`);
+      await this.prisma.usuario.update({
+        where: { id: usuario.id },
+        data: {
+          tokenRecuperacaoSenha: null,
+          tokenRecuperacaoExpiraEm: null,
+        },
+      });
       throw new BadRequestException('O token de recuperação expirou.');
     }
 

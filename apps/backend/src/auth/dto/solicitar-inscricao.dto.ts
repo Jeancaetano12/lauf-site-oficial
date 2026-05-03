@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength, MaxLength, Matches } from 'class-validator';
 import { Cargo, Curso } from '@prisma/client';
 
 export class SolicitarInscricaoDto {
@@ -12,10 +12,16 @@ export class SolicitarInscricaoDto {
 
   @IsString({ message: 'A matrícula deve ser uma string.' })
   @IsNotEmpty({ message: 'A matrícula é obrigatória.' })
+  @MinLength(8, { message: 'A matrícula deve ter pelo menos 8 caracteres.' })
+  @MaxLength(9, { message: 'A matrícula deve ter no máximo 9 caracteres.' })
+  @Matches(/^[0-9]+$/, { message: 'A matrícula deve conter apenas números.' })
   matricula: string;
 
   @IsString({ message: 'O telefone deve ser uma string' })
   @IsNotEmpty({ message: 'O telefone é obrigatório' })
+  @MinLength(11, { message: 'O telefone deve ter pelo menos 11 caracteres.' })
+  @MaxLength(11, { message: 'O telefone deve ter no máximo 11 caracteres.' })
+  @Matches(/^[0-9]+$/, { message: 'O telefone deve conter apenas números.' })
   telefone: string;
 
   @IsEnum(Curso, { message: 'Curso inválido.' })
