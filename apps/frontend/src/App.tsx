@@ -7,6 +7,7 @@ import { AuthProvider } from "./context/AuthContext";
 import LaufHub from "./pages/LaufHub";
 import RecuperarSenha from "./pages/RecuperarSenha";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RedefinirSenha from "./pages/RedefinirSenha";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             }
           />
           <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+          <Route path="/redefinir-senha" element={<RedefinirSenha />} />
         </Routes>
       </Router>
     </AuthProvider>

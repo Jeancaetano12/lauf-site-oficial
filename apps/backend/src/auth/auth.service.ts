@@ -363,9 +363,7 @@ export class AuthService {
     const hashSenha = await bcrypt.hash(novaSenha, 10);
 
     // Segurança: Deslogar o usuário de todos os aparelhos
-    await this.prisma.sessao.deleteMany({
-      where: { usuarioId: usuario.id },
-    });
+    await this.logOff(usuario.id);
 
     // Atualiza a senha e inutiliza o token
     await this.prisma.usuario.update({

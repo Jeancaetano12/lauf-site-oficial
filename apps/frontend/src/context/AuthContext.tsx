@@ -28,6 +28,16 @@ interface SolicitarRecuperacaoSenhaData {
     email: string;
 }
 
+interface RedefinirSenhaData {
+    tokenRecuperacaoSenha: string;
+    novaSenha: string;
+}
+
+interface ConcluirCadastroData {
+    tokenRegistro: string;
+    senha: string;
+}
+
 interface AuthContextData {
     user: DecodedToken | null;
     isAuthenticated: boolean;
@@ -35,7 +45,9 @@ interface AuthContextData {
     login: (matricula: string, senha: string) => Promise<void>;
     logout: () => void;
     solicitarInscricao: (data: SolicitarInscricaoData) => Promise<any>;
+    concluirCadastro: (data: ConcluirCadastroData) => Promise<any>;
     solicitarRecuperacaoSenha: (data: SolicitarRecuperacaoSenhaData) => Promise<any>;
+    redefinirSenha: (data: RedefinirSenhaData) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -114,6 +126,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
 
+    async function redefinirSenha(data: RedefinirSenhaData) {
+        try {
+            const response = await api.post("/auth/redefinir-senha", data);
+            return response.data;
+        } catch (error) {
+            console.error("Falha ao redefinir senha", error);
+            throw error;
+        }
+    }
+
+    async function concluirCadastro(data: ConcluirCadastroData) {
+        try {
+            const response = await api.post("/auth/concluir-cadastro", data);
+            return response.data;
+        } catch (error) {
+            console.error("Falha ao concluir cadastro", error);
+            throw error;
+        }
+    }
+
     return (
         <AuthContext.Provider
             value={{
@@ -123,7 +155,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 login,
                 logout,
                 solicitarInscricao,
+                concluirCadastro,
                 solicitarRecuperacaoSenha,
+                redefinirSenha,
             }}
         >
             {children}

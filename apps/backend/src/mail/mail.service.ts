@@ -54,7 +54,7 @@ export class MailService {
   }
 
   async enviarEmailRecuperacaoSenha(email: string, token: string) {
-    const url = `http://localhost:5173/recuperar-senha?token=${token}`;
+    const url = `http://localhost:5173/redefinir-senha?token=${token}`;
 
     return await this.mailerService.sendMail({
       to: email,

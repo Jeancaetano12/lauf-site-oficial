@@ -1,24 +1,29 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaUser, FaEnvelope, FaIdCard, FaPhone, FaGraduationCap } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
 
 export default function SolicitarInscricao() {
-  const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    matricula: "",
-    telefone: "",
-    curso: "",
-  });
+  const { solicitarInscricao } = useAuth();
+  const navigate = useNavigate();
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [matricula, setMatricula] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [curso, setCurso] = useState("");
+  const [cargo, setCargo] = useState("");
+  const [message, setMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Inscricao request:", formData);
-    // Integração com o backend será feita aqui
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    try {
+      await solicitarInscricao({ nome, email, matricula, telefone, curso, cargoPretendido: cargo });
+      setMessage("Inscrição solicitada com sucesso!");
+      navigate("/login");
+    } catch (error) {
+      console.error("Error requesting registration:", error);
+      setMessage("Erro ao solicitar inscrição. Tente novamente.");
+    }
   };
 
   return (
@@ -40,6 +45,15 @@ export default function SolicitarInscricao() {
           <p className="text-brand-text/70 max-w-md mx-auto">
             Preencha os dados abaixo para que a coordenação da LAUF possa avaliar seu perfil.
           </p>
+
+          {message && (
+            <div className={`mb-4 p-4 rounded-xl border ${message === "success"
+              ? "bg-green-500/10 border-green-500/30 text-green-400"
+              : "bg-red-500/10 border-red-500/30 text-red-400"
+              }`}>
+              {message}
+            </div>
+          )}
         </div>
 
         <div className="bg-brand-gray-light border border-brand-gray-medium p-8 md:p-12 rounded-[2.5rem] shadow-xl shadow-brand-black/5">
@@ -54,8 +68,8 @@ export default function SolicitarInscricao() {
                   type="text"
                   name="nome"
                   placeholder="Seu nome completo"
-                  value={formData.nome}
-                  onChange={handleChange}
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
                   className="w-full bg-white text-brand-black border border-brand-gray-medium rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple transition-all"
                   required
                 />
@@ -72,8 +86,8 @@ export default function SolicitarInscricao() {
                   type="email"
                   name="email"
                   placeholder="exemplo@gmail.com"
-                  value={formData.email}
-                  onChange={handleChange}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-white text-brand-black border border-brand-gray-medium rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple transition-all"
                   required
                 />
@@ -91,8 +105,8 @@ export default function SolicitarInscricao() {
                   name="matricula"
                   placeholder="00000000"
                   maxLength={9}
-                  value={formData.matricula}
-                  onChange={handleChange}
+                  value={matricula}
+                  onChange={(e) => setMatricula(e.target.value)}
                   className="w-full bg-white text-brand-black border border-brand-gray-medium rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple transition-all"
                   required
                 />
@@ -110,8 +124,8 @@ export default function SolicitarInscricao() {
                   name="telefone"
                   placeholder="(00) 00000-0000"
                   maxLength={11}
-                  value={formData.telefone}
-                  onChange={handleChange}
+                  value={telefone}
+                  onChange={(e) => setTelefone(e.target.value)}
                   className="w-full bg-white text-brand-black border border-brand-gray-medium rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple transition-all"
                   required
                 />
@@ -126,15 +140,39 @@ export default function SolicitarInscricao() {
                 </span>
                 <select
                   name="curso"
-                  value={formData.curso}
-                  onChange={handleChange}
+                  value={curso}
+                  onChange={(e) => setCurso(e.target.value)}
                   className="w-full bg-white text-brand-black border border-brand-gray-medium rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple transition-all appearance-none"
                   required
                 >
-                  <option>ANÁLISE E DESENVOLVIMENTO DE SISTEMAS</option>
-                  <option>ENGENHARIA DA COMPUTAÇÃO</option>
-                  <option>ENGENHARIA ELÉTRICA</option>
-                  <option>SISTEMAS DE INFORMAÇÃO</option>
+                  <option value="" disabled>Selecione seu curso</option>
+                  <option value="ANALISE_E_DESENVOLVIMENTO_DE_SISTEMAS">Análise e Desenvolvimento de Sistemas</option>
+                  <option value="BANCO_DE_DADOS">Banco de Dados</option>
+                  <option value="CIENCIAS_AERONAUTICAS">Ciências Aeronáuticas</option>
+                  <option value="ENGENHARIA_DA_COMPUTACAO">Engenharia da Computação</option>
+                  <option value="GESTAO_DA_TECNOLOGIA_DA_INFORMACAO">Gestão da Tecnologia da Informação</option>
+                  <option value="JOGOS_DIGITAIS">Jogos Digitais</option>
+                  <option value="SEGURANCA_DA_INFORMACAO">Segurança da Informação</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-brand-purple ml-1">Cargo Pretendido</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-purple/50">
+                  <FaGraduationCap className="text-sm" />
+                </span>
+                <select
+                  name="cargo"
+                  value={cargo}
+                  onChange={(e) => setCargo(e.target.value)}
+                  className="w-full bg-white text-brand-black border border-brand-gray-medium rounded-2xl py-4 pl-12 pr-4 focus:outline-none focus:border-brand-purple focus:ring-1 focus:ring-brand-purple transition-all appearance-none"
+                  required
+                >
+                  <option value="" disabled>Selecione o cargo</option>
+                  <option value="ALUNO">Aluno</option>
+                  <option value="PROFESSOR">Professor</option>
                 </select>
               </div>
             </div>
