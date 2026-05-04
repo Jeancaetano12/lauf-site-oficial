@@ -5,6 +5,8 @@ import Login from "./pages/Login";
 import SolicitarInscricao from "./pages/SolicitarInscricao";
 import { AuthProvider } from "./context/AuthContext";
 import LaufHub from "./pages/LaufHub";
+import RecuperarSenha from "./pages/RecuperarSenha";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -14,7 +16,15 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/solicitar-inscricao" element={<SolicitarInscricao />} />
-          <Route path="/hub" element={<LaufHub />} />
+          <Route
+            path="/hub"
+            element={
+              <ProtectedRoute>
+                <LaufHub />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/recuperar-senha" element={<RecuperarSenha />} />
         </Routes>
       </Router>
     </AuthProvider>

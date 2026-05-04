@@ -46,6 +46,16 @@ O `AuthContext` é o "Cérebro" da sessão:
 - **Persistência**: Ao carregar a página, o context tenta ler o storage e restaurar a sessão automaticamente.
 
 ### 5.3. Redirecionamento e Proteção
-- **Página de Login**: Deve verificar se `isAuthenticated` é true e redirecionar para o Hub imediatamente.
-- **Rotas Protegidas**: (Padrão a implementar) Utilize componentes de "Guard" ou verifique `isAuthenticated` dentro do `useEffect` das páginas privadas para evitar acesso não autorizado.
+- **Página de Login**: Deve verificar se `isAuthenticated` é true e redirecionar para o Hub imediatamente para evitar que o usuário logue duas vezes.
+- **Rotas Protegidas**: Utilize o componente `ProtectedRoute` (em `src/components/ProtectedRoute.tsx`) para envolver rotas que exigem autenticação. Ele gerencia o estado de carregamento e redireciona automaticamente para o `/login` caso não haja uma sessão válida.
 
+```tsx
+<Route 
+  path="/privadas" 
+  element={
+    <ProtectedRoute>
+      <SuaPaginaPrivada />
+    </ProtectedRoute>
+  } 
+/>
+```

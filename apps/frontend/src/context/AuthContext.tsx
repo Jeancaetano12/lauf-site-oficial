@@ -23,6 +23,11 @@ interface SolicitarInscricaoData {
     cargoPretendido: string;
 }
 
+interface SolicitarRecuperacaoSenhaData {
+    matricula: string;
+    email: string;
+}
+
 interface AuthContextData {
     user: DecodedToken | null;
     isAuthenticated: boolean;
@@ -30,6 +35,7 @@ interface AuthContextData {
     login: (matricula: string, senha: string) => Promise<void>;
     logout: () => void;
     solicitarInscricao: (data: SolicitarInscricaoData) => Promise<any>;
+    solicitarRecuperacaoSenha: (data: SolicitarRecuperacaoSenhaData) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -98,6 +104,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
 
+    async function solicitarRecuperacaoSenha(data: SolicitarRecuperacaoSenhaData) {
+        try {
+            const response = await api.post("/auth/solicitar-recuperacao-senha", data);
+            return response.data;
+        } catch (error) {
+            console.error("Falha ao solicitar recuperação de senha", error);
+            throw error;
+        }
+    }
+
     return (
         <AuthContext.Provider
             value={{
@@ -107,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 login,
                 logout,
                 solicitarInscricao,
+                solicitarRecuperacaoSenha,
             }}
         >
             {children}
