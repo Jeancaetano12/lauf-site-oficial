@@ -1,17 +1,34 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { FaArrowLeft, FaEnvelope, FaLock } from "react-icons/fa";
 import { GoCpu } from "react-icons/go";
 
 export default function Login() {
   const [matricula, setMatricula] = useState("");
   const [senha, setSenha] = useState("");
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const { login, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (isAuthenticated && !isAuthLoading) {
+      navigate("/hub");
+    }
+  }, [isAuthenticated, isAuthLoading, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login attempt:", { matricula, senha });
-    // Lógica de login será integrada aqui
+    try {
+      setLoading(true);
+      await login(matricula, senha);
+      navigate("/hub");
+    } catch (error) {
+      // Ideal seria um Toast de erro (ex: react-toastify)
+      alert("Falha no login. Verifique sua matrícula e senha.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,9 +96,10 @@ export default function Login() {
 
           <button
             type="submit"
-            className="w-full bg-brand-purple hover:bg-brand-purple-hover text-white py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-brand-purple/20"
+            disabled={loading || isAuthLoading}
+            className="w-full bg-brand-purple hover:bg-brand-purple-hover text-white py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-brand-purple/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Entrar no Portal
+            {loading ? "Entrando..." : "Entrar no Portal"}
           </button>
         </form>
 

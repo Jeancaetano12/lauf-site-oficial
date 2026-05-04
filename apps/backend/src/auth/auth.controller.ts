@@ -44,6 +44,13 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(@Body('refreshToken') refreshToken: string) {
+    this.logger.log('[DEBUG] Solicitação de refresh token recebida');
+    return this.authService.refreshToken(refreshToken);
+  }
+
   @Post('concluir-cadastro')
   @HttpCode(HttpStatus.OK)
   async concluirCadastro(@Body() dto: ConcluirCadastroDto) {

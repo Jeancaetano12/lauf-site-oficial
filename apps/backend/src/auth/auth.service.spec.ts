@@ -28,7 +28,10 @@ const mockPrismaService = {
   },
   sessao: {
     deleteMany: jest.fn(),
+    delete: jest.fn(),
     create: jest.fn(),
+    findFirst: jest.fn(),
+    update: jest.fn(),
   },
 };
 
@@ -394,6 +397,72 @@ describe('AuthService', () => {
         where: { usuarioId: 'user-id' },
       });
       expect(resultado.message).toBe('Usuario nao tem sessoes ativas');
+    });
+  });
+
+  describe('refreshToken', () => {
+    it('deve rotacionar o refresh token com sucesso', async () => {
+      const dataFutura = new Date();
+      dataFutura.setDate(dataFutura.getDate() + 7);
+
+      const sessaoMock = {
+        id: 'sessao-antiga-id',
+        refreshToken: 'token-valido',
+        expiraEm: dataFutura,
+        valido: true,
+        usuario: {
+          id: 'user-id',
+          matricula: '01548379',
+          cargo: 'ALUNO',
+          email: 'j@t.com',
+          nome: 'João',
+          telefone: '85989694059',
+        },
+      };
+
+      mockPrismaService.sessao.findFirst.mockResolvedValue(sessaoMock);
+      mockPrismaService.sessao.delete.mockResolvedValue({});
+      mockPrismaService.sessao.create.mockResolvedValue({});
+
+      const resultado = await service.refreshToken('token-valido');
+
+      expect(mockPrismaService.sessao.findFirst).toHaveBeenCalledWith({
+        where: { refreshToken: 'token-valido', valido: true },
+        include: { usuario: true },
+      });
+      // Verifica se rotacionou (deletou a antiga)
+      expect(mockPrismaService.sessao.delete).toHaveBeenCalledWith({
+        where: { id: 'sessao-antiga-id' },
+      });
+      // Verifica se gerou novos tokens (chamando gerarTokensESessao internamente)
+      expect(resultado.accessToken).toBeDefined();
+      expect(resultado.refreshToken).toBeDefined();
+      expect(resultado.refreshToken).not.toBe('token-valido');
+    });
+
+    it('deve lançar erro se o refresh token não existir ou for inválido', async () => {
+      mockPrismaService.sessao.findFirst.mockResolvedValue(null);
+
+      await expect(service.refreshToken('token-invalido')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('deve invalidar a sessão e lançar erro se o refresh token estiver expirado', async () => {
+      const dataPassada = new Date();
+      dataPassada.setDate(dataPassada.getDate() - 1);
+
+      mockPrismaService.sessao.findFirst.mockResolvedValue({
+        id: 'sessao-expirada-id',
+        expiraEm: dataPassada,
+        valido: true,
+      });
+      mockPrismaService.sessao.update.mockResolvedValue({});
+
+      await expect(service.refreshToken('token-expirado')).rejects.toThrow(UnauthorizedException);
+      
+      expect(mockPrismaService.sessao.update).toHaveBeenCalledWith({
+        where: { id: 'sessao-expirada-id' },
+        data: { valido: false },
+      });
     });
   });
 });

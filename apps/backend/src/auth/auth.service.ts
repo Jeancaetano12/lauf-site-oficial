@@ -208,7 +208,35 @@ export class AuthService {
       // throw new InternalServerErrorException('Não foi possível enviar o e-mail de login. Tente novamente mais tarde.');
     }
     this.logger.log(`[DEBUG] Usuario com a matricula ${dto.matricula} logou com sucesso, Sessão iniciada...`);
-    return this.gerarTokensESessao(usuario.id, usuario.matricula, usuario.cargo, usuario.email);
+    return this.gerarTokensESessao(usuario.id, usuario.matricula, usuario.cargo, usuario.email, usuario.nome, usuario.telefone);
+  }
+
+  async refreshToken(refreshToken: string) {
+    const sessao = await this.prisma.sessao.findFirst({
+      where: { refreshToken, valido: true },
+      include: { usuario: true },
+    });
+
+    if (!sessao) {
+      this.logger.log(`[DEBUG] Tentativa de uso de Refresh Token inválido ou revogado: ${refreshToken}`);
+      throw new UnauthorizedException('Refresh token inválido ou sessão revogada.');
+    }
+
+    if (sessao.expiraEm < new Date()) {
+      this.logger.log(`[DEBUG] Tentativa de uso de Refresh Token expirado: ${refreshToken}`);
+      await this.prisma.sessao.update({
+        where: { id: sessao.id },
+        data: { valido: false },
+      });
+      throw new UnauthorizedException('Refresh token expirado. Faça login novamente.');
+    }
+
+    // Rotaciona o token e invalida a sessão anterior para segurança
+    await this.prisma.sessao.delete({ where: { id: sessao.id } });
+
+    const { usuario } = sessao;
+    this.logger.log(`[DEBUG] Refresh Token validado. Gerando novos tokens para o usuario ID: ${usuario.id}`);
+    return this.gerarTokensESessao(usuario.id, usuario.matricula, usuario.cargo, usuario.email, usuario.nome, usuario.telefone);
   }
 
   async concluirCadastro(dto: ConcluirCadastroDto) {
@@ -360,8 +388,8 @@ export class AuthService {
     return { message: 'Senha redefinida com sucesso. Faça login novamente.' };
   }
 
-  private async gerarTokensESessao(usuarioId: string, matricula: string, cargo: string, email: string) {
-    const payload = { sub: usuarioId, matricula, cargo, email };
+  private async gerarTokensESessao(usuarioId: string, matricula: string, cargo: string, email: string, nome: string, telefone: string) {
+    const payload = { sub: usuarioId, matricula, cargo, email, nome, telefone };
 
     const accessToken = this.jwtService.sign(payload);
 
