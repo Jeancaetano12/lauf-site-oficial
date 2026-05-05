@@ -24,26 +24,81 @@ export class AuthService {
       where: {
         OR: [{ email: dto.email }, { matricula: dto.matricula }],
       },
-      select: { status: true }
+      select: {
+        id: true,
+        status: true,
+        tokenRegistroExpiraEm: true,
+        email: true,
+        nome: true,
+      },
     });
 
     if (solicitacaoExistente && solicitacaoExistente.status === 'PENDENTE') {
-      this.logger.log(`[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} barrado pois já existe uma solicitação pendente`)
+      this.logger.log(
+        `[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} barrado pois já existe uma solicitação pendente`,
+      );
       throw new BadRequestException('Já existe uma solicitação com este e-mail ou matrícula.');
     }
 
     if (solicitacaoExistente && solicitacaoExistente.status === 'APROVADA') {
       const usuarioExistente = await this.prisma.usuario.findUnique({
-        where: { matricula: dto.matricula }
-      })
+        where: { matricula: dto.matricula },
+      });
 
       if (usuarioExistente) {
-        this.logger.log(`[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} foi barrado porque já é usuário`)
+        this.logger.log(
+          `[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} foi barrado porque já é usuário`,
+        );
         throw new BadRequestException('Já existe um usuário cadastrado com esta matrícula.');
-      } else {
-        this.logger.log(`[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} foi barrado porque já está aprovado`)
-        throw new BadRequestException('Já existe uma solicitação aprovada com esta matrícula.');
       }
+
+      // Se a solicitação está aprovada mas o token expirou, renovamos e reenviamos o e-mail
+      if (solicitacaoExistente.tokenRegistroExpiraEm && solicitacaoExistente.tokenRegistroExpiraEm < new Date()) {
+        const tokenRegistro = randomBytes(32).toString('hex');
+        const tokenRegistroExpiraEm = new Date();
+        tokenRegistroExpiraEm.setDate(tokenRegistroExpiraEm.getDate() + 7); // +7 dias
+
+        await this.prisma.solicitacaoInscricao.update({
+          where: { id: solicitacaoExistente.id },
+          data: {
+            tokenRegistro,
+            tokenRegistroExpiraEm,
+          },
+        });
+
+        this.logger.log(`[DEBUG] Renovando token de inscrição expirado para email: ${solicitacaoExistente.email}`);
+        const emailAprovacao = await this.mailService.enviarEmailAprovacao(
+          solicitacaoExistente.email,
+          solicitacaoExistente.nome,
+          tokenRegistro,
+        );
+
+        if (emailAprovacao === 0) {
+          await this.prisma.solicitacaoInscricao.update({
+            where: { id: solicitacaoExistente.id },
+            data: {
+              tokenRegistro: null,
+              tokenRegistroExpiraEm: null,
+            },
+          });
+          this.logger.error(`Erro ao reenviar e-mail de aprovação para ${solicitacaoExistente.email}`);
+          throw new InternalServerErrorException(
+            'Não foi possível reenviar o e-mail de aprovação. Tente novamente mais tarde.',
+          );
+        }
+
+        return {
+          message:
+            'Sua solicitação já havia sido aprovada, mas o token expirou. Um novo link de cadastro foi enviado para o seu e-mail.',
+        };
+      }
+
+      this.logger.log(
+        `[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} foi barrado porque já está aprovado`,
+      );
+      throw new BadRequestException(
+        'Já existe uma solicitação aprovada com esta matrícula. Verifique seu e-mail para concluir o cadastro.',
+      );
     }
 
     if (solicitacaoExistente && solicitacaoExistente.status === 'REJEITADA') {
