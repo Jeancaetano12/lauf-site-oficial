@@ -104,10 +104,10 @@ export class AuthService {
     if (solicitacaoExistente && solicitacaoExistente.status === 'REJEITADA') {
       const solicitacao2 = await this.prisma.solicitacaoInscricao.create({
         data: {
-          nome: dto.nome,
-          email: dto.email,
+          nome: dto.nome.toUpperCase(),
+          email: dto.email.toLowerCase(),
           matricula: dto.matricula,
-          telefone: dto.telefone,
+          telefone: dto.telefone.trim(),
           curso: dto.curso,
           cargoPretendido: dto.cargoPretendido,
         },
@@ -130,10 +130,10 @@ export class AuthService {
 
     const solicitacao = await this.prisma.solicitacaoInscricao.create({
       data: {
-        nome: dto.nome,
-        email: dto.email,
+        nome: dto.nome.toUpperCase(),
+        email: dto.email.toLowerCase(),
         matricula: dto.matricula,
-        telefone: dto.telefone,
+        telefone: dto.telefone.trim(),
         curso: dto.curso,
         cargoPretendido: dto.cargoPretendido,
       },
@@ -313,10 +313,10 @@ export class AuthService {
 
     const usuario = await this.prisma.usuario.create({
       data: {
-        nome: solicitacao.nome,
-        email: solicitacao.email,
+        nome: solicitacao.nome.toUpperCase(),
+        email: solicitacao.email.toLowerCase(),
         matricula: solicitacao.matricula,
-        telefone: solicitacao.telefone,
+        telefone: solicitacao.telefone.trim(),
         curso: solicitacao.curso,
         cargo: solicitacao.cargoPretendido,
         senha: hashSenha,
