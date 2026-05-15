@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Cria a instância base do axios
 export const api = axios.create({
-  baseURL: import.meta.env.BACK_API_URL || 'http://localhost:3000', // ajuste se a porta for diferente
+  baseURL: import.meta.env.VITE_BACK_API_URL || 'http://localhost:3000', // ajuste se a porta for diferente
 });
 
 // Flag para saber se já estamos atualizando o token
