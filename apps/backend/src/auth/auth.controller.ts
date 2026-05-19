@@ -20,7 +20,7 @@ export class AuthController {
   @Post('solicitar-inscricao')
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   async solicitarInscricao(@Body() dto: SolicitarInscricaoDto) {
-    this.logger.log('[DEBUG] Solicitação de inscrição recebida com os seguintes dados: ', dto.matricula, dto.email);
+    this.logger.log(`[DEBUG] Solicitação de inscrição recebida com os seguintes dados: ${dto.matricula}, ${dto.email}`);
     return this.authService.solicitarInscricao(dto);
   }
 
@@ -46,7 +46,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   async login(@Body() dto: LoginDto) {
-    this.logger.log('[DEBUG] Login recebido com os seguintes dados: ', dto.matricula);
+    this.logger.log(`[DEBUG] Login recebido com os seguintes dados: ${dto.matricula}`);
     return this.authService.login(dto);
   }
 
@@ -60,7 +60,7 @@ export class AuthController {
   @Post('concluir-cadastro')
   @HttpCode(HttpStatus.OK)
   async concluirCadastro(@Body() dto: ConcluirCadastroDto) {
-    this.logger.log('[DEBUG] Conclusão de cadastro recebida para o tokenRegistro: ', dto.tokenRegistro);
+    this.logger.log(`[DEBUG] Conclusão de cadastro recebida para o tokenRegistro: ${dto.tokenRegistro}`);
     return this.authService.concluirCadastro(dto);
   }
 
@@ -68,7 +68,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   async solicitarRecuperacaoSenha(@Body() dto: RecuperarSenhaDto) {
-    this.logger.log('[DEBUG] Solicitação de recuperação de senha recebida com os seguintes dados: ', dto.email, dto.matricula);
+    this.logger.log(`[DEBUG] Solicitação de recuperação de senha recebida com os seguintes dados: ${dto.email}, ${dto.matricula}`);
     return this.authService.solicitarRecuperacaoSenha(dto);
   }
 
@@ -76,14 +76,14 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   async redefinirSenha(@Body() dto: RedefinirSenhaDto) {
-    this.logger.log('[DEBUG] Redefinição de senha recebida com os seguintes dados: ', dto.tokenRecuperacaoSenha);
+    this.logger.log(`[DEBUG] Redefinição de senha recebida com os seguintes dados: ${dto.tokenRecuperacaoSenha}`);
     return this.authService.redefinirSenha(dto.tokenRecuperacaoSenha, dto.novaSenha);
   }
 
   @Post('logoff')
   @HttpCode(HttpStatus.OK)
   async logoff(@Body('usuarioId') usuarioId: string) {
-    this.logger.log('[DEBUG] Logoff recebido com os seguintes dados: ', usuarioId);
+    this.logger.log(`[DEBUG] Logoff recebido com os seguintes dados: ${usuarioId}`);
     return this.authService.logOff(usuarioId);
   }
 }

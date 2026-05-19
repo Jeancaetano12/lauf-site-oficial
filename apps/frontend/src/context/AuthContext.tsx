@@ -12,6 +12,7 @@ export interface DecodedToken {
     matricula: string;
     telefone: string;
     cargo: string;
+    genero: string;
 }
 
 interface SolicitarInscricaoData {
@@ -21,6 +22,7 @@ interface SolicitarInscricaoData {
     telefone: string;
     curso: string;
     cargoPretendido: string;
+    genero: string;
 }
 
 interface SolicitarRecuperacaoSenhaData {
