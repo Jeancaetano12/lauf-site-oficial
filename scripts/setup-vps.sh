@@ -18,9 +18,9 @@ sudo apt update && sudo apt upgrade -y
 echo "🛠️ 2. Instalando ferramentas essenciais (Git, Curl, Nginx)..."
 sudo apt install -y git curl unzip nginx software-properties-common
 
-echo "🟢 3. Instalando Node.js (v24) e NPM..."
-curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
-sudo apt install -y nodejs
+echo "🟢 3. Instalando Node.js (v20) e NPM..."
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs npm
 
 echo "⚙️ 4. Instalando o PM2 globalmente..."
 sudo npm install -g pm2
