@@ -66,7 +66,7 @@ export default function ConfirmarInscricao() {
                     <div className="inline-flex p-4 bg-brand-purple/10 rounded-2xl border border-brand-purple/20 mb-6">
                         <GoCpu className="text-5xl text-brand-purple" />
                     </div>
-                    <h1 className="text-4xl font-bold mb-2">Redefinir senha</h1>
+                    <h1 className="text-4xl font-bold mb-2">Conclua seu cadastro</h1>
                     <p className="text-brand-gray-medium">Digite sua nova senha abaixo.</p>
                 </div>
 

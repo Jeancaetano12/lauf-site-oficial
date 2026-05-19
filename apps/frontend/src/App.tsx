@@ -8,6 +8,7 @@ import LaufHub from "./pages/LaufHub";
 import RecuperarSenha from "./pages/RecuperarSenha";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RedefinirSenha from "./pages/RedefinirSenha";
+import ConfirmarInscricao from "./pages/ConfirmarInscricao";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/solicitar-inscricao" element={<SolicitarInscricao />} />
+          <Route path="/confirmar-inscricao" element={<ConfirmarInscricao />} />
           <Route
             path="/hub"
             element={

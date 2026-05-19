@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, Patch, Post, Logger, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Param, Patch, Post, Logger, UseGuards, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Throttle } from '@nestjs/throttler';
 import { SolicitarInscricaoDto } from './dto/solicitar-inscricao.dto';
@@ -85,5 +85,12 @@ export class AuthController {
   async logoff(@Body('usuarioId') usuarioId: string) {
     this.logger.log(`[DEBUG] Logoff recebido com os seguintes dados: ${usuarioId}`);
     return this.authService.logOff(usuarioId);
+  }
+
+  @Post('validate-sessao')
+  @HttpCode(HttpStatus.OK)
+  async validarSessao(@Body('refreshToken') refreshToken: string) {
+    this.logger.log(`[DEBUG] Requisição de validação de sessão recebida`);
+    return this.authService.validarSessao(refreshToken);
   }
 }

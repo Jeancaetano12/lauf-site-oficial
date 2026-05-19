@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 
+const FRONTEND_URL = process.env.FRONTEND_URL;
+
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
@@ -29,7 +31,7 @@ export class MailService {
   }
 
   async enviarEmailAprovacao(email: string, nome: string, token: string) {
-    const url = `http://localhost:5173/concluir-cadastro?token=${token}`; // Supondo que o frontend roda na porta 5173 e a rota seja /registro
+    const url = `${FRONTEND_URL}/confirmar-inscricao?token=${token}`;
 
     return await this.mailerService.sendMail({
       to: email,
@@ -54,7 +56,7 @@ export class MailService {
   }
 
   async enviarEmailRecuperacaoSenha(email: string, token: string) {
-    const url = `http://localhost:5173/redefinir-senha?token=${token}`;
+    const url = `${FRONTEND_URL}/redefinir-senha?token=${token}`;
 
     return await this.mailerService.sendMail({
       to: email,
@@ -85,8 +87,7 @@ export class MailService {
       html: `
         <h3>Olá, ${nome}!</h3>
         <p>Sua senha foi redefinida com sucesso no sistema da LAUF.</p>
-        <p>Se você não foi você quem redefiniu a senha, entre em contato conosco em:</p>
-        <p><a href="https://www.instagram.com/lauf.for/">Instagram da LAUF</a></p>
+        <p>Se você não foi você quem redefiniu a senha, entre em contato conosco no grupo do whatsapp</p>
         <br />      
         <p>Atenciosamente,</p>
         <p>Equipe LAUF</p>
@@ -129,7 +130,7 @@ export class MailService {
       html: `
         <h3>Olá, ${nome}!</h3>
         <p>Você logou no sistema da LAUF.</p>
-        <p>Se você não foi você quem logou, redefina sua senha clicando <a href="ROTAS DO FRONTEND">>:</p>
+        <p>Se você não foi você quem logou, redefina sua senha clicando em <a href="${FRONTEND_URL}/recuperar-senha">REDEFINIR SENHA</a></p>
         <br />      
         <p>Atenciosamente,</p>
         <p>Equipe LAUF</p>

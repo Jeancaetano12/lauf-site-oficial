@@ -13,6 +13,7 @@ export interface DecodedToken {
     telefone: string;
     cargo: string;
     genero: string;
+    curso: string;
 }
 
 interface SolicitarInscricaoData {
@@ -60,18 +61,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         // Ao iniciar a aplicação, recupera o token salvo e restaura a sessão
-        const loadStorageData = () => {
+        const loadStorageData = async () => {
             const storageAccessToken = localStorage.getItem("@Lauf:accessToken");
             const storageRefreshToken = localStorage.getItem("@Lauf:refreshToken");
 
             if (storageAccessToken && storageRefreshToken) {
                 try {
+                    // Valida a sessão REAL no banco de dados através do refreshToken
+                    await api.post("/auth/validar-sessao", {
+                        refreshToken: storageRefreshToken
+                    });
+
                     const decoded = jwtDecode<DecodedToken>(storageAccessToken);
                     // Adicionamos o id com base no sub para manter consistência
                     setUser({ ...decoded, id: decoded.sub });
                 } catch (error) {
-                    console.error("Erro ao decodificar o token salvo", error);
-                    // Se falhou por algum motivo de estrutura, limpa
+                    console.error("Sessão inválida ou erro ao decodificar o token salvo", error);
+                    // Se falhou por algum motivo (ex: token revogado no DB), limpa
                     logout();
                 }
             }

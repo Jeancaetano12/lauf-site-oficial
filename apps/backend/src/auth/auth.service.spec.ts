@@ -78,7 +78,7 @@ describe('AuthService', () => {
       mockPrismaService.solicitacaoInscricao.create.mockResolvedValue({ id: 'id-solicitacao' });
 
       const dto: SolicitarInscricaoDto = {
-        nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO' as any
+        nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO', genero: 'MASCULINO' as any
       };
 
       const resultado = await service.solicitarInscricao(dto);
@@ -93,7 +93,7 @@ describe('AuthService', () => {
     it('deve rejeitar se ja existir uma solicitacao PENDENTE', async () => {
       mockPrismaService.solicitacaoInscricao.findFirst.mockResolvedValue({ status: 'PENDENTE' });
 
-      const dto: SolicitarInscricaoDto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO' as any };
+      const dto: SolicitarInscricaoDto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO', genero: 'MASCULINO' as any };
 
       await expect(service.solicitarInscricao(dto)).rejects.toThrow(BadRequestException);
     });
@@ -101,7 +101,7 @@ describe('AuthService', () => {
     it('deve rejeitar se ja existir uma solicitacao APROVADA', async () => {
       mockPrismaService.solicitacaoInscricao.findFirst.mockResolvedValue({ status: 'APROVADA' });
 
-      const dto: SolicitarInscricaoDto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO' as any };
+      const dto: SolicitarInscricaoDto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO', genero: 'MASCULINO' as any };
 
       await expect(service.solicitarInscricao(dto)).rejects.toThrow(BadRequestException);
     });
@@ -110,7 +110,7 @@ describe('AuthService', () => {
       mockPrismaService.solicitacaoInscricao.findFirst.mockResolvedValue({ status: 'REJEITADA' });
       mockPrismaService.solicitacaoInscricao.create.mockResolvedValue({ id: 'id-solicitacao' });
 
-      const dto: SolicitarInscricaoDto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO' as any };
+      const dto: SolicitarInscricaoDto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO', genero: 'MASCULINO' as any };
 
       const resultado = await service.solicitarInscricao(dto);
 
@@ -160,7 +160,7 @@ describe('AuthService', () => {
 
       mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
         id: 'id-1', tokenRegistro: 'meu-token', tokenRegistroExpiraEm: dataFutura,
-        nome: 'João', email: 'joao@t.com', matricula: '01548379', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO'
+        nome: 'João', email: 'joao@t.com', matricula: '01548379', telefone: '85989694059', genero: 'MASCULINO', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO'
       });
 
       // Espionar e forçar o bcrypt a retornar uma hash simulada
@@ -181,7 +181,7 @@ describe('AuthService', () => {
 
       mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
         id: 'id-1', tokenRegistro: 'meu-token', tokenRegistroExpiraEm: dataPassada,
-        nome: 'João', email: 'joao@t.com', matricula: '01548379', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO'
+        nome: 'João', email: 'joao@t.com', matricula: '01548379', telefone: '85989694059', genero: 'MASCULINO', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO'
       });
 
       await expect(service.concluirCadastro({ tokenRegistro: 'meu-token', senha: '01548379' })).rejects.toThrow(BadRequestException);
@@ -458,7 +458,67 @@ describe('AuthService', () => {
       mockPrismaService.sessao.update.mockResolvedValue({});
 
       await expect(service.refreshToken('token-expirado')).rejects.toThrow(UnauthorizedException);
-      
+
+      expect(mockPrismaService.sessao.update).toHaveBeenCalledWith({
+        where: { id: 'sessao-expirada-id' },
+        data: { valido: false },
+      });
+    });
+  });
+
+  describe('validarSessao', () => {
+    it('deve retornar ok e usuario sem senha se o refresh token for valido', async () => {
+      const dataFutura = new Date();
+      dataFutura.setDate(dataFutura.getDate() + 7);
+
+      const sessaoMock = {
+        id: 'sessao-valida-id',
+        refreshToken: 'token-valido',
+        expiraEm: dataFutura,
+        valido: true,
+        usuario: {
+          id: 'user-id',
+          matricula: '01548379',
+          senha: 'senha-hasheada',
+          cargo: 'ALUNO',
+          email: 'j@t.com',
+          nome: 'João',
+          telefone: '85989694059',
+        },
+      };
+
+      mockPrismaService.sessao.findFirst.mockResolvedValue(sessaoMock);
+
+      const resultado = await service.validarSessao('token-valido');
+
+      expect(mockPrismaService.sessao.findFirst).toHaveBeenCalledWith({
+        where: { refreshToken: 'token-valido', valido: true },
+        include: { usuario: true },
+      });
+      expect(resultado.ok).toBe(true);
+      expect((resultado.usuario as any).senha).toBeUndefined(); // a senha não deve ser retornada
+      expect(resultado.usuario.nome).toBe('João');
+    });
+
+    it('deve lançar erro se o refresh token não existir ou for inválido', async () => {
+      mockPrismaService.sessao.findFirst.mockResolvedValue(null);
+
+      await expect(service.validarSessao('token-invalido')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('deve invalidar a sessão e lançar erro se o refresh token estiver expirado', async () => {
+      const dataPassada = new Date();
+      dataPassada.setDate(dataPassada.getDate() - 1);
+
+      mockPrismaService.sessao.findFirst.mockResolvedValue({
+        id: 'sessao-expirada-id',
+        expiraEm: dataPassada,
+        valido: true,
+      });
+      mockPrismaService.sessao.update.mockResolvedValue({});
+
+      await expect(service.validarSessao('token-expirado')).rejects.toThrow(UnauthorizedException);
+
       expect(mockPrismaService.sessao.update).toHaveBeenCalledWith({
         where: { id: 'sessao-expirada-id' },
         data: { valido: false },

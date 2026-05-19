@@ -20,6 +20,7 @@ const mockAuthService = {
   solicitarRecuperacaoSenha: jest.fn().mockResolvedValue({ message: 'Email enviado' }),
   redefinirSenha: jest.fn().mockResolvedValue({ message: 'Senha redefinida' }),
   logOff: jest.fn().mockResolvedValue({ message: 'Logoff realizado' }),
+  validarSessao: jest.fn().mockResolvedValue({ ok: true, usuario: {} }),
 };
 
 describe('AuthController', () => {
@@ -46,7 +47,7 @@ describe('AuthController', () => {
   });
 
   it('deve chamar o metodo de solicitarInscricao do service', async () => {
-    const dto: SolicitarInscricaoDto = { nome: 'Teste', matricula: '12345678', email: 'teste@teste.com', telefone: '85989694059', curso: 'ENGENHARIA_DA_COMPUTACAO', cargoPretendido: 'COORDENADOR' };
+    const dto: SolicitarInscricaoDto = { nome: 'Teste', matricula: '12345678', email: 'teste@teste.com', telefone: '85989694059', curso: 'ENGENHARIA_DA_COMPUTACAO', cargoPretendido: 'COORDENADOR', genero: 'MASCULINO' as any };
 
     const resultado = await controller.solicitarInscricao(dto);
 
@@ -57,18 +58,20 @@ describe('AuthController', () => {
 
   it('deve chamar o metodo de aprovarSolicitacao do service', async () => {
     const id = 'ID-Aprovado';
+    const mockUser = { nome: 'Admin', email: 'admin@lauf.com', matricula: '11111111' };
 
-    await controller.aprovarSolicitacao(id);
+    await controller.aprovarSolicitacao(id, mockUser);
 
-    expect(authService.aprovarSolicitacao).toHaveBeenCalledWith(id);
+    expect(authService.aprovarSolicitacao).toHaveBeenCalledWith(id, 'Admin (admin@lauf.com - 11111111)');
   });
 
   it('deve chamar o metodo de rejeitarSolicitacao do service', async () => {
     const id = 'ID-Rejeitado';
+    const mockUser = { nome: 'Admin', email: 'admin@lauf.com', matricula: '11111111' };
 
-    await controller.rejeitarSolicitacao(id);
+    await controller.rejeitarSolicitacao(id, mockUser);
 
-    expect(authService.rejeitarSolicitacao).toHaveBeenCalledWith(id);
+    expect(authService.rejeitarSolicitacao).toHaveBeenCalledWith(id, 'Admin (admin@lauf.com - 11111111)');
   });
 
   it('deve chamar o metodo de login do service', async () => {
@@ -104,5 +107,14 @@ describe('AuthController', () => {
     await controller.logoff(usuarioId);
 
     expect(authService.logOff).toHaveBeenCalledWith(usuarioId);
+  });
+
+  it('deve chamar o metodo validarSessao do service', async () => {
+    const refreshToken = 'meu-refresh-token';
+    // Add the mock to authService if not exists, but we can just use any property that is mock function, wait we need to add it to mockAuthService.
+    // Actually, I should add validarSessao to mockAuthService. I will do that in the next step.
+    await controller.validarSessao(refreshToken);
+
+    expect(authService.validarSessao).toHaveBeenCalledWith(refreshToken);
   });
 });

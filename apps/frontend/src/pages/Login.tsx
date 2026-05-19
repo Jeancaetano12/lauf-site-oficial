@@ -99,7 +99,14 @@ export default function Login() {
             disabled={loading || isAuthLoading}
             className="w-full bg-brand-purple hover:bg-brand-purple-hover text-white py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-brand-purple/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Entrando..." : "Entrar no Portal"}
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Entrando...
+              </div>
+            ) : (
+              "Entrar no Portal"
+            )}
           </button>
         </form>
 

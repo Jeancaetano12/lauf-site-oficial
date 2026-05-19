@@ -69,7 +69,7 @@ export default function SolicitarInscricao() {
 
             <div className="w-full bg-brand-purple/5 border border-brand-purple/10 rounded-2xl p-5 mb-8 text-left text-brand-text">
               <h4 className="font-bold text-sm text-brand-purple mb-2">Próximos Passos:</h4>
-              <ul className="text-xs space-y-2 list-disc list-inside text-black text-brand-text/80 font-medium">
+              <ul className="text-2sm space-y-2 list-disc list-inside text-black text-brand-text/80 font-medium">
                 <li>Verifique sua caixa de entrada e a pasta de <strong>Spam</strong>.</li>
                 <li>A coordenação analisará seus dados cadastrados.</li>
                 <li>Assim que aprovada, você receberá um e-mail com <span className="font-bold text-purple-800">validade de 7 dias</span> com as instruções para concluir seu cadastro.</li>
