@@ -1,5 +1,5 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength, MaxLength, Matches } from 'class-validator';
-import { Cargo, Curso } from '@prisma/client';
+import { Cargo, Curso, Genero } from '@prisma/client';
 
 export class SolicitarInscricaoDto {
   @IsString({ message: 'O nome deve ser uma string.' })
@@ -31,4 +31,8 @@ export class SolicitarInscricaoDto {
   @IsEnum(Cargo, { message: 'Cargo inválido.' })
   @IsNotEmpty({ message: 'O cargo pretendido é obrigatório.' })
   cargoPretendido: Cargo;
+
+  @IsEnum(Genero, { message: 'Genero inválido.' })
+  @IsNotEmpty({ message: 'O gênero é obrigatório.' })
+  genero: Genero;
 }

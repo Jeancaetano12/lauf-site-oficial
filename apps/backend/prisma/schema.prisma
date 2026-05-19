@@ -32,6 +32,14 @@ enum StatusSolicitacao {
   REJEITADA
 }
 
+enum Genero {
+  MASCULINO
+  FEMININO
+  NAO_BINARIO
+  OUTRO
+  PREFIRO_NAO_INFORMAR
+}
+
 model SolicitacaoInscricao {
   id              String            @id @default(uuid())
   nome            String
@@ -40,11 +48,15 @@ model SolicitacaoInscricao {
   telefone        String            @unique
   curso           Curso
   cargoPretendido Cargo
+  genero          Genero
   status          StatusSolicitacao @default(PENDENTE)
 
   // Link gerado tem validade
   tokenRegistro         String?   @unique
   tokenRegistroExpiraEm DateTime?
+
+  // Auditoria de ações
+  processadoPor         String?
 
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
@@ -59,6 +71,7 @@ model Usuario {
   curso     Curso
   senha     String
   cargo     Cargo  @default(ALUNO)
+  genero    Genero
 
   tokenRecuperacaoSenha    String?   @unique
   tokenRecuperacaoExpiraEm DateTime?

@@ -110,6 +110,7 @@ export class AuthService {
           telefone: dto.telefone.trim(),
           curso: dto.curso,
           cargoPretendido: dto.cargoPretendido,
+          genero: dto.genero,
         },
       });
 
@@ -136,6 +137,7 @@ export class AuthService {
         telefone: dto.telefone.trim(),
         curso: dto.curso,
         cargoPretendido: dto.cargoPretendido,
+        genero: dto.genero,
       },
     });
 
@@ -154,7 +156,7 @@ export class AuthService {
     return { message: 'Solicitação criada com sucesso.', id: solicitacao.id };
   }
 
-  async aprovarSolicitacao(id: string) {
+  async aprovarSolicitacao(id: string, processadoPor?: string) {
     const solicitacao = await this.prisma.solicitacaoInscricao.findUnique({
       where: { id },
     });
@@ -179,6 +181,7 @@ export class AuthService {
         status: 'APROVADA',
         tokenRegistro,
         tokenRegistroExpiraEm,
+        processadoPor,
       },
     });
 
@@ -202,7 +205,7 @@ export class AuthService {
     };
   }
 
-  async rejeitarSolicitacao(id: string) {
+  async rejeitarSolicitacao(id: string, processadoPor?: string) {
     const solicitacao = await this.prisma.solicitacaoInscricao.findUnique({
       where: { id },
       select: { status: true, email: true, nome: true }
@@ -222,7 +225,8 @@ export class AuthService {
       const rejeitar = await this.prisma.solicitacaoInscricao.update({
         where: { id },
         data: {
-          status: 'REJEITADA'
+          status: 'REJEITADA',
+          processadoPor,
         },
       });
 
@@ -320,6 +324,7 @@ export class AuthService {
         curso: solicitacao.curso,
         cargo: solicitacao.cargoPretendido,
         senha: hashSenha,
+        genero: solicitacao.genero,
       },
     });
 
