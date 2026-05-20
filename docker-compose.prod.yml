@@ -16,7 +16,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M # Proteje sua VPS limitando quantia de RAM do banco de dados
+          memory: 450M # Proteje sua VPS limitando quantia de RAM do banco de dados
 
 volumes:
   postgres_data_prod:

@@ -63,6 +63,12 @@ npm run start:dev
 
 ---
 
+## 🛠️ Ferramentas externas de desenvolvimento
+
+- [Postman](https://www.postman.com/downloads/) ou [Insomnia](https://insomnia.rest/download/) para testar e validar os end-points.
+- Extensão da [ORM Prisma](https://marketplace.visualstudio.com/items?itemName=Prisma.prisma) para o VScode, que auxilia na escrita do código e na documentação do banco de dados.
+- Extensão [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=TailwindLabs.tailwindcss-intellisense) para o VScode, que auxilia na escrita do código para estilização.
+
 ## 🚀 Ambiente de Produção (VPS com Recursos Limitados)
 
 Sendo uma aplicação que rodará em um ambiente internetizado e com recursos regrados (como uma VPS básica vCPU e alguns gigas de RAM/Disco), **é expressamente proibido** subir a aplicação da mesma forma que fazemos o ambiente de Desenvolvimento (`npm run dev`).

@@ -10,6 +10,7 @@ lerna-debug.log*
 dist
 dist-ssr
 scripts/vps-setup-guide.md
+apps/backend/docs/agent-skills/seguranca.md
 *.local
 
 .env
