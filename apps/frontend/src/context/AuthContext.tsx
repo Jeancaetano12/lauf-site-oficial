@@ -107,11 +107,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
 
-    function logout() {
-        localStorage.removeItem("@Lauf:accessToken");
-        localStorage.removeItem("@Lauf:refreshToken");
-        setUser(null);
-        window.location.href = "/login";
+    async function logout() {
+        try {
+            const storageRefreshToken = localStorage.getItem("@Lauf:refreshToken")
+            if (storageRefreshToken) {
+                await api.post("auth/logout", {
+                    refreshToken: storageRefreshToken
+                })
+
+                localStorage.removeItem("@Lauf:accessToken");
+                localStorage.removeItem("@Lauf:refreshToken");
+                setUser(null);
+                window.location.href = "/login";
+            }
+
+        } catch (error) {
+            console.error("Falha no logout", error)
+        }
     }
 
     async function solicitarInscricao(data: SolicitarInscricaoData) {

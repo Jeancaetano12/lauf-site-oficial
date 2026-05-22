@@ -87,7 +87,14 @@ export class AuthController {
     return this.authService.logOff(usuarioId);
   }
 
-  @Post('validate-sessao')
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Body('refreshToken') refreshToken: string) {
+    this.logger.log(`[DEBUG] Logout recebido para uma sessao: ${refreshToken}`);
+    return this.authService.logOut(refreshToken);
+  }
+
+  @Post('validar-sessao')
   @HttpCode(HttpStatus.OK)
   async validarSessao(@Body('refreshToken') refreshToken: string) {
     this.logger.log(`[DEBUG] Requisição de validação de sessão recebida`);
