@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { FaHandSparkles, FaShieldAlt } from "react-icons/fa";
 
 export default function BoasVindas() {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
 
     return (
         <div className="flex flex-col items-center justify-center bg-brand-gray-light rounded-2xl shadow-xl p-8 max-w-lg text-center border-t-4 border-brand-purple">
@@ -40,6 +40,14 @@ export default function BoasVindas() {
                     No momento estamos construindo o nosso sistema. Logo traremos muitas novidades e funcionalidades incríveis para você.
                 </p>
             </div>
+
+            <button
+                type="button"
+                className="cursor-pointer bg-brand-purple text-white px-8 py-2 rounded-lg mt-4 hover:bg-brand-purple/80 transition-colors"
+                onClick={logout}
+            >
+                Sair
+            </button>
         </div>
     );
 }   

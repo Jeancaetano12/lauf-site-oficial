@@ -260,12 +260,15 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais inválidas.');
     }
 
-    this.logger.log(`[DEBUG] Usuario com a matricula ${dto.matricula} logou com sucesso, Disparando email...`);
-    const emailLogin = await this.mailService.enviarEmailLogin(usuario.email, usuario.nome);
-    if (emailLogin === 0) {
+    // Desabilitado por enquanto...
+
+    // this.logger.log(`[DEBUG] Usuario com a matricula ${dto.matricula} logou com sucesso, Disparando email...`);
+    // const emailLogin = await this.mailService.enviarEmailLogin(usuario.email, usuario.nome);
+    /* if (emailLogin === 0) {
       this.logger.warn(`Falha no envio do email de login. email: ${usuario.email}`);
       // throw new InternalServerErrorException('Não foi possível enviar o e-mail de login. Tente novamente mais tarde.');
-    }
+    } */
+
     this.logger.log(`[DEBUG] Usuario com a matricula ${dto.matricula} logou com sucesso, Sessão iniciada...`);
     return this.gerarTokensESessao(usuario.id, usuario.matricula, usuario.cargo, usuario.email, usuario.nome, usuario.telefone, usuario.curso);
   }
@@ -422,6 +425,18 @@ export class AuthService {
     }
     this.logger.log(`[DEBUG] LogOff realizado com sucesso para o usuario com o ID: ${usuarioId}`);
     return { message: 'LogOff realizado com sucesso' };
+  }
+
+  async logOut(refreshToken: string) {
+    const sessao = await this.prisma.sessao.deleteMany({
+      where: { refreshToken },
+    });
+    if (sessao.count === 0) {
+      this.logger.warn(`[WARN] Sessão ${refreshToken} não encontrada ou já encerrada`);
+      return { message: 'Sessão não encontrada ou já encerrada' };
+    }
+    this.logger.log(`[DEBUG] LogOut da sessao ${refreshToken} realizado com sucesso`);
+    return { message: 'LogOut realizado com sucesso' };
   }
 
   async redefinirSenha(tokenRecuperacaoSenha: string, novaSenha: string) {
