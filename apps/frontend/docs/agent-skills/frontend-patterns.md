@@ -28,22 +28,22 @@ O front-end é montado utilizando **Vite, TypeScript, TailwindCSS e React**.
 - O resultado originado na pasta `dist` será constituido apenas por HTML, CSS e JS enxutos.
 - Copie apenas a pasta `dist` para o servidor alvo e preencha uma configuração de `Nginx` servindo os arquivos estáticos na porta 80/443. Isso reduz o custo de RAM consumindo apenas megabytes.
 
-## 5. Padrões de Autenticação e API (JWT & Refresh Token)
+## 5. Padrões de Autenticação e API (HttpOnly Cookies)
 
-Este projeto utiliza um fluxo de autenticação robusto baseado em dois tokens:
-- **Access Token (JWT)**: Vida curta. Enviado em todas as requisições no header `Authorization`.
-- **Refresh Token (Opaque)**: Vida longa. Armazenado no `localStorage` e usado apenas para renovar o Access Token.
+Este projeto utiliza um fluxo de autenticação altamente seguro baseado em **HttpOnly Cookies** para evitar ataques de roubo de sessão (XSS).
+- **Access Token (JWT)**: Vida curta. Gerenciado e armazenado **exclusivamente pelo navegador via cookies**. NUNCA tente acessar ou armazenar esse token via JavaScript (localStorage/sessionStorage).
+- **Refresh Token (Opaque)**: Vida longa. Também armazenado como cookie HttpOnly e usado apenas para renovar o Access Token de forma transparente.
 
-### 5.1. O Módulo `api.ts` (Axios Interceptors)
-Todas as chamadas ao backend **devem** utilizar a instância exportada em `src/services/api.ts`. Ela possui interceptores que:
-1.  **Injeção Automática**: Anexa o `accessToken` do `localStorage` em cada request de saída.
-2.  **Silent Refresh**: Caso uma requisição falhe com erro `401 Unauthorized`, o interceptor pausa as requisições pendentes, tenta renovar o token chamando `/auth/refresh` e, em caso de sucesso, repete a requisição original de forma transparente para o usuário.
+### 5.1. O Módulo `api.ts` (Axios e Credentials)
+Todas as chamadas ao backend **devem** utilizar a instância exportada em `src/services/api.ts`.
+1. **Envio de Cookies (`withCredentials`)**: O Axios está configurado com `withCredentials: true`. Isso garante que o navegador envie automaticamente os cookies de sessão nas requisições, sem a necessidade de manipular headers de `Authorization` manualmente.
+2. **Silent Refresh**: Caso uma requisição falhe com erro `401 Unauthorized` (sinalizando expiração do Access Token), o interceptor do Axios fará uma chamada automática (POST) para a rota `/auth/refresh`. O backend validará o cookie do `refreshToken`, renovará os cookies e o interceptor repetirá a requisição original sem o usuário perceber.
 
 ### 5.2. AuthContext e useAuth
-O `AuthContext` é o "Cérebro" da sessão:
-- Gerencia o estado `user` (decodificado via `jwt-decode`).
-- Fornece as funções `login`, `logout` e `solicitarInscricao`.
-- **Persistência**: Ao carregar a página, o context tenta ler o storage e restaurar a sessão automaticamente.
+O `AuthContext` é o "Cérebro" da sessão do lado do Cliente:
+- **Sem LocalStorage**: A sessão não é baseada em dados persistentes vulneráveis do lado do cliente (como `localStorage` ou `jwt-decode`).
+- **Validação com o Backend**: Ao iniciar a página, o contexto realiza uma validação (`/auth/validar-sessao`) que envia os cookies para o backend, retornando os dados seguros do usuário para popular o estado caso a sessão seja válida.
+- Fornece as funções e métodos de fluxo como `login`, `logout` e `solicitarInscricao`.
 
 ### 5.3. Redirecionamento e Proteção
 - **Página de Login**: Deve verificar se `isAuthenticated` é true e redirecionar para o Hub imediatamente para evitar que o usuário logue duas vezes.

@@ -3,6 +3,7 @@ import axios from 'axios';
 // Cria a instância base do axios
 export const api = axios.create({
   baseURL: import.meta.env.VITE_BACK_API_URL || 'http://localhost:3000', // ajuste se a porta for diferente
+  withCredentials: true, // Garante que cookies sejam sempre enviados
 });
 
 // Flag para saber se já estamos atualizando o token
@@ -10,30 +11,19 @@ let isRefreshing = false;
 // Fila de requisições que estão esperando o token atualizar
 let failedQueue: any[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: any) => {
   failedQueue.forEach(prom => {
     if (error) {
       prom.reject(error);
     } else {
-      prom.resolve(token);
+      prom.resolve();
     }
   });
 
   failedQueue = [];
 };
 
-// Interceptor de Request: injeta o access token caso exista
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('@Lauf:accessToken');
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
-
-// Interceptor de Response: intercepta erros 401 e tenta atualizar o token
+// Interceptor de Response: intercepta erros 401 e tenta atualizar o token via cookies
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -44,8 +34,7 @@ api.interceptors.response.use(
       if (isRefreshing) {
         return new Promise(function (resolve, reject) {
           failedQueue.push({ resolve, reject });
-        }).then(token => {
-          originalRequest.headers['Authorization'] = 'Bearer ' + token;
+        }).then(() => {
           return api(originalRequest);
         }).catch(err => {
           return Promise.reject(err);
@@ -55,42 +44,21 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = localStorage.getItem('@Lauf:refreshToken');
-
-      if (!refreshToken) {
-        isRefreshing = false;
-        // Se não tem refresh token, força deslogar limpando o storage
-        localStorage.removeItem('@Lauf:accessToken');
-        localStorage.removeItem('@Lauf:refreshToken');
-        window.location.href = '/login'; // rediona pro login
-        return Promise.reject(error);
-      }
-
       try {
-        const { data } = await axios.post(`${api.defaults.baseURL}/auth/refresh`, {
-          refreshToken,
-        });
+        // Tenta renovar o token chamando a rota de refresh
+        // O backend lerá o cookie 'refreshToken' e setará um novo 'accessToken'
+        await axios.post(`${api.defaults.baseURL}/auth/refresh`, {}, { withCredentials: true });
 
-        const newAccessToken = data.accessToken;
-        const newRefreshToken = data.refreshToken;
-
-        localStorage.setItem('@Lauf:accessToken', newAccessToken);
-        localStorage.setItem('@Lauf:refreshToken', newRefreshToken);
-
-        api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
-        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-
-        processQueue(null, newAccessToken);
+        processQueue(null);
         isRefreshing = false;
 
+        // Refaz a requisição original
         return api(originalRequest);
       } catch (err) {
-        processQueue(err, null);
+        processQueue(err);
         isRefreshing = false;
 
-        // Se falhou o refresh (ex: token expirado de vez), limpa storage
-        localStorage.removeItem('@Lauf:accessToken');
-        localStorage.removeItem('@Lauf:refreshToken');
+        // Se falhou o refresh (ex: token expirado de vez), redireciona
         window.location.href = '/login';
 
         return Promise.reject(err);

@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { jwtDecode } from "jwt-decode";
 import { api } from "../services/api";
 
 export interface DecodedToken {
@@ -60,31 +59,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Ao iniciar a aplicação, recupera o token salvo e restaura a sessão
-        const loadStorageData = async () => {
-            const storageAccessToken = localStorage.getItem("@Lauf:accessToken");
-            const storageRefreshToken = localStorage.getItem("@Lauf:refreshToken");
-
-            if (storageAccessToken && storageRefreshToken) {
-                try {
-                    // Valida a sessão REAL no banco de dados através do refreshToken
-                    await api.post("/auth/validar-sessao", {
-                        refreshToken: storageRefreshToken
-                    });
-
-                    const decoded = jwtDecode<DecodedToken>(storageAccessToken);
-                    // Adicionamos o id com base no sub para manter consistência
-                    setUser({ ...decoded, id: decoded.sub });
-                } catch (error) {
-                    console.error("Sessão inválida ou erro ao decodificar o token salvo", error);
-                    // Se falhou por algum motivo (ex: token revogado no DB), limpa
-                    logout();
+        // Ao iniciar a aplicação, verifica se há uma sessão válida através dos cookies
+        const checkSession = async () => {
+            try {
+                // Valida a sessão e recupera os dados do usuário via cookie HTTP-Only
+                const response = await api.post("/auth/validar-sessao");
+                if (response.data?.usuario) {
+                    setUser({ ...response.data.usuario, sub: response.data.usuario.id });
+                } else {
+                    setUser(null);
                 }
+            } catch (error) {
+                console.error("Nenhuma sessão válida encontrada", error);
+                setUser(null);
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
 
-        loadStorageData();
+        checkSession();
     }, []);
 
     async function login(matricula: string, senha: string) {
@@ -94,13 +87,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 senha,
             });
 
-            const { accessToken, refreshToken } = response.data;
-
-            localStorage.setItem("@Lauf:accessToken", accessToken);
-            localStorage.setItem("@Lauf:refreshToken", refreshToken);
-
-            const decoded = jwtDecode<DecodedToken>(accessToken);
-            setUser({ ...decoded, id: decoded.sub });
+            // O backend envia os tokens via cookies HTTP-Only automaticamente
+            // Recebemos o usuário na resposta
+            const usuario = response.data.usuario;
+            
+            setUser({ ...usuario, sub: usuario.id });
         } catch (error) {
             console.error("Falha no login", error);
             throw error; // Lança o erro para ser tratado pela tela de Login (ex: exibir toast)
@@ -109,18 +100,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function logout() {
         try {
-            const storageRefreshToken = localStorage.getItem("@Lauf:refreshToken")
-            if (storageRefreshToken) {
-                await api.post("auth/logout", {
-                    refreshToken: storageRefreshToken
-                })
+            // Chama a rota de logout que irá limpar os cookies
+            await api.post("/auth/logout");
 
-                localStorage.removeItem("@Lauf:accessToken");
-                localStorage.removeItem("@Lauf:refreshToken");
-                setUser(null);
-                window.location.href = "/login";
-            }
-
+            setUser(null);
+            window.location.href = "/login";
         } catch (error) {
             console.error("Falha no logout", error)
         }

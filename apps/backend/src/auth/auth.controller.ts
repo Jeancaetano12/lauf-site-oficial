@@ -1,4 +1,5 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, Patch, Post, Logger, UseGuards, Get } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Param, Patch, Post, Logger, UseGuards, Get, Req, Res, UnauthorizedException } from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { Throttle } from '@nestjs/throttler';
 import { SolicitarInscricaoDto } from './dto/solicitar-inscricao.dto';
@@ -45,16 +46,24 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
-  async login(@Body() dto: LoginDto) {
+  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     this.logger.log(`[DEBUG] Login recebido com os seguintes dados: ${dto.matricula}`);
-    return this.authService.login(dto);
+    const result = await this.authService.login(dto);
+    this.setAuthCookies(res, result.accessToken, result.refreshToken);
+    return { message: 'Login realizado com sucesso', usuario: result.usuario };
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refreshToken(@Body('refreshToken') refreshToken: string) {
+  async refreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     this.logger.log('[DEBUG] Solicitação de refresh token recebida');
-    return this.authService.refreshToken(refreshToken);
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token não fornecido.');
+    }
+    const result = await this.authService.refreshToken(refreshToken);
+    this.setAuthCookies(res, result.accessToken, result.refreshToken);
+    return { message: 'Tokens atualizados com sucesso', usuario: result.usuario };
   }
 
   @Post('concluir-cadastro')
@@ -89,15 +98,41 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Body('refreshToken') refreshToken: string) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const refreshToken = req.cookies?.refreshToken;
     this.logger.log(`[DEBUG] Logout recebido para uma sessao: ${refreshToken}`);
-    return this.authService.logOut(refreshToken);
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    if (refreshToken) {
+      return this.authService.logOut(refreshToken);
+    }
+    return { message: 'Logout realizado localmente' };
   }
 
   @Post('validar-sessao')
   @HttpCode(HttpStatus.OK)
-  async validarSessao(@Body('refreshToken') refreshToken: string) {
+  async validarSessao(@Req() req: Request) {
     this.logger.log(`[DEBUG] Requisição de validação de sessão recebida`);
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      throw new UnauthorizedException('Nenhum refresh token fornecido.');
+    }
     return this.authService.validarSessao(refreshToken);
+  }
+
+  private setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 dias
+    });
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 dias
+    });
   }
 }
