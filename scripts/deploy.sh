@@ -37,13 +37,13 @@ cd ../..
 # 6. Reiniciar o serviço do Backend no PM2
 # pm2 reload garante um recarregamento com "zero downtime".
 echo "🔄 Reiniciando o Backend (PM2)..."
+cd apps/backend
 pm2 reload lauf-backend --update-env || (
   echo "⚠️ Processo não encontrado. Iniciando um novo do zero..."
-  cd apps/backend
-  pm2 start dist/src/main.js --name "lauf-backend"
+  pm2 start dist/main.js --name "lauf-backend"
   pm2 save
-  cd ../..
 ) || echo "⚠️ PM2 não conseguiu reiniciar ou iniciar o backend."
+cd ../..
 
 echo "✅ Deploy concluído com sucesso!"
 echo "Lembre-se: O Frontend (pasta apps/frontend/dist) já deve estar sendo servido pelo seu Nginx."
