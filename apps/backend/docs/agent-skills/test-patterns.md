@@ -34,3 +34,4 @@ Ao criar os arquivos `.spec.ts`, você notará a presença destas palavras, que 
 1. NUNCA importe o `PrismaService` real sem providenciar um `useValue: mockPrismaService` no Testing Module. Isso evitará de sujar as tabelas de desenvolvimento.
 2. Cada bloco `describe` deve testar um único método da classe.
 3. Garanta o uso de `jest.clearAllMocks()` dentro do bloco `afterEach()` para evitar que variáveis globais interfiram em testes futuros.
+4. Caso o Controller interaja diretamente com o ciclo HTTP do Express (por exemplo, lidando com cookies usando `@Res() res: Response` ou `@Req() req: Request`), **sempre crie mocks (objetos falsos) simulando o Request e o Response**. O NestJS não fará essa injeção automaticamente no teste unitário do Controller.

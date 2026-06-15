@@ -48,12 +48,12 @@ A utilização de Enums no banco ajuda a restringir os dados inseridos a um conj
 
 ### 2.3. Sessao
 **Objetivo:** Implementação de controle de sessão por Refresh Tokens (JWT), garantindo uma boa experiência de usuário ao revalidar tokens expirados sem precisar pedir login frequentemente.
-**Justificativa:** Reforça a segurança de autenticação de tokens JWT mantendo sessões de longa duração revogáveis no banco de dados.
+**Justificativa:** Reforça a segurança de autenticação de tokens JWT mantendo sessões de longa duração revogáveis no banco de dados. A partir da nova atualização, estes tokens operam nativamente como **HttpOnly Cookies**.
 
 **Campos:**
 - `id` (String/UUID): Identificador da sessão.
 
-- `refreshToken` (String): Token único encriptado no client para renovar acessos.
+- `refreshToken` (String): Token único de longa duração entregue para o client (agora embutido em Cookie) para renovar acessos.
 - `usuarioId` (String): Chave estrangeira que aponta para o Usuário.
 - `valido` (Boolean): Permite revogar a sessão remotamente (ex: deslogar de todos os dispositivos). Padrão `true`.
 - `expiraEm` (DateTime): Prazo máximo até que o usuário seja obrigado a realizar login com senha novamente.

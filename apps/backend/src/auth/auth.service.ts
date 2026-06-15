@@ -509,6 +509,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
+      usuario: { id: usuarioId, matricula, cargo, email, nome, telefone, curso }
     };
   }
 }

@@ -7,6 +7,17 @@ import { LoginDto } from './dto/login.dto';
 import { ConcluirCadastroDto } from './dto/concluir-cadastro.dto';
 import { RecuperarSenhaDto } from './dto/recuperar-senha.dto';
 
+const mockResponse = () => {
+  const res: any = {};
+  res.cookie = jest.fn().mockReturnValue(res);
+  res.clearCookie = jest.fn().mockReturnValue(res);
+  return res;
+};
+
+const mockRequest = (cookies: any = {}) => {
+  return { cookies } as any;
+};
+
 // Mock do AuthService
 // Como já testamos todas as lógicas no arquivo auth.service.spec.ts,
 // aqui no Controller não precisamos testar se as regras funcionam.
@@ -20,6 +31,7 @@ const mockAuthService = {
   solicitarRecuperacaoSenha: jest.fn().mockResolvedValue({ message: 'Email enviado' }),
   redefinirSenha: jest.fn().mockResolvedValue({ message: 'Senha redefinida' }),
   logOff: jest.fn().mockResolvedValue({ message: 'Logoff realizado' }),
+  logOut: jest.fn().mockResolvedValue({ message: 'Logout realizado' }),
   validarSessao: jest.fn().mockResolvedValue({ ok: true, usuario: {} }),
 };
 
@@ -76,11 +88,13 @@ describe('AuthController', () => {
 
   it('deve chamar o metodo de login do service', async () => {
     const dto: LoginDto = { matricula: '12345678', senha: '[PASSWORD]' };
+    const res = mockResponse();
 
-    const resultado = await controller.login(dto);
+    const resultado = await controller.login(dto, res);
 
     expect(authService.login).toHaveBeenCalledWith(dto);
-    expect(resultado).toHaveProperty('accessToken');
+    expect(res.cookie).toHaveBeenCalledTimes(2); // accessToken e refreshToken
+    expect(resultado.message).toBe('Login realizado com sucesso');
   });
 
   it('deve chamar o metodo de solicitarRecuperacaoSenha do service', async () => {
@@ -111,9 +125,9 @@ describe('AuthController', () => {
 
   it('deve chamar o metodo validarSessao do service', async () => {
     const refreshToken = 'meu-refresh-token';
-    // Add the mock to authService if not exists, but we can just use any property that is mock function, wait we need to add it to mockAuthService.
-    // Actually, I should add validarSessao to mockAuthService. I will do that in the next step.
-    await controller.validarSessao(refreshToken);
+    const req = mockRequest({ refreshToken });
+
+    await controller.validarSessao(req);
 
     expect(authService.validarSessao).toHaveBeenCalledWith(refreshToken);
   });

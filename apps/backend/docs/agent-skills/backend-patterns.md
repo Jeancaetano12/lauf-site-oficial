@@ -42,7 +42,7 @@ Não crie rotas "soltas" utilizando express cru. **Tudo** funciona em módulos. 
 
 Sempre que a funcionalidade envolver segurança e controle de acesso, atente-se às seguintes regras padronizadas na aplicação:
 
-- **Tokens e Criptografia**: A senha do usuário JAMAIS deve trafegar ou ser armazenada em texto limpo. Sempre utilize `bcrypt.hash()` antes de salvar e `bcrypt.compare()` no login. Para sessões, foi estabelecido o uso de **JWT (JSON Web Tokens)** associado a Refresh Tokens de longa duração, validados via `@nestjs/jwt`.
+- **Tokens e Criptografia**: A senha do usuário JAMAIS deve trafegar ou ser armazenada em texto limpo. Sempre utilize `bcrypt.hash()` antes de salvar e `bcrypt.compare()` no login. Para sessões, foi estabelecido o uso de **JWT (JSON Web Tokens)** associado a Refresh Tokens de longa duração, validados via `@nestjs/jwt`. **Esses tokens devem ser enviados exclusivamente via Cookies `HttpOnly`** para proteger contra ataques de XSS, nunca como resposta JSON direta ou armazenados em `localStorage` no frontend.
 - **Proteção de Rotas (Guards)**:
   - Rotas que exigem apenas o usuário estar logado devem ser decoradas com `@UseGuards(JwtAuthGuard)`.
   - Rotas exclusivas por Cargo (ex: funcionalidade administrativa) devem incluir o `@UseGuards(JwtAuthGuard, RolesGuard)` seguido do decorador `@Roles(Cargo.COORDENADOR, Cargo.PROFESSOR)` informando o Array de cargos permitidos.
