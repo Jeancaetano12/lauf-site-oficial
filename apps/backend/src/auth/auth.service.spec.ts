@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Curso } from '@prisma/client';
 import { MailService } from '../mail/mail.service';
@@ -20,6 +20,7 @@ const mockPrismaService = {
     create: jest.fn(),
     findUnique: jest.fn(),
     update: jest.fn(),
+    delete: jest.fn()
   },
   usuario: {
     findUnique: jest.fn(),
@@ -90,6 +91,69 @@ describe('AuthService', () => {
       expect(resultado.id).toBe('id-solicitacao');
     });
 
+    it('deve rejeitar se o usuario ja estiver cadastrado', async () => {
+      mockPrismaService.solicitacaoInscricao.findFirst.mockResolvedValue({ status: 'APROVADA' })
+      mockPrismaService.usuario.findUnique.mockResolvedValue({ id: 'id-usuario' })
+
+      const dto: SolicitarInscricaoDto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO', genero: 'MASCULINO' as any };
+
+      await expect(service.solicitarInscricao(dto)).rejects.toThrow(BadRequestException);
+    })
+
+    it('deve reenviar o email caso a solicitacao ja esteja aprovada e o token tenha expirado', async () => {
+      const dataPassada = new Date();
+      dataPassada.setDate(dataPassada.getDate() - 1);
+
+      mockPrismaService.solicitacaoInscricao.findFirst.mockResolvedValue({
+        id: 'id-solicitacao',
+        status: 'APROVADA',
+        email: 'joao@teste.com',
+        nome: 'João',
+        tokenRegistroExpiraEm: dataPassada
+      });
+      mockPrismaService.usuario.findUnique.mockResolvedValue(null);
+      mockMailService.enviarEmailAprovacao.mockResolvedValue(1);
+
+      const dto: SolicitarInscricaoDto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO', genero: 'MASCULINO' as any };
+
+      const resultado = await service.solicitarInscricao(dto);
+
+      expect(mockPrismaService.solicitacaoInscricao.update).toHaveBeenCalled();
+      expect(mockMailService.enviarEmailAprovacao).toHaveBeenCalledWith('joao@teste.com', 'João', expect.any(String));
+
+      expect(resultado.message).toBe('Sua solicitação já havia sido aprovada, mas o token expirou. Um novo link de cadastro foi enviado para o seu e-mail.');
+
+    });
+
+    it('deve apagar o token de registro e rejeitar caso ocorra erro ao reenviar o email de aprovação', async () => {
+      const dataPassada = new Date();
+      dataPassada.setDate(dataPassada.getDate() - 1);
+
+      mockPrismaService.solicitacaoInscricao.findFirst.mockResolvedValue({
+        id: 'id-solicitacao',
+        status: 'APROVADA',
+        email: 'joao@teste.com',
+        nome: 'João',
+        tokenRegistroExpiraEm: dataPassada
+      });
+      mockPrismaService.usuario.findUnique.mockResolvedValue(null);
+      // Simula a falha no envio do email (retorna 0) apenas uma vez para não afetar os outros testes
+      mockMailService.enviarEmailAprovacao.mockResolvedValueOnce(0);
+
+      const dto: SolicitarInscricaoDto = { nome: 'João', email: 'joao@teste.com', matricula: '01548379', telefone: '85989694059', curso: Curso.ENGENHARIA_DA_COMPUTACAO, cargoPretendido: 'ALUNO', genero: 'MASCULINO' as any };
+
+      await expect(service.solicitarInscricao(dto)).rejects.toThrow(InternalServerErrorException);
+
+      // Verifica se o último update foi para limpar os dados do token
+      expect(mockPrismaService.solicitacaoInscricao.update).toHaveBeenLastCalledWith({
+        where: { id: 'id-solicitacao' },
+        data: {
+          tokenRegistro: null,
+          tokenRegistroExpiraEm: null,
+        },
+      });
+    });
+
     it('deve rejeitar se ja existir uma solicitacao PENDENTE', async () => {
       mockPrismaService.solicitacaoInscricao.findFirst.mockResolvedValue({ status: 'PENDENTE' });
 
@@ -134,6 +198,15 @@ describe('AuthService', () => {
       expect(resultado.tokenGerado).toBeDefined(); // Garante que o token hex foi criado
     });
 
+    it('deve rejeitar se ocorrer erro ao enviar o email de aprovacao, revertendo a aprovacao', async () => {
+      mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({ id: 'id-1', status: 'PENDENTE' });
+      mockPrismaService.solicitacaoInscricao.update.mockResolvedValue({ status: 'APROVADA' });
+      mockMailService.enviarEmailAprovacao.mockResolvedValue(0);
+      mockPrismaService.solicitacaoInscricao.update.mockResolvedValue({ id: 'id-1', data: { tokenRegistro: null, tokenRegistroExpiraEm: null } })
+
+      await expect(service.aprovarSolicitacao('id-1')).rejects.toThrow(InternalServerErrorException);
+    });
+
     it('deve rejeitar se a solicitacao nao existir', async () => {
       mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue(null);
 
@@ -150,6 +223,94 @@ describe('AuthService', () => {
       mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({ id: 'id-1', status: 'REJEITADA' });
 
       await expect(service.aprovarSolicitacao('id-1')).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('rejeitarSolicitacao', () => {
+    it('deve rejeitar uma solicitacao pendente com sucesso', async () => {
+      mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
+        status: 'PENDENTE',
+        email: 'joao@teste.com',
+        nome: 'João',
+      });
+
+      mockPrismaService.solicitacaoInscricao.update.mockResolvedValue({
+        id: 'id-1',
+      });
+
+      mockMailService.enviarEmailRejeicao.mockResolvedValue(1);
+
+      const resultado = await service.rejeitarSolicitacao('id-1');
+
+      expect(mockPrismaService.solicitacaoInscricao.findUnique).toHaveBeenCalledWith({
+        where: { id: 'id-1' },
+        select: {
+          status: true,
+          email: true,
+          nome: true,
+        },
+      });
+
+      expect(mockPrismaService.solicitacaoInscricao.update).toHaveBeenCalledWith({
+        where: { id: 'id-1' },
+        data: {
+          status: 'REJEITADA',
+          processadoPor: undefined,
+        },
+      });
+
+      expect(mockMailService.enviarEmailRejeicao).toHaveBeenCalledWith(
+        'joao@teste.com',
+        'João',
+      );
+
+      expect(resultado).toEqual({
+        message: 'Solicitação rejeitada',
+        id: 'id-1',
+      });
+    });
+
+    it('deve lançar erro se a solicitacao nao existir', async () => {
+      mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.rejeitarSolicitacao('id-inexistente'),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('deve lançar erro se a solicitacao ja estiver aprovada', async () => {
+      mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
+        status: 'APROVADA',
+        email: 'joao@teste.com',
+        nome: 'João',
+      });
+
+      await expect(
+        service.rejeitarSolicitacao('id-1'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('deve lançar erro caso ocorra falha no envio do email de rejeicao', async () => {
+      mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
+        status: 'PENDENTE',
+        email: 'joao@teste.com',
+        nome: 'João',
+      });
+
+      mockPrismaService.solicitacaoInscricao.update.mockResolvedValue({
+        id: 'id-1',
+      });
+
+      mockMailService.enviarEmailRejeicao.mockResolvedValueOnce(0);
+
+      await expect(
+        service.rejeitarSolicitacao('id-1'),
+      ).rejects.toThrow(InternalServerErrorException);
+
+      expect(mockMailService.enviarEmailRejeicao).toHaveBeenCalledWith(
+        'joao@teste.com',
+        'João',
+      );
     });
   });
 
@@ -172,6 +333,7 @@ describe('AuthService', () => {
 
       expect(mockPrismaService.usuario.create).toHaveBeenCalled();
       expect(mockPrismaService.solicitacaoInscricao.update).toHaveBeenCalled();
+      expect((resultado.usuario as any).senha).toBeUndefined();
       expect(resultado.message).toBe('Cadastro concluído com sucesso.');
     });
 
@@ -218,6 +380,12 @@ describe('AuthService', () => {
 
       await expect(service.login({ matricula: '01548379', senha: '123' })).rejects.toThrow(UnauthorizedException);
     });
+
+    it('deve lançar um erro caso não existir usuario', async () => {
+      mockPrismaService.usuario.findUnique.mockResolvedValue(null);
+
+      await expect(service.login({ matricula: '01548379', senha: '01548379' })).rejects.toThrow(UnauthorizedException);
+    });
   });
 
   describe('solicitarRecuperacaoSenha', () => {
@@ -246,6 +414,31 @@ describe('AuthService', () => {
       expect(mockMailService.enviarEmailRecuperacaoSenha).toHaveBeenCalled();
       expect(resultado.message).toBe('Se o e-mail existir, um link de recuperação foi enviado.');
       expect(resultado.tokenGerado).toBeDefined();
+    });
+
+    it('deve ter o token de recuperação removido caso falha no envio do email', async () => {
+      mockPrismaService.usuario.findUnique.mockResolvedValue({
+        id: 'user-id',
+        email: 'joao@teste.com',
+        matricula: '01548379',
+      });
+      mockPrismaService.usuario.update = jest.fn().mockResolvedValue({});
+      mockMailService.enviarEmailRecuperacaoSenha.mockResolvedValueOnce(0);
+
+      await expect(service.solicitarRecuperacaoSenha({ email: 'joao@teste.com', matricula: '01548379' })).rejects.toThrow(InternalServerErrorException);
+
+      expect(mockPrismaService.usuario.findUnique).toHaveBeenCalledWith({
+        where: { email: 'joao@teste.com', matricula: '01548379' },
+      });
+      expect(mockPrismaService.usuario.update).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          where: { id: 'user-id' },
+          data: expect.objectContaining({
+            tokenRecuperacaoSenha: null,
+            tokenRecuperacaoExpiraEm: null,
+          }),
+        }),
+      );
     });
 
     it('deve retornar mensagem de sucesso mesmo quando usuario nao existir (seguranca)', async () => {
@@ -381,7 +574,7 @@ describe('AuthService', () => {
   });
 
   describe('logOff', () => {
-    it('deve deslogar o usuario com sucesso', async () => {
+    it('deve deslogar o usuario com sucesso de todas as suas sessoes', async () => {
       mockPrismaService.sessao.deleteMany = jest.fn().mockResolvedValue({ count: 1 });
       const resultado = await service.logOff('user-id');
       expect(mockPrismaService.sessao.deleteMany).toHaveBeenCalledWith({
@@ -399,6 +592,27 @@ describe('AuthService', () => {
       expect(resultado.message).toBe('Usuario nao tem sessoes ativas');
     });
   });
+
+  describe('logOut', () => {
+    it('deve deslogar o usuario da sua sessão atual', async () => {
+      mockPrismaService.sessao.deleteMany = jest.fn().mockResolvedValue({ count: 1 });
+      const resultado = await service.logOut('token-atual');
+
+      expect(mockPrismaService.sessao.deleteMany).toHaveBeenCalledWith({
+        where: { refreshToken: 'token-atual' },
+      });
+      expect(resultado.message).toBe('LogOut realizado com sucesso');
+    });
+
+    it('deve retornar mensagem de erro quando a sessao nao existir ou ja estiver encerrada', async () => {
+      mockPrismaService.sessao.deleteMany = jest.fn().mockResolvedValue({ count: 0 });
+      const resultado = await service.logOut('token-invalido');
+      expect(mockPrismaService.sessao.deleteMany).toHaveBeenCalledWith({
+        where: { refreshToken: 'token-invalido' },
+      });
+      expect(resultado.message).toBe('Sessão não encontrada ou já encerrada');
+    })
+  })
 
   describe('refreshToken', () => {
     it('deve rotacionar o refresh token com sucesso', async () => {
