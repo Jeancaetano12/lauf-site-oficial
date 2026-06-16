@@ -31,6 +31,16 @@ api.interceptors.response.use(
 
     // Se o erro for 401 e não for a própria rota de refresh que falhou
     if (error.response?.status === 401 && !originalRequest._retry) {
+      
+      // Ignora rotas de autenticação que naturalmente podem retornar 401 sem precisar de refresh
+      if (
+        originalRequest.url?.includes('/auth/login') || 
+        originalRequest.url?.includes('/auth/validar-sessao') || 
+        originalRequest.url?.includes('/auth/refresh')
+      ) {
+        return Promise.reject(error);
+      }
+
       if (isRefreshing) {
         return new Promise(function (resolve, reject) {
           failedQueue.push({ resolve, reject });
