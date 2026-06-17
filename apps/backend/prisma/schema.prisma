@@ -9,6 +9,18 @@ datasource db {
   provider = "postgresql"
 }
 
+enum StatusAula {
+  AGENDADA
+  CONCLUIDA
+  CANCELADA
+}
+
+enum StatusEvento {
+  AGENDADO
+  CONCLUIDO
+  CANCELADO
+}
+
 enum Curso {
   ANALISE_E_DESENVOLVIMENTO_DE_SISTEMAS
   BANCO_DE_DADOS
@@ -56,7 +68,7 @@ model SolicitacaoInscricao {
   tokenRegistroExpiraEm DateTime?
 
   // Auditoria de ações
-  processadoPor         String?
+  processadoPor String?
 
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
@@ -80,6 +92,112 @@ model Usuario {
 
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
+
+  presencaAulas      PresencaAula[]
+  certificados       Certificado[]
+  aulasCriadas       Aula[]         @relation("AulaCriador")
+  aulasMinistradas   Aula[]         @relation("AulaProfessor")
+  eventosCriados     Evento[]       @relation("EventoCriador")
+  eventosMinistrados Evento[]       @relation("EventoProfessor")
+}
+
+model Aula {
+  id             String     @id @default(uuid())
+  titulo         String
+  local          String
+  status         StatusAula @default(AGENDADA)
+  dataHora       DateTime
+  criadorId      String
+  professorId    String
+  qrCodeToken    String?
+  qrCodeExpiraEm DateTime?
+  qrCodeAtivo    Boolean    @default(false)
+  criadoEm       DateTime   @default(now())
+  atualizadoEm   DateTime   @updatedAt
+
+  // Nomes explícitos são obrigatórios quando há duas relações com o mesmo modelo
+  criador   Usuario        @relation("AulaCriador", fields: [criadorId], references: [id])
+  professor Usuario        @relation("AulaProfessor", fields: [professorId], references: [id])
+  presencas PresencaAula[]
+}
+
+model PresencaAula {
+  id           String   @id @default(uuid())
+  aulaId       String
+  usuarioId    String
+  confirmadoEm DateTime @default(now())
+
+  aula    Aula    @relation(fields: [aulaId], references: [id], onDelete: Cascade)
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@unique([aulaId, usuarioId]) // impede presença duplicada
+}
+
+// -- Carga horaria é uma informação que vem do coordenador ---
+model Certificado {
+  id           String   @id @default(uuid())
+  usuarioId    String
+  cargaHoraria Int
+  emitidoEm    DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+}
+
+// --- Eventos Externos ---
+
+model Evento {
+  id             String       @id @default(uuid())
+  titulo         String
+  local          String
+  status         StatusEvento @default(AGENDADO)
+  dataHora       DateTime
+  duracaoMinutos Int // duração declarada; usada para calcular a expiração do QR
+  cargaHoraria   Int // definida na criação — todos os presentes recebem esse valor
+  criadorId      String
+  professorId    String
+  qrCodeToken    String?
+  qrCodeExpiraEm DateTime?
+  qrCodeAtivo    Boolean      @default(false)
+  criadoEm       DateTime     @default(now())
+  atualizadoEm   DateTime     @updatedAt
+
+  criador      Usuario             @relation("EventoCriador", fields: [criadorId], references: [id])
+  professor    Usuario             @relation("EventoProfessor", fields: [professorId], references: [id])
+  presencas    PresencaEvento[]
+  certificados CertificadoEvento[]
+}
+
+model ParticipanteExterno {
+  id    String @id @default(uuid())
+  nome  String
+  email String // identificador por evento; não precisa ser único globalmente
+
+  presencas    PresencaEvento[]
+  certificados CertificadoEvento[]
+}
+
+model PresencaEvento {
+  id             String   @id @default(uuid())
+  eventoId       String
+  participanteId String
+  confirmadoEm   DateTime @default(now())
+
+  evento       Evento              @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  participante ParticipanteExterno @relation(fields: [participanteId], references: [id], onDelete: Cascade)
+
+  @@unique([eventoId, participanteId])
+}
+
+// -- Carga horaria informada na criação do evento
+model CertificadoEvento {
+  id             String   @id @default(uuid())
+  eventoId       String
+  participanteId String
+  cargaHoraria   Int
+  emitidoEm      DateTime @default(now())
+
+  evento       Evento              @relation(fields: [eventoId], references: [id])
+  participante ParticipanteExterno @relation(fields: [participanteId], references: [id])
 }
 
 model Sessao {
