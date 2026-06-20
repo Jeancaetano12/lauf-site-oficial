@@ -29,10 +29,10 @@ export default function RecuperarSenha() {
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-purple/10 blur-[120px] rounded-full"></div>
 
             <Link
-                to="/"
-                className="absolute top-8 left-8 flex items-center gap-2 text-brand-gray-medium hover:text-brand-white transition-colors"
+                to="/login"
+                className="absolute top-8 left-8 z-50 flex items-center gap-2 bg-brand-purple hover:bg-brand-purple-hover text-white px-3 py-1.5 text-sm rounded-lg font-semibold transition-all hover:scale-105 shadow-md shadow-brand-purple/20"
             >
-                <FaArrowLeft /> Voltar para o início
+                <FaArrowLeft /> Voltar
             </Link>
 
             <div className="w-full max-w-md z-10">

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { FaArrowLeft, FaEnvelope, FaLock } from "react-icons/fa";
 import { GoCpu } from "react-icons/go";
+import roboPcImg from "../assets/img-robo-pc.png";
 
 export default function Login() {
   const [matricula, setMatricula] = useState("");
@@ -39,15 +40,20 @@ export default function Login() {
 
       <Link
         to="/"
-        className="absolute top-8 left-8 flex items-center gap-2 text-brand-gray-medium hover:text-brand-white transition-colors"
+        className="absolute top-8 left-8 z-50 flex items-center gap-2 bg-brand-purple hover:bg-brand-purple-hover text-white px-3 py-1.5 text-sm rounded-lg font-semibold transition-all hover:scale-105 shadow-md shadow-brand-purple/20"
       >
-        <FaArrowLeft /> Voltar para o início
+        <FaArrowLeft /> Voltar
       </Link>
 
       <div className="w-full max-w-md z-10">
         <div className="text-center mb-10">
-          <div className="inline-flex p-4 bg-brand-purple/10 rounded-2xl border border-brand-purple/20 mb-6">
-            <GoCpu className="text-5xl text-brand-purple" />
+          <div className="inline-flex items-center justify-center mb-6 relative">
+            <div className="absolute inset-0 bg-brand-purple/20 blur-[40px] rounded-full z-0"></div>
+            <img 
+              src={roboPcImg} 
+              alt="Robô de Login LAUF" 
+              className="relative z-10 w-32 md:w-40 object-contain drop-shadow-[0_0_15px_rgba(110,64,201,0.3)] transition-transform duration-700 hover:scale-110 hover:-translate-y-3" 
+            />
           </div>
           <h1 className="text-4xl font-bold mb-2">Bem-vindo de volta</h1>
           <p className="text-brand-gray-medium">Acesse o portal da Liga de Arduino</p>

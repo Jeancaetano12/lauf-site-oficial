@@ -97,16 +97,16 @@ export default function SolicitarInscricao() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-black text-brand-white flex flex-col justify-center items-center px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-brand-black text-brand-white flex flex-col justify-center items-center px-6 py-24 relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-purple/20 blur-[120px] rounded-full"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-brand-purple/10 blur-[120px] rounded-full"></div>
 
       <Link
-        to="/"
-        className="absolute top-8 left-8 flex items-center gap-2 text-brand-gray-medium hover:text-brand-white transition-colors"
+        to="/login"
+        className="absolute top-6 left-6 md:top-8 md:left-8 z-50 flex items-center gap-2 bg-brand-purple hover:bg-brand-purple-hover text-white px-3 py-1.5 text-sm rounded-lg font-semibold transition-all hover:scale-105 shadow-md shadow-brand-purple/20"
       >
-        <FaArrowLeft /> Voltar para o início
+        <FaArrowLeft /> Voltar
       </Link>
 
       <div className="w-full max-w-2xl z-10">
