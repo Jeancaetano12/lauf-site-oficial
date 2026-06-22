@@ -10,6 +10,9 @@ import {
   FaChalkboardTeacher,
   FaInstagram
 } from "react-icons/fa";
+import roboImg from "../assets/img-robo-eng.png.png";
+import roboChatImg from "../assets/img-robo-chat.png";
+import roboTargetImg from "../assets/img-robo-target.png";
 
 export default function Home() {
   function scrollTo(id: string) {
@@ -47,10 +50,17 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex justify-center items-center relative">
-            <div className="absolute inset-0 bg-brand-purple/20 blur-[100px] rounded-full w-3/4 h-3/4 m-auto z-0"></div>
-            <div className="relative z-10 bg-brand-black border border-brand-gray-medium/20 p-16 rounded-3xl shadow-2xl">
-              <GoCpu className="text-[12rem] text-brand-purple" />
+          <div className="flex justify-center items-center relative h-full min-h-[300px] md:min-h-[400px]">
+            {/* brilho de fundo */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-purple/30 blur-[100px] rounded-full w-[250px] h-[250px] md:w-[400px] md:h-[400px] z-0"></div>
+            
+            {/* imagem do robo */}
+            <div className="relative z-10 flex items-center justify-center">
+              <img 
+                src={roboImg} 
+                alt="Robô Engenharia LAUF" 
+                className="w-[18rem] md:w-[24rem] lg:w-[30rem] object-contain drop-shadow-[0_0_30px_rgba(110,64,201,0.4)] transition-all duration-700 hover:scale-110 hover:-translate-y-4" 
+              />
             </div>
           </div>
         </div>
@@ -59,18 +69,22 @@ export default function Home() {
       {/* SEÇÃO SOBRE */}
       <section id="sobre" className="bg-brand-white min-h-screen flex items-center py-24 border-b border-brand-gray-medium">
         <div className="w-full max-w-7xl mx-auto px-8">
-          <div className="flex flex-col md:flex-row gap-12 items-center mb-16">
-            <div className="md:w-1/2">
+          <div className="flex flex-col md:flex-row gap-12 items-center mb-12">
+            <div className="w-full md:w-1/2">
               <h2 className="text-brand-purple font-semibold tracking-wide uppercase text-sm mb-2">Quem Somos</h2>
               <h3 className="text-4xl font-bold text-brand-black mb-6">Liderando a Inovação Maker na UNINASSAU</h3>
               <p className="text-brand-text text-lg leading-relaxed">
                 A LAUF (Liga de Arduino Uninassau Fortaleza) nasceu da vontade de conectar alunos apaixonados por hardware e software. Nosso foco é preencher a lacuna entre a teoria acadêmica e a construção de soluções tecnológicas reais.
               </p>
             </div>
-            <div className="md:w-1/2 bg-brand-gray-light p-8 rounded-3xl border border-brand-gray-medium">
-              <p className="italic text-brand-text border-l-4 border-brand-purple pl-4">
-                "Transformamos componentes eletrônicos em soluções inteligentes, um código por vez."
-              </p>
+            <div className="w-full md:w-1/2 flex justify-center relative">
+               {/* brilho de fundo opcional para combinar com os outros */}
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-purple/20 blur-[60px] rounded-full w-[120px] h-[120px] md:w-[180px] md:h-[180px] z-0"></div>
+               <img 
+                 src={roboTargetImg} 
+                 alt="Robô Alvo LAUF" 
+                 className="relative z-10 w-[10rem] md:w-[14rem] lg:w-[18rem] object-contain drop-shadow-[0_0_25px_rgba(110,64,201,0.3)] transition-transform duration-700 hover:scale-110 hover:-translate-y-3" 
+               />
             </div>
           </div>
 
@@ -107,7 +121,7 @@ export default function Home() {
         <div className="w-full max-w-7xl mx-auto px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-brand-black">Nossas Atividades</h2>
-            <p className="text-brand-text mt-4">O que desenvolvemos dentro da liga</p>
+            <p className="text-brand-text mt-4">O que desenvolvemos dentro da liga:</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -161,7 +175,17 @@ export default function Home() {
               Acessar Instagram da LAUF
             </a>
           </div>
-          <div className="w-full"></div>
+          <div className="w-full flex justify-center items-center relative min-h-[300px]">
+            {/* Efeito de brilho atrás do robô */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-purple/20 blur-[80px] rounded-full w-[200px] h-[200px] md:w-[300px] md:h-[300px] z-0"></div>
+            
+            {/* Imagem do robô chat */}
+            <img 
+              src={roboChatImg} 
+              alt="Robô de Contato LAUF" 
+              className="relative z-10 w-[14rem] md:w-[20rem] lg:w-[24rem] object-contain drop-shadow-[0_0_25px_rgba(110,64,201,0.3)] transition-transform duration-700 hover:scale-110 hover:-translate-y-3" 
+            />
+          </div>
         </div>
       </section>
 
