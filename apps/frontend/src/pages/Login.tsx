@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { FaArrowLeft, FaEnvelope, FaLock } from "react-icons/fa";
-import { GoCpu } from "react-icons/go";
 import roboPcImg from "../assets/img-robo-pc.png";
 
 export default function Login() {
