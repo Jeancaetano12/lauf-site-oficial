@@ -1,0 +1,280 @@
+/* =========================================
+   BOTÕES DE NAVEGAÇÃO
+========================================= */
+.fc .fc-button {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  text-transform: capitalize !important;
+  transition: background-color 0.15s ease !important;
+  box-shadow: none !important;
+  border: 1px solid #6b21a8 !important;
+  background-color: #6b21a8 !important;
+  color: #ffffff !important;
+}
+
+.fc .fc-button:hover {
+  background-color: #581c87 !important;
+  border-color: #581c87 !important;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background-color: #581c87 !important;
+}
+
+/* Botões prev/next do footer ficam com visual mais discreto */
+.fc-footer-toolbar .fc-button.fc-prev-button,
+.fc-footer-toolbar .fc-button.fc-next-button {
+  background-color: transparent !important;
+  border-color: #e2e8f0 !important;
+  color: #6b21a8 !important;
+}
+
+.fc-footer-toolbar .fc-button.fc-prev-button:hover,
+.fc-footer-toolbar .fc-button.fc-next-button:hover {
+  background-color: #f3e8ff !important;
+  border-color: #6b21a8 !important;
+}
+
+/* =========================================
+   TÍTULO E CABEÇALHO
+========================================= */
+.fc .fc-toolbar-title {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  text-transform: capitalize !important;
+}
+
+/* =========================================
+   GRID DO CALENDÁRIO
+========================================= */
+.fc-theme-standard .fc-scrollgrid {
+  border: 1px solid #e2e8f0 !important;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: #e2e8f0 !important;
+}
+
+.fc-col-header-cell-cushion {
+  color: #334155 !important;
+  text-decoration: none !important;
+  font-size: 0.8rem !important;
+  padding: 6px !important;
+}
+
+.fc .fc-daygrid-day-number {
+  text-decoration: none !important;
+}
+
+/* =========================================
+   CÉLULAS COM AULA
+========================================= */
+.fc .fc-daygrid-day-frame {
+  min-height: 88px !important;
+  overflow: hidden !important;
+  /* impede o conteúdo de vazar para fora da célula */
+}
+
+.fc .fc-daygrid-day.fc-day:has(.has-aula) {
+  cursor: pointer;
+}
+
+.fc .fc-daygrid-day.fc-day:has(.has-aula):hover {
+  background-color: #faf5ff !important;
+}
+
+/* =========================================
+   CONTEÚDO INTERNO DA CÉLULA
+========================================= */
+.cal-cell-inner {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 5px;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  /* garante que os cards não ultrapassem a célula */
+}
+
+.cal-day-number {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #334155;
+  text-align: right;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+/* =========================================
+   MINI CARDS
+========================================= */
+.cal-mini-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.cal-mini-card {
+  border-left: 2px solid #6b21a8;
+  border-radius: 0 4px 4px 0;
+  padding: 2px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow: hidden;
+}
+
+.cal-mini-card-titulo {
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.cal-mini-card-hora {
+  font-size: 0.62rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.cal-mini-card-extra {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #6b21a8;
+  padding: 1px 2px;
+  margin-top: 1px;
+}
+
+/* =========================================
+   MODAL
+========================================= */
+.cal-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.cal-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.cal-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cal-modal-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  text-transform: capitalize;
+  margin: 0;
+}
+
+.cal-modal-header button {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+.cal-modal-header button:hover {
+  background: #f1f5f9;
+}
+
+.cal-modal-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.cal-modal-card {
+  border-left: 4px solid #6b21a8;
+  border-radius: 0;
+  background: #fafafa;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cal-modal-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.cal-modal-card-meta {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.cal-modal-badge {
+  align-self: flex-start;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+}
+
+/* =========================================
+   RESPONSIVIDADE (Mobile)
+========================================= */
+@media (max-width: 768px) {
+  .fc .fc-toolbar-title {
+    font-size: 0.95rem !important;
+  }
+
+  .fc .fc-daygrid-day-frame {
+    min-height: 70px !important;
+    overflow: hidden !important;
+  }
+
+  .cal-cell-inner {
+    padding: 3px;
+  }
+
+  .cal-mini-card-titulo {
+    font-size: 0.62rem;
+  }
+
+  .cal-mini-card-hora {
+    display: none;
+  }
+
+  .cal-modal {
+    max-width: 100%;
+    margin: 0 8px;
+  }
+}

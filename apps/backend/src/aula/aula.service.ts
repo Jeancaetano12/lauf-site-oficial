@@ -47,7 +47,7 @@ export class AulaService {
             return aula;
         } catch (error) {
             if (error instanceof HttpException) throw error;
-            this.logger.error(`[ERRO] Erro ao criar aula pelo usuário ${auditoria}: `, error);
+            this.logger.warn(`[WARN] Erro ao criar aula pelo usuário ${auditoria}: `, error);
             throw new InternalServerErrorException("Erro ao criar aula");
         }
     }
@@ -59,6 +59,7 @@ export class AulaService {
                 select: {
                     id: true,
                     titulo: true,
+                    local: true,
                     status: true,
                     dataHora: true,
                     professor: { // Faz um "join" com a tabela de usuário para trazer os dados do professor

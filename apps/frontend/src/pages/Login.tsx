@@ -48,10 +48,10 @@ export default function Login() {
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center mb-6 relative">
             <div className="absolute inset-0 bg-brand-purple/20 blur-[40px] rounded-full z-0"></div>
-            <img 
-              src={roboPcImg} 
-              alt="Robô de Login LAUF" 
-              className="relative z-10 w-32 md:w-40 object-contain drop-shadow-[0_0_15px_rgba(110,64,201,0.3)] transition-transform duration-700 hover:scale-110 hover:-translate-y-3" 
+            <img
+              src={roboPcImg}
+              alt="Robô de Login LAUF"
+              className="relative z-10 w-32 md:w-40 object-contain drop-shadow-[0_0_15px_rgba(110,64,201,0.3)] transition-transform duration-700 hover:scale-110 hover:-translate-y-3"
             />
           </div>
           <h1 className="text-4xl font-bold mb-2">Bem-vindo de volta</h1>
@@ -102,7 +102,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading || isAuthLoading}
-            className="w-full bg-brand-purple hover:bg-brand-purple-hover text-white py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-brand-purple/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="cursor-pointer w-full bg-brand-purple hover:bg-brand-purple-hover text-white py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-brand-purple/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <div className="flex items-center justify-center gap-2">

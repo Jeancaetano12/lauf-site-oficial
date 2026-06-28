@@ -50,12 +50,19 @@ O `AuthContext` é o "Cérebro" da sessão do lado do Cliente:
 - **Rotas Protegidas**: Utilize o componente `ProtectedRoute` (em `src/components/ProtectedRoute.tsx`) para envolver rotas que exigem autenticação. Ele gerencia o estado de carregamento e redireciona automaticamente para o `/login` caso não haja uma sessão válida.
 
 ```tsx
-<Route 
-  path="/privadas" 
+{/* Rota Pai que carrega o Layout de Navegação */}
+<Route
   element={
     <ProtectedRoute>
-      <SuaPaginaPrivada />
+      <HubLayout />
     </ProtectedRoute>
-  } 
-/>
+  }
+>
+  {/* Todas as rotas que precisam do menu lateral/bottom-bar entram aqui como filhas */}
+  <Route path="/hub" element={<LaufHub />} />
+  <Route path="/aulas" element={<Aulas />} />
+  <Route path="/perfil" element={<Perfil />} />
+  <Route path="/solicitacoes" element={<Solicitacoes />} />
+  <Route path="/configuracoes" element={<Configuracoes />} />
+  {/* <Route path="/calendario" element={<Calendario />} /> */}
 ```
