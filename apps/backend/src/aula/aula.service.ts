@@ -191,4 +191,35 @@ export class AulaService {
             throw new InternalServerErrorException("Erro ao atualizar aula");
         }
     }
+
+    async listarProfessores(auditoria: string) {
+        try {
+            const professores = await this.prisma.usuario.findMany({
+                where: {
+                    OR: [
+                        { cargo: 'PROFESSOR' },
+                        { cargo: 'COORDENADOR' }
+                    ]
+                },
+                select: {
+                    id: true,
+                    nome: true,
+                },
+                orderBy: {
+                    nome: 'asc',
+                }
+            });
+
+            if (professores.length === 0) {
+                throw new NotFoundException("Nenhum professor encontrado");
+            }
+
+            this.logger.log(`[AUDIT] Professores listados para ${auditoria}`);
+            return professores;
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            this.logger.warn(`[WARN] Erro ao listar professores pelo usuário ${auditoria}: `, error);
+            throw new InternalServerErrorException("Erro ao listar professores");
+        }
+    }
 }

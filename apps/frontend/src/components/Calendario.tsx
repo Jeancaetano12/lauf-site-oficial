@@ -6,6 +6,7 @@ import type { DayCellContentArg } from '@fullcalendar/core';
 import type { Aula } from '../hooks/useAulas';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Calendario.css';
+import ModalAgendarAula from './ModalAgendarAula';
 
 interface CalendarioProps {
     aulas: Aula[];
@@ -27,7 +28,9 @@ function toChave(data: string | Date): string {
 
 export default function Calendario({ aulas, onDayClick }: CalendarioProps) {
     const [modalAulaInfo, setModalAulaInfo] = useState<{ data: Date; aulas: Aula[] } | null>(null);
-    const cargoUsuario = useAuth().user.cargo;
+    const [modalAgendarAula, setModalAgendarAula] = useState<{ data: Date } | null>(null);
+    const { user } = useAuth();
+    const cargoUsuario = user.cargo;
 
     const aulasPorDia = useMemo(() =>
         aulas.reduce<Record<string, Aula[]>>((acc, aula) => {
@@ -40,12 +43,18 @@ export default function Calendario({ aulas, onDayClick }: CalendarioProps) {
 
     const handleDateClick = useCallback((info: DateClickArg) => {
         const aulasNoDia = aulasPorDia[info.dateStr] ?? [];
-        if (aulasNoDia.length === 0) return;
+        
+        if (aulasNoDia.length === 0) {
+            // Se o dia não tem aula, mas o usuário tem permissão, abre modal de agendar
+            if (cargoUsuario === 'COORDENADOR' || cargoUsuario === 'PROFESSOR') {
+                setModalAgendarAula({ data: info.date });
+            }
+            return;
+        }
+        
         setModalAulaInfo({ data: info.date, aulas: aulasNoDia });
         onDayClick?.(aulasNoDia, info.date);
-    }, [aulasPorDia, onDayClick]);
-
-
+    }, [aulasPorDia, onDayClick, cargoUsuario]);
 
     const renderDayCell = useCallback((info: DayCellContentArg) => {
         const aulasNoDia = aulasPorDia[toChave(info.date)] ?? [];
@@ -116,14 +125,27 @@ export default function Calendario({ aulas, onDayClick }: CalendarioProps) {
             {modalAulaInfo && (
                 <div className="cal-modal-overlay" onClick={fecharModal}>
                     <div className="cal-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="cal-modal-header">
-                            <h3>
+                        <div className="cal-modal-header flex justify-between items-center px-4 py-3">
+                            <h3 className="font-bold text-gray-800">
                                 {modalAulaInfo.data.toLocaleDateString('pt-BR', {
                                     weekday: 'long', day: 'numeric', month: 'long',
                                 })}
                             </h3>
-                            <button onClick={fecharModal} aria-label="Fechar">✕</button>
+                            <button onClick={fecharModal} aria-label="Fechar" className="text-gray-500 hover:text-gray-800 text-xl font-bold">✕</button>
                         </div>
+                        {(cargoUsuario === 'COORDENADOR' || cargoUsuario === 'PROFESSOR') && (
+                            <div className="px-4 pb-3 border-b border-gray-100 flex justify-end bg-white">
+                                <button
+                                    className="text-sm bg-brand-purple text-white px-3 py-1.5 rounded-md hover:bg-brand-purple-hover transition-colors font-medium shadow-sm"
+                                    onClick={() => {
+                                        setModalAgendarAula({ data: modalAulaInfo.data });
+                                        fecharModal();
+                                    }}
+                                >
+                                    + Agendar Nova Aula
+                                </button>
+                            </div>
+                        )}
                         <div className="cal-modal-body">
                             {modalAulaInfo.aulas.map((aula) => {
                                 const cor = STATUS_COR[aula.status];
@@ -153,6 +175,14 @@ export default function Calendario({ aulas, onDayClick }: CalendarioProps) {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {modalAgendarAula && (
+                <ModalAgendarAula
+                    isOpen={!!modalAgendarAula}
+                    onClose={() => setModalAgendarAula(null)}
+                    dataInicial={modalAgendarAula.data}
+                />
             )}
         </div>
     );

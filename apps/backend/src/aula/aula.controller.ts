@@ -46,6 +46,21 @@ export class AulaController {
         }
     }
 
+    @Get('professores')
+    @HttpCode(HttpStatus.OK)
+    @Throttle({ default: { limit: 5, ttl: 60000 } })
+    @UseGuards(JwtAuthGuard)
+    async listarProfessores(@CurrentUser() user: any) {
+        this.logger.log(`[AUDIT] Listagem de professores solicitada pelo usuário: ${user.nome}`);
+        try {
+            const auditoria = `${user.nome} (Matricula: ${user.matricula})`;
+            return await this.aulaService.listarProfessores(auditoria);
+        } catch (error) {
+            this.logger.warn(`[WARN] Erro ao listar professores pelo usuário ${user.nome}: `, error);
+            throw error;
+        }
+    }
+
     @Get(':id')
     @HttpCode(HttpStatus.OK)
     @Throttle({ default: { limit: 5, ttl: 60000 } })
