@@ -6,9 +6,10 @@ interface ModalAgendarAulaProps {
     isOpen: boolean;
     onClose: () => void;
     dataInicial: Date;
+    onSuccess?: () => void;
 }
 
-export default function ModalAgendarAula({ isOpen, onClose, dataInicial }: ModalAgendarAulaProps) {
+export default function ModalAgendarAula({ isOpen, onClose, dataInicial, onSuccess }: ModalAgendarAulaProps) {
     const { user } = useAuth();
     const { criarAula, isCreating, error, professores, fetchProfessores } = useAulas();
 
@@ -68,6 +69,7 @@ export default function ModalAgendarAula({ isOpen, onClose, dataInicial }: Modal
 
         try {
             await criarAula(dto);
+            onSuccess?.();
             onClose();
         } catch (err) {
             // Erro já tratado no hook, apenas evita o fechamento

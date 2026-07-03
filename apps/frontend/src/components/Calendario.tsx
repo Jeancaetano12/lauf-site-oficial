@@ -11,6 +11,7 @@ import ModalAgendarAula from './ModalAgendarAula';
 interface CalendarioProps {
     aulas: Aula[];
     onDayClick?: (aulas: Aula[], data: Date) => void;
+    onAulasUpdated?: () => void;
 }
 
 const STATUS_COR: Record<Aula['status'], { borda: string; fundo: string; texto: string; hora: string }> = {
@@ -26,7 +27,7 @@ function toChave(data: string | Date): string {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-export default function Calendario({ aulas, onDayClick }: CalendarioProps) {
+export default function Calendario({ aulas, onDayClick, onAulasUpdated }: CalendarioProps) {
     const [modalAulaInfo, setModalAulaInfo] = useState<{ data: Date; aulas: Aula[] } | null>(null);
     const [modalAgendarAula, setModalAgendarAula] = useState<{ data: Date } | null>(null);
     const { user } = useAuth();
@@ -182,6 +183,7 @@ export default function Calendario({ aulas, onDayClick }: CalendarioProps) {
                     isOpen={!!modalAgendarAula}
                     onClose={() => setModalAgendarAula(null)}
                     dataInicial={modalAgendarAula.data}
+                    onSuccess={onAulasUpdated}
                 />
             )}
         </div>

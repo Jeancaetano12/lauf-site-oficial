@@ -37,7 +37,7 @@ export default function Aulas() {
                         <span className="text-brand-gray-text font-medium animate-pulse">Carregando calendário...</span>
                     </div>
                 ) : (
-                    <Calendario aulas={aulas} />
+                    <Calendario aulas={aulas} onAulasUpdated={refetch} />
                 )}
             </div>
         </div>
