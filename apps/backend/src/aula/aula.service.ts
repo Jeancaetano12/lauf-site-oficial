@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException, Logger, InternalServerErrorException, HttpException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, Logger, InternalServerErrorException, HttpException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CriarAulaDto } from './dto/criar-aula.dto';
 import { AtualizarAulaDto } from './dto/atualizar-aula.dto';
@@ -11,6 +11,11 @@ export class AulaService {
 
     async criarAula(dto: CriarAulaDto, criadorId: string, auditoria: string) {
         try {
+            // Regra: Não permitir agendamento no passado
+            if (dto.dataHora < new Date()) {
+                throw new BadRequestException('Não é possível agendar uma aula no passado.');
+            }
+
             // Regra: Não permitir sobreposição de horário (margem de 2 horas)
             // Consideramos sobreposição se for no mesmo local OU com o mesmo professor.
             const duasHorasAntes = new Date(dto.dataHora.getTime() - 2 * 60 * 60 * 1000);
@@ -38,7 +43,11 @@ export class AulaService {
 
             const aula = await this.prisma.aula.create({
                 data: {
-                    ...dto,
+                    professorId: dto.professorId,
+                    titulo: dto.titulo.toUpperCase(),
+                    local: dto.local.toUpperCase(),
+                    status: dto.status,
+                    dataHora: dto.dataHora,
                     criadorId, // Pegamos o ID de quem chamou a rota (do token)
                 },
             });
@@ -117,6 +126,11 @@ export class AulaService {
 
     async atualizarAula(id: string, dto: AtualizarAulaDto, auditoria: string) {
         try {
+            // Regra: Não permitir agendamento no passado
+            if (dto.dataHora && dto.dataHora < new Date()) {
+                throw new BadRequestException('Não é possível reagendar uma aula para o passado.');
+            }
+
             const aulaExistente = await this.prisma.aula.findUnique({
                 where: { id }
             });
@@ -180,7 +194,13 @@ export class AulaService {
 
             const aula = await this.prisma.aula.update({
                 where: { id },
-                data: dto,
+                data: {
+                    professorId: dto.professorId,
+                    titulo: dto.titulo?.toUpperCase(),
+                    local: dto.local?.toUpperCase(),
+                    status: dto.status,
+                    dataHora: dto.dataHora,
+                },
             });
 
             this.logger.warn(`[WARN] Aula atualizada com ID ${aula.id} por ${auditoria}`);
