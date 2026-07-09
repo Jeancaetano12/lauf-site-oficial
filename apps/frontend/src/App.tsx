@@ -16,6 +16,7 @@ import Aulas from "./pages/Aulas";
 import Perfil from "./pages/Perfil";
 import Solicitacoes from "./pages/Solicitacoes";
 import Configuracoes from "./pages/Configuracoes";
+import AulaDetalhes from "./pages/AulasDetalhes";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/solicitacoes" element={<Solicitacoes />} />
             <Route path="/configuracoes" element={<Configuracoes />} />
+            <Route path="/aulas/:id" element={<AulaDetalhes />} />
             {/* <Route path="/calendario" element={<Calendario />} /> */}
           </Route>
           <Route path="/recuperar-senha" element={<RecuperarSenha />} />

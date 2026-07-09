@@ -105,6 +105,7 @@ model Aula {
   id             String     @id @default(uuid())
   titulo         String
   local          String
+  descricao      String?    @db.VarChar(140)
   status         StatusAula @default(AGENDADA)
   dataHora       DateTime
   criadorId      String

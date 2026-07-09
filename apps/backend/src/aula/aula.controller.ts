@@ -34,7 +34,7 @@ export class AulaController {
     @Get()
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
-    @Throttle({ default: { limit: 5, ttl: 60000 } })
+    @Throttle({ default: { limit: 15, ttl: 60000 } })
     async listarAulas(@CurrentUser() user: any) {
         this.logger.log(`[AUDIT] Listagem de aulas solicitada pelo usuário: ${user.nome}`);
         try {
@@ -48,7 +48,7 @@ export class AulaController {
 
     @Get('professores')
     @HttpCode(HttpStatus.OK)
-    @Throttle({ default: { limit: 5, ttl: 60000 } })
+    @Throttle({ default: { limit: 15, ttl: 60000 } })
     @UseGuards(JwtAuthGuard)
     async listarProfessores(@CurrentUser() user: any) {
         this.logger.log(`[AUDIT] Listagem de professores solicitada pelo usuário: ${user.nome}`);
@@ -63,7 +63,7 @@ export class AulaController {
 
     @Get(':id')
     @HttpCode(HttpStatus.OK)
-    @Throttle({ default: { limit: 5, ttl: 60000 } })
+    @Throttle({ default: { limit: 15, ttl: 60000 } })
     @UseGuards(JwtAuthGuard)
     async detalheAula(@Param('id') id: string, @CurrentUser() user: any) {
         this.logger.log(`[AUDIT] Detalhe de aula solicitado pelo usuário: ${user.nome} para a aula ${id}`);
@@ -82,7 +82,7 @@ export class AulaController {
     @UseGuards(JwtAuthGuard, CargosGuard)
     @Cargos('COORDENADOR', 'PROFESSOR')
     async atualizarAula(@Param('id') id: string, @Body() dto: AtualizarAulaDto, @CurrentUser() user: any) {
-        this.logger.log(`[AUDIT] Atualização de aula solicitada pelo usuário: ${user.nome} para a aula ${id} com os seguintes dados: ${JSON.stringify(dto)}`);
+        this.logger.warn(`[WARN] Atualização de aula solicitada pelo usuário: ${user.nome} para a aula ${id} com os seguintes dados: ${JSON.stringify(dto)}`);
         try {
             const auditoria = `${user.nome} (Id: ${user.id})`;
             return await this.aulaService.atualizarAula(id, dto, auditoria);

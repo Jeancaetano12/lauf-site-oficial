@@ -67,10 +67,16 @@ A utilização de Enums no banco ajuda a restringir os dados inseridos a um conj
 
 **Campos Principais:**
 - `id` (String/UUID): Identificador único da aula.
-- `titulo`, `local`, `dataHora`: Informações básicas do encontro.
+- `titulo` (String): Título da aula.
+- `local` (String): Local de realização da aula.
+- `descricao` (String, 140 caracteres): Descrição da aula.
+- `dataHora` (DateTime): Data e hora de realização da aula.
 - `status` (Enum: StatusAula): Estado atual da aula. Padrão `AGENDADA`.
-- `criadorId`, `professorId`: Relações com `Usuario` indicando quem criou e quem ministrará.
-- `qrCodeToken`, `qrCodeExpiraEm`, `qrCodeAtivo`: Controle para chamada por QR Code.
+- `criadorId` (String): Chave estrangeira que aponta para o Usuário que criou a aula.
+- `professorId` (String): Chave estrangeira que aponta para o Usuário que ministrará a aula.
+- `qrCodeToken` (String?): Token único para geração do QR Code.
+- `qrCodeExpiraEm` (DateTime?): Data e hora de expiração do QR Code.
+- `qrCodeAtivo` (Boolean): Status do QR Code. Padrão `false`.
 
 ### 2.5. PresencaAula
 **Objetivo:** Registro individual de presença de alunos (membros ativos) em aulas regulares.

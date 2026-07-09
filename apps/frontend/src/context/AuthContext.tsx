@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // O backend envia os tokens via cookies HTTP-Only automaticamente
             // Recebemos o usuário na resposta
             const usuario = response.data.usuario;
-            
+
             setUser({ ...usuario, sub: usuario.id });
         } catch (error) {
             console.error("Falha no login", error);

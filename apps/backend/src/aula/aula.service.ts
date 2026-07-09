@@ -46,6 +46,7 @@ export class AulaService {
                     professorId: dto.professorId,
                     titulo: dto.titulo.toUpperCase(),
                     local: dto.local.toUpperCase(),
+                    descricao: dto.descricao,
                     status: dto.status,
                     dataHora: dto.dataHora,
                     criadorId, // Pegamos o ID de quem chamou a rota (do token)
@@ -100,6 +101,7 @@ export class AulaService {
                     id: true,
                     titulo: true,
                     local: true,
+                    descricao: true,
                     status: true,
                     dataHora: true,
                     professor: {
@@ -157,7 +159,7 @@ export class AulaService {
                 })
 
                 if (verificarStatus?.status === 'CANCELADA' || verificarStatus?.status === 'CONCLUIDA') {
-                    throw new BadRequestException("Aula já foi cancelada ou concluída e não pode ser alterada");
+                    throw new BadRequestException("Aulas canceladas ou concluídas não podem ser alteradas");
                 }
             }
 
@@ -198,6 +200,7 @@ export class AulaService {
                     professorId: dto.professorId,
                     titulo: dto.titulo?.toUpperCase(),
                     local: dto.local?.toUpperCase(),
+                    descricao: dto.descricao,
                     status: dto.status,
                     dataHora: dto.dataHora,
                 },

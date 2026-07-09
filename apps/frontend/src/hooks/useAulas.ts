@@ -5,6 +5,7 @@ export interface Aula {
     id: string;
     titulo: string;
     local: string;
+    descricao?: string;
     status: 'AGENDADA' | 'CONCLUIDA' | 'CANCELADA';
     dataHora: string;
     professor: {
@@ -21,8 +22,19 @@ export interface CriarAulaDTO {
     professorId: string;
     titulo: string;
     local: string;
+    descricao?: string;
     status: 'AGENDADA' | 'CONCLUIDA' | 'CANCELADA';
     dataHora: string; // ISO String
+}
+
+export interface UpdateAulaDTO {
+    id: string;
+    titulo?: string;
+    local?: string;
+    descricao?: string;
+    dataHora?: string;
+    status?: 'AGENDADA' | 'CONCLUIDA' | 'CANCELADA';
+    professorId?: string;
 }
 
 // Variável global para armazenar o cache e evitar requests repetidos na navegação
@@ -34,6 +46,7 @@ export function useAulas() {
     const [professores, setProfessores] = useState<Professor[]>(globalProfessores || []);
     const [isLoading, setIsLoading] = useState(globalAulas === null);
     const [isCreating, setIsCreating] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const fetchAulas = useCallback(async (force = false) => {
@@ -98,6 +111,21 @@ export function useAulas() {
         }
     };
 
+    const updateAula = async (id: string, dados: UpdateAulaDTO | CriarAulaDTO) => {
+        setIsUpdating(true);
+        setError(null);
+        try {
+            await api.patch(`/aulas/${id}`, dados);
+            await fetchAulas(true);
+            return true;
+        } catch (err: any) {
+            const msg = err.response?.data?.message || 'Erro ao atualizar aula.';
+            setError(msg);
+            throw new Error(msg);
+        } finally {
+            setIsUpdating(false);
+        }
+    }
     useEffect(() => {
         fetchAulas();
     }, [fetchAulas]);
@@ -107,9 +135,11 @@ export function useAulas() {
         professores,
         isLoading,
         isCreating,
+        isUpdating,
         error,
         refetch: () => fetchAulas(true),
         fetchProfessores,
-        criarAula
+        criarAula,
+        updateAula
     };
 }

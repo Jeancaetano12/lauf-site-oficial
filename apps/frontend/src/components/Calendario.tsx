@@ -7,6 +7,7 @@ import type { Aula } from '../hooks/useAulas';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Calendario.css';
 import ModalAgendarAula from './ModalAgendarAula';
+import { FiExternalLink } from "react-icons/fi";
 
 interface CalendarioProps {
     aulas: Aula[];
@@ -44,7 +45,7 @@ export default function Calendario({ aulas, onDayClick, onAulasUpdated }: Calend
 
     const handleDateClick = useCallback((info: DateClickArg) => {
         const aulasNoDia = aulasPorDia[info.dateStr] ?? [];
-        
+
         if (aulasNoDia.length === 0) {
             // Se o dia não tem aula, mas o usuário tem permissão, abre modal de agendar
             if (cargoUsuario === 'COORDENADOR' || cargoUsuario === 'PROFESSOR') {
@@ -52,7 +53,7 @@ export default function Calendario({ aulas, onDayClick, onAulasUpdated }: Calend
             }
             return;
         }
-        
+
         setModalAulaInfo({ data: info.date, aulas: aulasNoDia });
         onDayClick?.(aulasNoDia, info.date);
     }, [aulasPorDia, onDayClick, cargoUsuario]);
@@ -137,7 +138,7 @@ export default function Calendario({ aulas, onDayClick, onAulasUpdated }: Calend
                         {(cargoUsuario === 'COORDENADOR' || cargoUsuario === 'PROFESSOR') && (
                             <div className="px-4 pb-3 border-b border-gray-100 flex justify-end bg-white">
                                 <button
-                                    className="text-sm bg-brand-purple text-white px-3 py-1.5 rounded-md hover:bg-brand-purple-hover transition-colors font-medium shadow-sm"
+                                    className="cursor-pointer text-sm bg-brand-purple text-white px-3 py-1.5 rounded-md hover:bg-brand-purple-hover transition-colors font-medium shadow-sm"
                                     onClick={() => {
                                         setModalAgendarAula({ data: modalAulaInfo.data });
                                         fecharModal();
@@ -156,7 +157,16 @@ export default function Calendario({ aulas, onDayClick, onAulasUpdated }: Calend
                                         className="cal-modal-card"
                                         style={{ borderLeftColor: cor.borda }}
                                     >
-                                        <div className="cal-modal-card-title">{aula.titulo}</div>
+                                        <div className="cal-modal-card-title flex justify-between">
+                                            {aula.titulo}
+                                            <button className='cursor-pointer text-sm bg-brand-purple flex text-white px-2 py-1.5 rounded-md hover:bg-brand-purple-hover transition-colors font-medium shadow-sm'
+                                                onClick={() => {
+                                                    window.location.href = `/aulas/${aula.id}`;
+                                                }}
+                                            >
+                                                <FiExternalLink className="w-4 h-4 text-white mr-2" /> Ver detalhes
+                                            </button>
+                                        </div>
                                         <div className="cal-modal-card-meta">
                                             🕐&nbsp;{new Date(aula.dataHora).toLocaleTimeString('pt-BR', {
                                                 hour: '2-digit', minute: '2-digit',
