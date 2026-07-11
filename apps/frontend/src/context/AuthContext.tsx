@@ -61,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         // Ao iniciar a aplicação, verifica se há uma sessão válida através dos cookies
         const checkSession = async () => {
+            console.log("Checando sessão...")
             try {
                 // Valida a sessão e recupera os dados do usuário via cookie HTTP-Only
                 const response = await api.post("/auth/validar-sessao");

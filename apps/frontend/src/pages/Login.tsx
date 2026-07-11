@@ -47,7 +47,7 @@ export default function Login() {
       <div className="w-full max-w-md z-10">
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center mb-6 relative">
-            <div className="absolute inset-0 bg-brand-purple/20 blur-[40px] rounded-full z-0"></div>
+            <div className="absolute inset-0 bg-brand-purple/20 blur-2x1 rounded-full z-0"></div>
             <img
               src={roboPcImg}
               alt="Robô de Login LAUF"

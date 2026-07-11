@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import '../styles/Calendario.css';
 import ModalAgendarAula from './ModalAgendarAula';
 import { FiExternalLink } from "react-icons/fi";
+import { useNavigate } from 'react-router-dom';
 
 interface CalendarioProps {
     aulas: Aula[];
@@ -32,6 +33,7 @@ export default function Calendario({ aulas, onDayClick, onAulasUpdated }: Calend
     const [modalAulaInfo, setModalAulaInfo] = useState<{ data: Date; aulas: Aula[] } | null>(null);
     const [modalAgendarAula, setModalAgendarAula] = useState<{ data: Date } | null>(null);
     const { user } = useAuth();
+    const navigate = useNavigate();
     const cargoUsuario = user.cargo;
 
     const aulasPorDia = useMemo(() =>
@@ -160,9 +162,7 @@ export default function Calendario({ aulas, onDayClick, onAulasUpdated }: Calend
                                         <div className="cal-modal-card-title flex justify-between">
                                             {aula.titulo}
                                             <button className='cursor-pointer text-sm bg-brand-purple flex text-white px-2 py-1.5 rounded-md hover:bg-brand-purple-hover transition-colors font-medium shadow-sm'
-                                                onClick={() => {
-                                                    window.location.href = `/aulas/${aula.id}`;
-                                                }}
+                                                onClick={() => { navigate(`/aulas/${aula.id}`) }}
                                             >
                                                 <FiExternalLink className="w-4 h-4 text-white mr-2" /> Ver detalhes
                                             </button>

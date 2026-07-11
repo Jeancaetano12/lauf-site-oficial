@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import icone2 from "../assets/icone2.png";
 
 export default function Header() {
@@ -77,12 +77,12 @@ export default function Header() {
                 ))}
             </div>
 
-            <Link 
-                to="/login"
-                className="bg-brand-purple text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-brand-purple-hover transition-all hover:scale-105 shadow-md shadow-brand-purple/20"
+            <button
+                onClick={() => { navigate('/login') }}
+                className="cursor-pointer bg-brand-purple text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-brand-purple-hover transition-all hover:scale-105 shadow-md shadow-brand-purple/20"
             >
                 Área do Membro
-            </Link>
+            </button>
         </nav>
     );
-}
+}

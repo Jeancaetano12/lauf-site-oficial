@@ -33,8 +33,8 @@ export default function AulaDetalhes() {
     const [aula, setAula] = useState<Aula | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [idCopiado, setIdCopiado] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [idCopiado, setIdCopiado] = useState(false);
 
     // user pode ainda ser null no primeiro render (enquanto o AuthContext valida a sessão),
     // então usar optional chaining aqui evita quebrar a página nesse instante.
@@ -103,14 +103,14 @@ export default function AulaDetalhes() {
         <div className="p-4 md:p-8 max-w-4xl mx-auto w-full transition-all duration-300">
 
             {/* Hero com o gradiente de volta como FUNDO — título, status, ID e ações moram aqui dentro */}
-            <div className="relative rounded-3xl overflow-hidden shadow-lg bg-gradient-to-br from-brand-black via-slate-800 to-brand-purple p-6 sm:p-8 md:p-10">
+            <div className="relative rounded-3xl overflow-hidden shadow-lg bg-linear-to-br from-brand-black via-slate-800 to-brand-purple p-6 sm:p-8 md:p-10">
                 <div className="absolute top-0 right-0 -mt-16 -mr-16 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl"></div>
                 <div className="absolute bottom-0 left-0 -mb-16 -ml-16 w-48 h-48 bg-brand-purple opacity-30 rounded-full blur-2xl"></div>
 
                 <div className="relative z-10">
                     <div className='flex flex-row justify-between mb-2'>
                         <button
-                            onClick={() => navigate(-1)}
+                            onClick={() => navigate('/aulas')}
                             className="cursor-pointer flex items-center text-slate-300 hover:bg-white/20 border border-white/20 px-4 py-2 rounded-lg transition-colors font-medium mb-4 text-sm"
                         >
                             <FiArrowLeft className="mr-2" /> Voltar
