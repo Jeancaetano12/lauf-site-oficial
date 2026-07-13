@@ -5,7 +5,7 @@ import { GoHome } from "react-icons/go";
 import { IoCalendarNumberOutline } from "react-icons/io5";
 import { GrUserSettings } from "react-icons/gr";
 import { RiShieldUserLine } from "react-icons/ri";
-import { GoGear } from "react-icons/go";
+import { CgMoreO } from "react-icons/cg";
 
 
 export default function HubLayout() {
@@ -17,13 +17,13 @@ export default function HubLayout() {
       { name: "Aulas", path: "/aulas", icon: <IoCalendarNumberOutline color="black" /> },
       { name: "Perfil", path: "/perfil", icon: <GrUserSettings color="black" /> },
       { name: "Solicitações", path: "/solicitacoes", icon: <RiShieldUserLine color="black" /> },
-      { name: "Configurações", path: "/configuracoes", icon: <GoGear color="black" /> }
+      { name: "Extras", path: "/extras", icon: <CgMoreO color="black" /> }
     ]
     : [
       { name: "Início", path: "/hub", icon: <GoHome color="black" /> },
       { name: "Aulas", path: "/aulas", icon: <IoCalendarNumberOutline color="black" /> },
       { name: "Perfil", path: "/perfil", icon: <GrUserSettings color="black" /> },
-      { name: "Configurações", path: "/configuracoes", icon: <GoGear color="black" /> }
+      { name: "Extras", path: "/extras", icon: <CgMoreO color="black" /> }
     ]
 
 

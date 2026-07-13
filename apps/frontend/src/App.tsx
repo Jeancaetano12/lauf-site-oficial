@@ -15,7 +15,7 @@ import ConfirmarInscricao from "./pages/ConfirmarInscricao";
 import Aulas from "./pages/Aulas";
 import Perfil from "./pages/Perfil";
 import Solicitacoes from "./pages/Solicitacoes";
-import Configuracoes from "./pages/Configuracoes";
+import Extras from "./pages/Extras";
 import AulaDetalhes from "./pages/AulasDetalhes";
 import ConfirmarPresenca from "./pages/ConfirmarPresenca";
 
@@ -41,7 +41,7 @@ function App() {
             <Route path="/aulas" element={<Aulas />} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/solicitacoes" element={<Solicitacoes />} />
-            <Route path="/configuracoes" element={<Configuracoes />} />
+            <Route path="/extras" element={<Extras />} />
             <Route path="/aulas/:id" element={<AulaDetalhes />} />
             <Route path="/confirmar-presenca" element={<ConfirmarPresenca />} />
             {/* <Route path="/calendario" element={<Calendario />} /> */}

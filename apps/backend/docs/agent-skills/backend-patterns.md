@@ -58,6 +58,10 @@ Sempre que a funcionalidade envolver segurança e controle de acesso, atente-se 
 
 Modulo responsavel por gerenciar aulas e eventos do sistema. Segue as seguintes regras:
 
+## 7. Registro de presença (PresencaModule)
+
+Modulo responsavel por registrar a presença dos usuários em aulas. Segue as seguintes regras:
+
 ### Responsabilidades em Arquitetura (NestJS)
 
 Não crie rotas "soltas" utilizando express cru. **Tudo** funciona em módulos. O fluxo da aplicação DEVE ser:
