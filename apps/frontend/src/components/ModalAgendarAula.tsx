@@ -45,7 +45,7 @@ export default function ModalAgendarAula({ isOpen, onClose, dataInicial, onSucce
                 fetchProfessores();
             }
         }
-    }, [isOpen, dataInicial, isProfessor, isCoordenador, user.id, fetchProfessores]);
+    }, [isOpen, dataInicial, isProfessor, isCoordenador, user?.id, fetchProfessores]);
 
     if (!isOpen) return null;
 

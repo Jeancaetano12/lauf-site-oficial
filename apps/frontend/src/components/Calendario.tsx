@@ -34,7 +34,7 @@ export default function Calendario({ aulas, onDayClick, onAulasUpdated }: Calend
     const [modalAgendarAula, setModalAgendarAula] = useState<{ data: Date } | null>(null);
     const { user } = useAuth();
     const navigate = useNavigate();
-    const cargoUsuario = user.cargo;
+    const cargoUsuario = user?.cargo;
 
     const aulasPorDia = useMemo(() =>
         aulas.reduce<Record<string, Aula[]>>((acc, aula) => {

@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, Patch, Post, Logger, UseGuards, Get, Req, Res, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Param, Patch, Post, Logger, UseGuards, Get } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AulaService } from './aula.service';
@@ -88,6 +88,51 @@ export class AulaController {
             return await this.aulaService.atualizarAula(id, dto, auditoria);
         } catch (error) {
             this.logger.error(`[ERRO] Erro ao atualizar aula pelo usuário ${user.nome}: `, error);
+            throw error;
+        }
+    }
+
+    @Patch(':id/iniciar-chamada')
+    @HttpCode(HttpStatus.OK)
+    @Throttle({ default: { limit: 3, ttl: 60000 } })
+    @UseGuards(JwtAuthGuard, CargosGuard)
+    @Cargos('COORDENADOR', 'PROFESSOR')
+    async iniciarChamada(@Param('id') id: string, @CurrentUser() user: any) {
+        this.logger.log(`[AUDIT] Início de chamada solicitado pelo usuário: ${user.nome} para a aula ${id}`);
+        try {
+            return await this.aulaService.iniciarChamada(id, user);
+        } catch (error) {
+            this.logger.error(`[ERRO] Erro ao iniciar chamada pelo usuário ${user.nome}: `, error);
+            throw error;
+        }
+    }
+
+    @Patch(':id/encerrar-chamada')
+    @HttpCode(HttpStatus.OK)
+    @Throttle({ default: { limit: 3, ttl: 60000 } })
+    @UseGuards(JwtAuthGuard, CargosGuard)
+    @Cargos('COORDENADOR', 'PROFESSOR')
+    async encerrarChamada(@Param('id') id: string, @CurrentUser() user: any) {
+        this.logger.log(`[AUDIT] Encerramento de chamada solicitado pelo usuário: ${user.nome} para a aula ${id}`);
+        try {
+            return await this.aulaService.encerrarChamada(id, user);
+        } catch (error) {
+            this.logger.error(`[ERRO] Erro ao encerrar chamada pelo usuário ${user.nome}: `, error);
+            throw error;
+        }
+    }
+
+    @Get(':id/qr')
+    @HttpCode(HttpStatus.OK)
+    @Throttle({ default: { limit: 15, ttl: 60000 } })
+    @UseGuards(JwtAuthGuard, CargosGuard)
+    @Cargos('COORDENADOR', 'PROFESSOR')
+    async obterQrCode(@Param('id') id: string, @CurrentUser() user: any) {
+        this.logger.log(`[AUDIT] Obtenção de QR Code solicitada pelo usuário: ${user.nome} para a aula ${id}`);
+        try {
+            return await this.aulaService.obterQrCode(id, user);
+        } catch (error) {
+            this.logger.error(`[ERRO] Erro ao obter QR Code pelo usuário ${user.nome}: `, error);
             throw error;
         }
     }

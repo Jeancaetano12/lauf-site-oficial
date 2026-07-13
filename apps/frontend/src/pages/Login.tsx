@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { FaArrowLeft, FaEnvelope, FaLock } from "react-icons/fa";
 import roboPcImg from "../assets/img-robo-pc.png";
@@ -10,19 +10,22 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname + (location.state?.from?.search || "") || "/hub";
 
   useEffect(() => {
     if (isAuthenticated && !isAuthLoading) {
-      navigate("/hub");
+      navigate(from, { replace: true });
     }
-  }, [isAuthenticated, isAuthLoading, navigate]);
+  }, [isAuthenticated, isAuthLoading, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
       await login(matricula, senha);
-      navigate("/hub");
+      navigate(from, { replace: true });
     } catch (error) {
       // Ideal seria um Toast de erro (ex: react-toastify)
       alert("Falha no login. Verifique sua matrícula e senha.");

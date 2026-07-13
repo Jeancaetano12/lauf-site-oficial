@@ -46,7 +46,7 @@ export default function ModalEditarAula({ isOpen, onClose, aula, dataInicial, on
                 fetchProfessores();
             }
         }
-    }, [isOpen, dataInicial, isProfessor, isCoordenador, user.id, fetchProfessores]);
+    }, [isOpen, dataInicial, isProfessor, isCoordenador, user?.id, fetchProfessores]);
 
     if (!isOpen) return null;
 

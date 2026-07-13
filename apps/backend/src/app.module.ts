@@ -7,7 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { AulaModule } from './aula/aula.module';
+import { AulaModule } from './aula-module/aula.module';
+import { PresencaModule } from './presenca-module/presenca-module.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AulaModule } from './aula/aula.module';
       limit: 45,  // max 45 requests per minute by default per IP
     }]),
     AulaModule,
+    PresencaModule,
   ],
   controllers: [AppController],
   providers: [

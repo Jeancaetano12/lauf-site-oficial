@@ -17,6 +17,7 @@ import {
 } from 'react-icons/fi';
 import type { Aula } from '../hooks/useAulas';
 import ModalEditarAula from '../components/ModalEditarAula';
+import ModalQrCode from '../components/ModalQrCode';
 
 // fundo/borda usam a mesma cor do "ponto", só que com baixa opacidade (via rgba),
 // pra criar uma pílula colorida que ainda combina com o gradiente escuro do hero.
@@ -34,6 +35,7 @@ export default function AulaDetalhes() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isQrModalOpen, setIsQrModalOpen] = useState(false);
     const [idCopiado, setIdCopiado] = useState(false);
 
     // user pode ainda ser null no primeiro render (enquanto o AuthContext valida a sessão),
@@ -156,7 +158,13 @@ export default function AulaDetalhes() {
                                     <FiEdit2 className="mr-2" /> Editar
                                 </button>
                                 <button
-                                    onClick={() => { }}
+                                    onClick={() => {
+                                        if (aula.status !== 'AGENDADA') {
+                                            alert("Não é possível abrir chamada para aulas concluídas ou canceladas.");
+                                        } else {
+                                            setIsQrModalOpen(true);
+                                        }
+                                    }}
                                     className="cursor-pointer sm:flex-none flex items-center justify-center text-white transition-all font-semibold bg-brand-purple hover:bg-brand-purple-hover px-4 py-2 rounded-lg text-sm shadow-sm"
                                 >
                                     <FiCheckSquare className="mr-2" /> Abrir Chamada
@@ -219,6 +227,12 @@ export default function AulaDetalhes() {
                 aula={aula}
                 dataInicial={new Date(aula.dataHora)}
                 onAulaUpdated={fetchAula}
+            />
+
+            <ModalQrCode
+                isOpen={isQrModalOpen}
+                onClose={() => setIsQrModalOpen(false)}
+                aulaId={aula.id}
             />
         </div>
     );

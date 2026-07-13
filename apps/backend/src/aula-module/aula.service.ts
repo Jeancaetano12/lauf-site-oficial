@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException, Logger, InternalServerErrorException, HttpException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, Logger, InternalServerErrorException, HttpException, ForbiddenException } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CriarAulaDto } from './dto/criar-aula.dto';
 import { AtualizarAulaDto } from './dto/atualizar-aula.dto';
@@ -243,6 +244,129 @@ export class AulaService {
             if (error instanceof HttpException) throw error;
             this.logger.warn(`[WARN] Erro ao listar professores pelo usuário ${auditoria}: `, error);
             throw new InternalServerErrorException("Erro ao listar professores");
+        }
+    }
+
+    async iniciarChamada(id: string, user: any) {
+        const auditoria = `${user.nome} (Id: ${user.id})`;
+        try {
+            const aulaExistente = await this.prisma.aula.findUnique({
+                where: { id }
+            });
+
+            if (!aulaExistente) {
+                throw new NotFoundException("Aula não encontrada");
+            }
+
+            if (aulaExistente.status !== 'AGENDADA') {
+                throw new BadRequestException("Apenas aulas AGENDADAS podem ter chamada iniciada");
+            }
+
+            if (user.cargo === 'PROFESSOR' && aulaExistente.professorId !== user.id) {
+                throw new ForbiddenException("Apenas o professor atribuído à aula pode iniciar a chamada.");
+            }
+            
+            const qrCodeToken = randomUUID();
+            const qrCodeExpiraEm = new Date(Date.now() + 15 * 60000); // 15 minutos
+
+            const aula = await this.prisma.aula.update({
+                where: { id },
+                data: {
+                    qrCodeToken,
+                    qrCodeAtivo: true,
+                    qrCodeExpiraEm
+                }
+            });
+
+            // Timer simples para atualizar o status após os 15 minutos
+            setTimeout(async () => {
+                try {
+                    const aulaAtual = await this.prisma.aula.findUnique({ where: { id } });
+                    // Garante que ainda está agendada (se o professor já não alterou) e que o QR code ativo é o mesmo (ou se ainda está ativo)
+                    if (aulaAtual && aulaAtual.status === 'AGENDADA' && aulaAtual.qrCodeAtivo) {
+                        await this.prisma.aula.update({
+                            where: { id },
+                            data: {
+                                qrCodeAtivo: false,
+                                status: 'CONCLUIDA'
+                            }
+                        });
+                        this.logger.warn(`[TIMEOUT] Aula ${id} expirou e foi marcada como CONCLUIDA.`);
+                    }
+                } catch (e) {
+                    this.logger.error(`[TIMEOUT ERRO] Falha ao concluir aula ${id}: `, e);
+                }
+            }, 15 * 60000);
+
+            this.logger.log(`[AUDIT] Chamada iniciada para a aula ${id} por ${auditoria}`);
+            return aula;
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            this.logger.error(`[ERRO] Erro ao iniciar chamada pelo usuário ${auditoria}: `, error);
+            throw new InternalServerErrorException("Erro ao iniciar chamada");
+        }
+    }
+
+    async encerrarChamada(id: string, user: any) {
+        const auditoria = `${user.nome} (Id: ${user.id})`;
+        try {
+            const aulaExistente = await this.prisma.aula.findUnique({
+                where: { id }
+            });
+
+            if (!aulaExistente) {
+                throw new NotFoundException("Aula não encontrada");
+            }
+
+            if (user.cargo === 'PROFESSOR' && aulaExistente.professorId !== user.id) {
+                throw new ForbiddenException("Apenas o professor atribuído à aula pode encerrar a chamada.");
+            }
+
+            const aula = await this.prisma.aula.update({
+                where: { id },
+                data: {
+                    qrCodeAtivo: false,
+                    status: 'CONCLUIDA'
+                }
+            });
+
+            this.logger.log(`[AUDIT] Chamada encerrada para a aula ${id} por ${auditoria}`);
+            return aula;
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            this.logger.error(`[ERRO] Erro ao encerrar chamada pelo usuário ${auditoria}: `, error);
+            throw new InternalServerErrorException("Erro ao encerrar chamada");
+        }
+    }
+
+    async obterQrCode(id: string, user: any) {
+        const auditoria = `${user.nome} (Id: ${user.id})`;
+        try {
+            const aula = await this.prisma.aula.findUnique({
+                where: { id },
+                select: {
+                    id: true,
+                    qrCodeToken: true,
+                    qrCodeAtivo: true,
+                    qrCodeExpiraEm: true,
+                    professorId: true
+                }
+            });
+
+            if (!aula) {
+                throw new NotFoundException("Aula não encontrada");
+            }
+
+            if (user.cargo === 'PROFESSOR' && aula.professorId !== user.id) {
+                throw new ForbiddenException("Você não tem permissão para visualizar o QR Code desta aula.");
+            }
+
+            this.logger.log(`[AUDIT] QR Code da aula ${id} solicitado por ${auditoria}`);
+            return aula;
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            this.logger.error(`[ERRO] Erro ao obter QR Code pelo usuário ${auditoria}: `, error);
+            throw new InternalServerErrorException("Erro ao obter QR Code");
         }
     }
 }
