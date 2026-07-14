@@ -75,6 +75,7 @@ export default function ModalQrCode({ isOpen, onClose, aulaId }: ModalQrCodeProp
             setError(null);
             await api.patch(`/aulas/${aulaId}/encerrar-chamada`);
             setQrData(null);
+            window.location.reload();
         } catch (err: any) {
             setError(err.response?.data?.message || 'Erro ao encerrar chamada.');
         } finally {

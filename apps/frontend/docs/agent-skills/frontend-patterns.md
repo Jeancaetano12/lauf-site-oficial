@@ -63,6 +63,30 @@ O `AuthContext` é o "Cérebro" da sessão do lado do Cliente:
   <Route path="/aulas" element={<Aulas />} />
   <Route path="/perfil" element={<Perfil />} />
   <Route path="/solicitacoes" element={<Solicitacoes />} />
-  <Route path="/configuracoes" element={<Configuracoes />} />
+  <Route path="/extras" element={<Extras />} />
+  <Route path="/aulas/:id" element={<AulaDetalhes />} />
+  <Route path="/confirmar-presenca" element={<ConfirmarPresenca />} />
   {/* <Route path="/calendario" element={<Calendario />} /> */}
 ```
+
+## Hooks:
+O proprio `AuthContext` é um hook, e ele é o único hook que deve ser usado para autenticação.
+Ele possui o seguinte estado:
+- `user`: Dados do usuário
+- `isAuthenticated`: Verifica se o usuário está autenticado
+- `isLoading`: Verifica se o usuário está carregando
+- `login`: Método de login
+- `logout`: Método de logout
+- `solicitarInscricao`: Método de solicitação de inscrição
+- `validarSessao`: Método de validação de sessão
+
+### useAulas:
+Responsavel por gerenciar as aulas, ele trabalha junto com o componente de calendario para exibir as aulas.
+Ele possui os seguintes métodos:
+- `buscarAulas`: Busca as aulas, sempre retorna as aulas ordenadas por data e hora
+- `buscarProfessores`: Busca os professores
+- `criarAula`: Cria uma aula
+- `updateAula`: Atualiza uma aula
+- `refetch`: Recarrega as aulas
+- `isLoading`: Verifica se está carregando
+- `error`: Verifica se houve erro
