@@ -38,11 +38,10 @@ export class MailService {
       subject: 'Bem-vindo(a) à LAUF - Inscrição Aprovada!',
       html: `
         <h3>Olá, ${nome}!</h3>
-        <p>Sua solicitação de inscrição na Liga de Arduino Uninassau Fortaleza (LAUF) foi <strong>aprovada</strong>.</p>
+        <p>Sua solicitação de inscrição na Liga de Arduino Uninassau Fortaleza (LAUF) foi <strong>APROVADA</strong>.</p>
         <p>Para concluir seu cadastro e criar sua senha de acesso ao sistema, clique no link abaixo:</p>
         <p><a href="${url}">Concluir Meu Cadastro</a></p>
-        <br />
-        <p><strong>ATENÇÃO:</strong> Este link expira em <strong>7 dias.</strong>. Caso não conclua o cadastro nesse prazo, será necessário solicitar a entrada novamente.</p>
+        <p><strong>ATENÇÃO:</strong> Este link expira em <strong>7 dias.</strong> a partir do recebimento deste email. Caso não conclua o cadastro nesse prazo, será necessário solicitar a entrada novamente.</p>
         <p>Atenciosamente,</p>
         <p>Equipe LAUF</p>
       `,

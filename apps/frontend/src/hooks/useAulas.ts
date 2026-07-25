@@ -9,6 +9,7 @@ export interface Aula {
     status: 'AGENDADA' | 'CONCLUIDA' | 'CANCELADA';
     dataHora: string;
     professor: {
+        id: string;
         nome: string;
     };
 }
@@ -103,7 +104,10 @@ export function useAulas() {
             await fetchAulas(true); // Recarrega a lista após criar
             return true;
         } catch (err: any) {
-            const msg = err.response?.data?.message || 'Erro  desconhecido ao agendar aula.';
+            let msg = err.response?.data?.message || 'Erro desconhecido ao agendar aula.';
+            if (Array.isArray(msg)) {
+                msg = msg.join(', ');
+            }
             setError(msg);
             throw new Error(msg);
         } finally {
@@ -119,7 +123,12 @@ export function useAulas() {
             await fetchAulas(true);
             return true;
         } catch (err: any) {
-            const msg = err.response?.data?.message || 'Erro ao atualizar aula.';
+            console.log("erro 1", err)
+            let msg = err.response?.data?.message || 'Erro ao atualizar aula.';
+            if (Array.isArray(msg)) {
+                msg = msg.join(', ');
+            }
+            console.log("mensagem de erro do usuario", msg)
             setError(msg);
             throw new Error(msg);
         } finally {

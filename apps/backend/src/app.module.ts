@@ -9,6 +9,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { AulaModule } from './aula-module/aula.module';
 import { PresencaModule } from './presenca-module/presenca-module.module';
+import { UsuariosModule } from './usuarios/usuarios.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PresencaModule } from './presenca-module/presenca-module.module';
     }]),
     AulaModule,
     PresencaModule,
+    UsuariosModule,
   ],
   controllers: [AppController],
   providers: [

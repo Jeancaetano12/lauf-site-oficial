@@ -107,6 +107,7 @@ export class AulaService {
                     dataHora: true,
                     professor: {
                         select: {
+                            id: true,
                             nome: true,
                         }
                     }
@@ -265,7 +266,7 @@ export class AulaService {
             if (user.cargo === 'PROFESSOR' && aulaExistente.professorId !== user.id) {
                 throw new ForbiddenException("Apenas o professor atribuído à aula pode iniciar a chamada.");
             }
-            
+
             const qrCodeToken = randomUUID();
             const qrCodeExpiraEm = new Date(Date.now() + 15 * 60000); // 15 minutos
 
@@ -359,6 +360,17 @@ export class AulaService {
 
             if (user.cargo === 'PROFESSOR' && aula.professorId !== user.id) {
                 throw new ForbiddenException("Você não tem permissão para visualizar o QR Code desta aula.");
+            }
+
+            if (!aula.qrCodeAtivo) {
+                this.logger.warn(`[WARN] QR Code da aula ${id} expirou ou não foi gerado.`);
+                return {
+                    id: aula.id,
+                    qrCodeAtivo: false,
+                    qrCodeToken: null,
+                    qrCodeExpiraEm: null,
+                    professorId: true
+                }
             }
 
             this.logger.log(`[AUDIT] QR Code da aula ${id} solicitado por ${auditoria}`);

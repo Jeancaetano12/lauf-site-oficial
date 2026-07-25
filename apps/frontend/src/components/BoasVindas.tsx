@@ -2,10 +2,10 @@
 
 import { useAuth } from "../context/AuthContext";
 import { FaHandSparkles, FaShieldAlt } from "react-icons/fa";
+import { formatarNomeCurso, formatarTelefone, formatarGenero } from "../utils/formatters";
 
 export default function BoasVindas() {
     const { user, logout } = useAuth();
-
     return (
         <div className="flex flex-col items-center justify-center bg-brand-gray-light rounded-2xl shadow-xl p-8 max-w-lg text-center border-t-4 border-brand-purple">
             <div className="bg-brand-purple/10 p-4 rounded-full mb-4">
@@ -25,9 +25,11 @@ export default function BoasVindas() {
                 <br />
                 <strong>Cargo:</strong> {user?.cargo}
                 <br />
-                <strong>Curso:</strong> {user?.curso}
+                <strong>Curso:</strong> {formatarNomeCurso(user?.curso)}
                 <br />
-                <strong>Telefone:</strong> {user?.telefone}
+                <strong>Telefone:</strong> {formatarTelefone(user?.telefone)}
+                <br />
+                <strong>Gênero:</strong> {formatarGenero(user?.genero)}
                 <br />
                 <span className="font-semibold text-red-700">Notou algo errado? Entre em contato no grupo do whatsapp da liga para corrigirmos!</span>
             </p>

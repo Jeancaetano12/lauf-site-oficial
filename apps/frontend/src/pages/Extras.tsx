@@ -1,17 +1,10 @@
 "use client";
-import { useAuth } from "../context/AuthContext";
-import { BiLogOut } from "react-icons/bi";
-
+import BoasVindas from "../components/BoasVindas";
 
 export default function Extras() {
-    const { logout } = useAuth()
-
     return (
-        <div>
-            <h1>Extras</h1>
-            <button onClick={logout} className="px-6 py-3 bg-brand-purple rounded-lg font-medium text-white hover:bg-brand-purple/90 transition-colors">
-                <BiLogOut /> Sair
-            </button>
+        <div className="min-h-screen bg-brand-black text-brand-white flex flex-col justify-center items-center px-6 relative overflow-hidden">
+            <BoasVindas />
         </div>
     )
 }

@@ -15,6 +15,7 @@ import {
     FiCopy,
     FiCheck,
 } from 'react-icons/fi';
+import { LuCalendarX2 } from "react-icons/lu";
 import type { Aula } from '../hooks/useAulas';
 import ModalEditarAula from '../components/ModalEditarAula';
 import ModalQrCode from '../components/ModalQrCode';
@@ -37,6 +38,7 @@ export default function AulaDetalhes() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isQrModalOpen, setIsQrModalOpen] = useState(false);
     const [idCopiado, setIdCopiado] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     // user pode ainda ser null no primeiro render (enquanto o AuthContext valida a sessão),
     // então usar optional chaining aqui evita quebrar a página nesse instante.
@@ -44,7 +46,7 @@ export default function AulaDetalhes() {
     if (user?.cargo === 'COORDENADOR') {
         podeGerenciar = true;
     }
-    if (user?.nome === aula?.professor.nome) {
+    if (user?.id === aula?.professor.id) {
         podeGerenciar = true;
     }
 
@@ -96,6 +98,20 @@ export default function AulaDetalhes() {
         );
     }
 
+    const handleCancelarAula = async () => {
+        setIsLoading(true);
+        setError(null);
+        if (!confirm("Cancelar a aula é uma ação irreversível, tem certeza?")) return;
+        try {
+            await api.patch(`/aulas/${id}`, { status: 'CANCELADA' });
+            fetchAula();
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Erro ao cancelar aula.');
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
     const corStatus = STATUS_COR[aula.status] || STATUS_COR.AGENDADA;
     const dataObj = new Date(aula.dataHora);
     const dataStr = dataObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
@@ -143,8 +159,27 @@ export default function AulaDetalhes() {
                             </span>
                         </div>
 
-                        {podeGerenciar && (
+                        {podeGerenciar && aula.status === 'AGENDADA' && (
                             <div className="flex items-center gap-3 w-full sm:w-auto">
+                                <button
+                                    onClick={handleCancelarAula}
+                                    disabled={isLoading}
+                                    className="cursor-pointer sm:flex-none flex items-center justify-center text-white transition-all font-semibold bg-red-600 hover:bg-red-800 px-4 py-2 rounded-lg text-sm shadow-sm"
+                                >
+                                    <LuCalendarX2 className="mr-2" /> Cancelar Aula
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (aula.status !== 'AGENDADA') {
+                                            alert("Não é possível abrir chamada para aulas concluídas ou canceladas.");
+                                        } else {
+                                            setIsQrModalOpen(true);
+                                        }
+                                    }}
+                                    className="cursor-pointer sm:flex-none flex items-center justify-center text-white transition-all font-semibold bg-indigo-600 hover:bg-indigo-800 px-4 py-2 rounded-lg text-sm shadow-sm"
+                                >
+                                    <FiCheckSquare className="mr-2" /> Abrir Chamada
+                                </button>
                                 <button
                                     onClick={() => {
                                         if (aula.status !== 'AGENDADA') {
@@ -156,18 +191,6 @@ export default function AulaDetalhes() {
                                     className="cursor-pointer flex-1 sm:flex-none flex items-center justify-center text-white transition-all font-semibold bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2 rounded-lg text-sm backdrop-blur-sm"
                                 >
                                     <FiEdit2 className="mr-2" /> Editar
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        if (aula.status !== 'AGENDADA') {
-                                            alert("Não é possível abrir chamada para aulas concluídas ou canceladas.");
-                                        } else {
-                                            setIsQrModalOpen(true);
-                                        }
-                                    }}
-                                    className="cursor-pointer sm:flex-none flex items-center justify-center text-white transition-all font-semibold bg-brand-purple hover:bg-brand-purple-hover px-4 py-2 rounded-lg text-sm shadow-sm"
-                                >
-                                    <FiCheckSquare className="mr-2" /> Abrir Chamada
                                 </button>
                             </div>
                         )}

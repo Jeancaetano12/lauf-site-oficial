@@ -184,7 +184,7 @@ export default function ModalAgendarAula({ isOpen, onClose, dataInicial, onSucce
                         <button
                             type="submit"
                             disabled={isCreating}
-                            className="cursor-pointer px-4 py-2 bg-brand-purple text-brand-white rounded-md hover:bg-brand-purple-hover transition-colors disabled:opacity-70 disabled:cursor-wait font-medium flex items-center justify-center min-w-[120px]"
+                            className="cursor-pointer px-4 py-2 bg-brand-purple text-brand-white rounded-md hover:bg-brand-purple-hover transition-colors disabled:opacity-70 disabled:cursor-wait font-medium flex items-center justify-center min-w-30"
                         >
                             {isCreating ? <AiOutlineSchedule className="mr-2 animate-spin" /> : <AiOutlineSchedule className="mr-2" />}
                             Agendar

@@ -7,7 +7,7 @@ export default function ConfirmarPresenca() {
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
     const navigate = useNavigate();
-
+    const [isLoading, setLoading] = useState(false);
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
 
@@ -19,6 +19,8 @@ export default function ConfirmarPresenca() {
     }, [token]);
 
     const handleConfirmar = async () => {
+        setLoading(true);
+        setMessage('');
         try {
             setStatus('loading');
             await api.post('/presenca/confirmar', { token });
@@ -27,6 +29,8 @@ export default function ConfirmarPresenca() {
         } catch (err: any) {
             setStatus('error');
             setMessage(err.response?.data?.message || 'Erro ao confirmar presença. O QR Code pode estar expirado ou você já confirmou.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -52,6 +56,7 @@ export default function ConfirmarPresenca() {
                         <div className='flex flex-col w-full gap-3'>
                             <button
                                 onClick={handleConfirmar}
+                                disabled={isLoading}
                                 className='w-full flex items-center justify-center gap-2 bg-brand-purple text-white hover:bg-brand-purple-hover font-bold py-4 px-6 rounded-xl transition-all shadow-lg shadow-brand-purple/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
                             >
                                 <FiCheck className="text-xl" /> Confirmar Agora

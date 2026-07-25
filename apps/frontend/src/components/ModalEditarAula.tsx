@@ -28,30 +28,44 @@ export default function ModalEditarAula({ isOpen, onClose, aula, dataInicial, on
 
     useEffect(() => {
         if (isOpen) {
+            let targetDate = dataInicial;
+            if ((aula as any).dataHora) {
+                targetDate = new Date((aula as any).dataHora);
+            }
+
             // Formatar data para yyyy-MM-dd
-            const ano = dataInicial.getFullYear();
-            const mes = String(dataInicial.getMonth() + 1).padStart(2, '0');
-            const dia = String(dataInicial.getDate()).padStart(2, '0');
+            const ano = targetDate.getFullYear();
+            const mes = String(targetDate.getMonth() + 1).padStart(2, '0');
+            const dia = String(targetDate.getDate()).padStart(2, '0');
             setData(`${ano}-${mes}-${dia}`);
 
-            // Preencher com hora atual ou vazio, vamos deixar 08:00 como padrão
-            setHora('08:00');
+            // Preencher com a hora existente da aula ou o horário de dataInicial
+            const horas = String(targetDate.getHours()).padStart(2, '0');
+            const minutos = String(targetDate.getMinutes()).padStart(2, '0');
+            setHora(`${horas}:${minutos}`);
 
-            setTitulo('');
-            setLocal('');
-            setDescricao('');
-            setProfessorId(isProfessor ? user.id : '');
+            setTitulo(aula.titulo || '');
+            setLocal(aula.local || '');
+            setDescricao(aula.descricao || '');
+            
+            const profId = (aula as any).professor?.id || aula.professorId || (isProfessor ? user?.id : '');
+            setProfessorId(profId);
 
             if (isCoordenador) {
                 fetchProfessores();
             }
         }
-    }, [isOpen, dataInicial, isProfessor, isCoordenador, user?.id, fetchProfessores]);
+    }, [isOpen, aula, dataInicial, isProfessor, isCoordenador, user?.id, fetchProfessores]);
 
     if (!isOpen) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (!titulo.trim() || !local.trim()) {
+            return; // Bloqueia submissão se forem apenas espaços vazios
+        }
+
         // Montar a string ISO "YYYY-MM-DDTHH:mm:00" e então new Date()
         // O Date assume o timezone local, e o toISOString converte para UTC 
         // compatível com o Prisma e o DTO
@@ -101,6 +115,7 @@ export default function ModalEditarAula({ isOpen, onClose, aula, dataInicial, on
                             className="w-full p-2 border text-black border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple outline-none"
                             placeholder="Ex: Treinamento Funcional"
                             maxLength={30}
+                            required
                         />
                     </div>
 
@@ -113,6 +128,7 @@ export default function ModalEditarAula({ isOpen, onClose, aula, dataInicial, on
                             className="w-full p-2 border text-black border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple outline-none"
                             placeholder="Ex: Sala 1"
                             maxLength={50}
+                            required
                         />
                     </div>
 
@@ -134,6 +150,7 @@ export default function ModalEditarAula({ isOpen, onClose, aula, dataInicial, on
                                 value={data}
                                 onChange={(e) => setData(e.target.value)}
                                 className="w-full p-2 border text-black border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple outline-none"
+                                required
                             />
                         </div>
                         <div className="flex-1">
@@ -143,6 +160,7 @@ export default function ModalEditarAula({ isOpen, onClose, aula, dataInicial, on
                                 value={hora}
                                 onChange={(e) => setHora(e.target.value)}
                                 className="w-full p-2 border text-black border-gray-300 rounded-md focus:ring-brand-purple focus:border-brand-purple outline-none"
+                                required
                             />
                         </div>
                     </div>
@@ -175,7 +193,7 @@ export default function ModalEditarAula({ isOpen, onClose, aula, dataInicial, on
                         <button
                             type="submit"
                             disabled={isUpdating}
-                            className="cursor-pointer px-4 py-2 bg-brand-purple text-brand-white rounded-md hover:bg-brand-purple-hover transition-colors disabled:opacity-70 disabled:cursor-wait font-medium flex items-center justify-center min-w-[120px]"
+                            className="cursor-pointer px-4 py-2 bg-brand-purple text-brand-white rounded-md hover:bg-brand-purple-hover transition-colors disabled:opacity-70 disabled:cursor-wait font-medium flex items-center justify-center min-w-30"
                         >
                             {isUpdating ? <AiOutlineSchedule className="mr-2 animate-spin" /> : <AiOutlineSchedule className="mr-2" />}
                             Atualizar

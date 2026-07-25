@@ -15,16 +15,6 @@ export interface DecodedToken {
     curso: string;
 }
 
-interface SolicitarInscricaoData {
-    nome: string;
-    email: string;
-    matricula: string;
-    telefone: string;
-    curso: string;
-    cargoPretendido: string;
-    genero: string;
-}
-
 interface SolicitarRecuperacaoSenhaData {
     matricula: string;
     email: string;
@@ -46,7 +36,6 @@ interface AuthContextData {
     isLoading: boolean;
     login: (matricula: string, senha: string) => Promise<void>;
     logout: () => void;
-    solicitarInscricao: (data: SolicitarInscricaoData) => Promise<any>;
     concluirCadastro: (data: ConcluirCadastroData) => Promise<any>;
     solicitarRecuperacaoSenha: (data: SolicitarRecuperacaoSenhaData) => Promise<any>;
     redefinirSenha: (data: RedefinirSenhaData) => Promise<any>;
@@ -62,11 +51,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Ao iniciar a aplicação, verifica se há uma sessão válida através dos cookies
         const checkSession = async () => {
             console.log("Checando sessão...")
+            setIsLoading(true);
             try {
                 // Valida a sessão e recupera os dados do usuário via cookie HTTP-Only
                 const response = await api.post("/auth/validar-sessao");
                 if (response.data?.usuario) {
                     setUser({ ...response.data.usuario, sub: response.data.usuario.id });
+                    console.log("Sessão válida encontrada")
                 } else {
                     setUser(null);
                 }
@@ -82,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     async function login(matricula: string, senha: string) {
+        setIsLoading(true);
         try {
             const response = await api.post("/auth/login", {
                 matricula,
@@ -91,11 +83,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // O backend envia os tokens via cookies HTTP-Only automaticamente
             // Recebemos o usuário na resposta
             const usuario = response.data.usuario;
-
             setUser({ ...usuario, sub: usuario.id });
+            console.log("Login realizado com sucesso", usuario);
         } catch (error) {
             console.error("Falha no login", error);
             throw error; // Lança o erro para ser tratado pela tela de Login (ex: exibir toast)
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -108,16 +102,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             window.location.href = "/login";
         } catch (error) {
             console.error("Falha no logout", error)
-        }
-    }
-
-    async function solicitarInscricao(data: SolicitarInscricaoData) {
-        try {
-            const response = await api.post("/auth/solicitar-inscricao", data);
-            return response.data;
-        } catch (error) {
-            console.error("Falha ao solicitar inscrição", error);
-            throw error;
         }
     }
 
@@ -159,7 +143,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 isLoading,
                 login,
                 logout,
-                solicitarInscricao,
                 concluirCadastro,
                 solicitarRecuperacaoSenha,
                 redefinirSenha,

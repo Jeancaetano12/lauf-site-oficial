@@ -18,6 +18,7 @@ import Solicitacoes from "./pages/Solicitacoes";
 import Extras from "./pages/Extras";
 import AulaDetalhes from "./pages/AulasDetalhes";
 import ConfirmarPresenca from "./pages/ConfirmarPresenca";
+import SolicitacaoDetalhes from "./pages/SolicitacaoDetalhes";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
             <Route path="/aulas" element={<Aulas />} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/solicitacoes" element={<Solicitacoes />} />
+            <Route path="/solicitacoes/:id" element={<SolicitacaoDetalhes />} />
             <Route path="/extras" element={<Extras />} />
             <Route path="/aulas/:id" element={<AulaDetalhes />} />
             <Route path="/confirmar-presenca" element={<ConfirmarPresenca />} />

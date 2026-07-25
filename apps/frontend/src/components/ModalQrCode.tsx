@@ -98,7 +98,7 @@ export default function ModalQrCode({ isOpen, onClose, aulaId }: ModalQrCodeProp
                     </button>
                 </div>
 
-                <div className="p-6 flex flex-col items-center min-h-[300px] justify-center text-center">
+                <div className="p-6 flex flex-col items-center min-h-75 justify-center text-center">
                     {loading ? (
                         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-brand-purple"></div>
                     ) : error ? (
@@ -119,6 +119,7 @@ export default function ModalQrCode({ isOpen, onClose, aulaId }: ModalQrCodeProp
 
                             <button
                                 onClick={handleEncerrarChamada}
+                                disabled={loading}
                                 className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 font-bold py-3 rounded-xl transition-colors cursor-pointer"
                             >
                                 <FiSquare /> Encerrar Chamada
@@ -134,6 +135,7 @@ export default function ModalQrCode({ isOpen, onClose, aulaId }: ModalQrCodeProp
                             </p>
                             <button
                                 onClick={handleIniciarChamada}
+                                disabled={loading}
                                 className="w-full flex items-center justify-center gap-2 bg-brand-purple text-white hover:bg-brand-purple-hover font-bold py-3 px-6 rounded-xl transition-colors cursor-pointer"
                             >
                                 <FiPlay /> Iniciar Chamada Agora
