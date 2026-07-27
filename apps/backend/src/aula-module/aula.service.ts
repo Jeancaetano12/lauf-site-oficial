@@ -327,6 +327,8 @@ export class AulaService {
                 where: { id },
                 data: {
                     qrCodeAtivo: false,
+                    qrCodeToken: null,
+                    qrCodeExpiraEm: null,
                     status: 'CONCLUIDA'
                 }
             });
@@ -379,6 +381,52 @@ export class AulaService {
             if (error instanceof HttpException) throw error;
             this.logger.error(`[ERRO] Erro ao obter QR Code pelo usuário ${auditoria}: `, error);
             throw new InternalServerErrorException("Erro ao obter QR Code");
+        }
+    }
+
+    async obterListaDePresenca(id: string, user: any) {
+        const auditoria = `${user.nome} (Id: ${user.id})`;
+        try {
+            const aula = await this.prisma.aula.findUnique({
+                where: { id }
+            });
+
+            if (!aula) {
+                throw new NotFoundException("Aula não encontrada");
+            }
+
+            if (user.cargo === 'PROFESSOR' && aula.professorId !== user.id) {
+                throw new ForbiddenException("Você não tem permissão para visualizar a lista de presença desta aula.");
+            }
+
+            const presencas = await this.prisma.presencaAula.findMany({
+                where: { aulaId: id },
+                orderBy: {
+                    confirmadoEm: 'asc'
+                },
+                select: {
+                    usuario: {
+                        select: {
+                            id: true,
+                            nome: true,
+                        }
+                    },
+                    confirmadoEm: true,
+                }
+            });
+
+            const listaFormatada = presencas.map(p => ({
+                id: p.usuario.id,
+                nome: p.usuario.nome,
+                confirmadoEm: p.confirmadoEm
+            }));
+
+            this.logger.log(`[AUDIT] Lista de presença da aula ${id} exibida para ${auditoria}`);
+            return listaFormatada;
+        } catch (error) {
+            if (error instanceof HttpException) throw error;
+            this.logger.error(`[ERRO] Erro ao obter lista de presença da aula ${id} pelo usuário ${auditoria}: `, error);
+            throw new InternalServerErrorException("Erro ao obter lista de presença");
         }
     }
 }

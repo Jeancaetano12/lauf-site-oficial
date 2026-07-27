@@ -7,7 +7,7 @@ export class PresencaService {
     private readonly logger = new Logger(PresencaService.name)
     constructor(private readonly prisma: PrismaService) { }
 
-    async confirmarPresenca(dto: ConfirmarPresencaDto, usuarioId: string, auditoria: string) {
+    async confirmarPresencaAula(dto: ConfirmarPresencaDto, usuarioId: string, auditoria: string) {
         try {
             const aula = await this.prisma.aula.findFirst({
                 where: { qrCodeToken: dto.token }

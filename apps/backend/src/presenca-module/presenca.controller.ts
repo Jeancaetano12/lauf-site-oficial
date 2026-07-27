@@ -15,11 +15,11 @@ export class PresencaController {
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtAuthGuard)
     @Throttle({ default: { limit: 5, ttl: 60000 } })
-    async confirmarPresenca(@Body() dto: ConfirmarPresencaDto, @CurrentUser() user: any) {
-        this.logger.log(`[AUDIT] Confirmação de presença solicitada pelo usuário: ${user.nome}`);
+    async confirmarPresencaAula(@Body() dto: ConfirmarPresencaDto, @CurrentUser() user: any) {
+        this.logger.log(`[AUDIT] Confirmar presença solicitada pelo usuário: ${user.nome}`);
         try {
             const auditoria = `${user.nome} (Id: ${user.id})`;
-            return await this.presencaService.confirmarPresenca(dto, user.id, auditoria);
+            return await this.presencaService.confirmarPresencaAula(dto, user.id, auditoria);
         } catch (error) {
             this.logger.error(`[ERRO] Erro ao confirmar presença pelo usuário ${user.nome}: `, error);
             throw error;

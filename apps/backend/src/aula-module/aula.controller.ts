@@ -136,4 +136,19 @@ export class AulaController {
             throw error;
         }
     }
+
+    @Get(':id/presenca')
+    @HttpCode(HttpStatus.OK)
+    @Throttle({ default: { limit: 15, ttl: 60000 } })
+    @UseGuards(JwtAuthGuard, CargosGuard)
+    @Cargos('COORDENADOR', 'PROFESSOR')
+    async obterListaDePresenca(@Param('id') id: string, @CurrentUser() user: any) {
+        this.logger.log(`[AUDIT] Obtenção de lista de presença solicitada pelo usuário: ${user.nome} para a aula ${id}`);
+        try {
+            return await this.aulaService.obterListaDePresenca(id, user);
+        } catch (error) {
+            this.logger.error(`[ERRO] Erro ao obter lista de presença pelo usuário ${user.nome}: `, error);
+            throw error;
+        }
+    }
 }

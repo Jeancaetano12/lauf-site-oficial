@@ -16,9 +16,11 @@ import {
     FiCheck,
 } from 'react-icons/fi';
 import { LuCalendarX2 } from "react-icons/lu";
+import { GoChecklist } from "react-icons/go";
 import type { Aula } from '../hooks/useAulas';
 import ModalEditarAula from '../components/ModalEditarAula';
 import ModalQrCode from '../components/ModalQrCode';
+import ModalListaPresenca from '../components/ModalListaPresenca';
 
 // fundo/borda usam a mesma cor do "ponto", só que com baixa opacidade (via rgba),
 // pra criar uma pílula colorida que ainda combina com o gradiente escuro do hero.
@@ -37,6 +39,7 @@ export default function AulaDetalhes() {
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+    const [isListaPresencaModalOpen, setIsListaPresencaModalOpen] = useState(false);
     const [idCopiado, setIdCopiado] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -194,6 +197,17 @@ export default function AulaDetalhes() {
                                 </button>
                             </div>
                         )}
+
+                        {podeGerenciar && aula.status === 'CONCLUIDA' && (
+                            <div className='flex items-center gap-3 w-full sm:w-auto'>
+                                <button
+                                    onClick={() => setIsListaPresencaModalOpen(true)}
+                                    className='cursor-pointer sm:flex-none flex items-center justify-center text-white transition-all font-semibold bg-indigo-600 hover:bg-indigo-800 px-4 py-2 rounded-lg text-sm shadow-sm'
+                                >
+                                    <GoChecklist className="mr-2" /> Ver lista de presença
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -255,6 +269,12 @@ export default function AulaDetalhes() {
             <ModalQrCode
                 isOpen={isQrModalOpen}
                 onClose={() => setIsQrModalOpen(false)}
+                aulaId={aula.id}
+            />
+
+            <ModalListaPresenca
+                isOpen={isListaPresencaModalOpen}
+                onClose={() => setIsListaPresencaModalOpen(false)}
                 aulaId={aula.id}
             />
         </div>
