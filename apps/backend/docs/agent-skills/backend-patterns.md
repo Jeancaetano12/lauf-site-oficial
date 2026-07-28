@@ -58,6 +58,10 @@ Sempre que a funcionalidade envolver segurança e controle de acesso, atente-se 
 
 Modulo responsavel por gerenciar aulas e eventos do sistema. Segue as seguintes regras:
 
+### 6.1 Processos em Background (CronJobs)
+- O modulo de Aulas possui um job configurado via `@nestjs/schedule` que roda a cada 30 minutos (`@Cron(CronExpression.EVERY_30_MINUTES)`).
+- **Cancelamento Automático:** Este job varre o banco buscando por aulas que tenham passado 5 horas do seu início e que não possuam nenhuma presença registrada. Tais aulas têm o seu status atualizado de `AGENDADA` para `CANCELADA` automaticamente, evitando retenção de aulas antigas abertas.
+
 ## 7. Registro de presença (PresencaModule)
 
 Modulo responsavel por registrar a presença dos usuários em aulas. Segue as seguintes regras:

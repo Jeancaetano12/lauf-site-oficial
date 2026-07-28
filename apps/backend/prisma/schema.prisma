@@ -120,6 +120,8 @@ model Aula {
   criador   Usuario        @relation("AulaCriador", fields: [criadorId], references: [id])
   professor Usuario        @relation("AulaProfessor", fields: [professorId], references: [id])
   presencas PresencaAula[]
+
+  @@index([status, dataHora])
 }
 
 model PresencaAula {

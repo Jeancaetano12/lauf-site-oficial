@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AulaController } from './aula.controller';
 import { AulaService } from './aula.service';
+import { AulaCronService } from './aula-cron.service';
 import { JwtStrategy } from '../auth/strategies/jwt.strategy';
 
 
@@ -25,7 +26,7 @@ import { JwtStrategy } from '../auth/strategies/jwt.strategy';
         })
     ],
     controllers: [AulaController],
-    providers: [AulaService, JwtStrategy],
+    providers: [AulaService, AulaCronService, JwtStrategy],
     exports: [AulaService],
 })
 export class AulaModule { }

@@ -78,6 +78,9 @@ A utilização de Enums no banco ajuda a restringir os dados inseridos a um conj
 - `qrCodeExpiraEm` (DateTime?): Data e hora de expiração do QR Code.
 - `qrCodeAtivo` (Boolean): Status do QR Code. Padrão `false`.
 
+**Índices de Banco:**
+- `@@index([status, dataHora])`: Índice composto para otimizar queries que varrem a tabela em busca de aulas "AGENDADAS" cujo tempo já tenha ultrapassado o limite para cancelamento automático. Essencial para que o Cron Job (`AulaCronService`) rode de maneira rápida (evitando *Full Table Scan*) conforme a tabela for crescendo.
+
 ### 2.5. PresencaAula
 **Objetivo:** Registro individual de presença de alunos (membros ativos) em aulas regulares.
 **Justificativa:** Tabela pivô de relacionamento N:N entre `Aula` e `Usuario`. Trabalha com modelagem positiva (apenas presenças são registradas, faltas são inferidas).
