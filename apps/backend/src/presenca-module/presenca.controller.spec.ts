@@ -38,13 +38,19 @@ describe('PresencaController', () => {
     it('deve chamar presencaService.confirmarPresencaAula', async () => {
       const dto: ConfirmarPresencaDto = { token: 'token-abc' };
       const mockUser = { id: 'uuid-user', nome: 'Teste User' };
-      
-      mockPresencaService.confirmarPresencaAula.mockResolvedValue({ id: 'uuid-presenca' });
+
+      mockPresencaService.confirmarPresencaAula.mockResolvedValue({
+        id: 'uuid-presenca',
+      });
 
       const result = await controller.confirmarPresencaAula(dto, mockUser);
-      
+
       expect(result).toBeDefined();
-      expect(service.confirmarPresencaAula).toHaveBeenCalledWith(dto, mockUser.id, `${mockUser.nome} (Id: ${mockUser.id})`);
+      expect(service.confirmarPresencaAula).toHaveBeenCalledWith(
+        dto,
+        mockUser.id,
+        `${mockUser.nome} (Id: ${mockUser.id})`,
+      );
     });
   });
 });

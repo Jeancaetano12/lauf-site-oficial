@@ -7,29 +7,26 @@ import { PresencaService } from './presenca.service';
 import { PresencaController } from './presenca.controller';
 
 @Module({
-    imports: [
-        PrismaModule,
-        PassportModule,
-        JwtModule.registerAsync({
-            useFactory: () => {
-                if (!process.env.JWT_SECRET) {
-                    throw new Error('JWT_SECRET não está definido nas variaveis de ambiente ou nao foi encontrada.')
-                }
+  imports: [
+    PrismaModule,
+    PassportModule,
+    JwtModule.registerAsync({
+      useFactory: () => {
+        if (!process.env.JWT_SECRET) {
+          throw new Error(
+            'JWT_SECRET não está definido nas variaveis de ambiente ou nao foi encontrada.',
+          );
+        }
 
-                return {
-                    secret: process.env.JWT_SECRET,
-                    signOptions: { expiresIn: '15m' }, // Token expira em 15min
-                }
-            },
-        })
-    ],
-    controllers: [
-        PresencaController
-    ],
-    providers: [
-        PresencaService,
-        JwtStrategy
-    ],
-    exports: [JwtStrategy],
+        return {
+          secret: process.env.JWT_SECRET,
+          signOptions: { expiresIn: '15m' }, // Token expira em 15min
+        };
+      },
+    }),
+  ],
+  controllers: [PresencaController],
+  providers: [PresencaService, JwtStrategy],
+  exports: [JwtStrategy],
 })
-export class PresencaModule { }
+export class PresencaModule {}

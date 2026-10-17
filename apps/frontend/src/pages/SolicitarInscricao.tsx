@@ -25,7 +25,15 @@ export default function SolicitarInscricao() {
     setLoading(true);
     setFeedback({ type: null, message: "" });
     try {
-      const response = await solicitarInscricao({ nome, email, matricula, telefone, curso, cargoPretendido: cargo, genero });
+      const response = await solicitarInscricao({
+        nome: nome.trim(),
+        email: email.trim(),
+        matricula: matricula.trim(),
+        telefone: telefone.trim(),
+        curso,
+        cargoPretendido: cargo,
+        genero,
+      });
       setFeedback({
         type: "success",
         message: response?.message || "Sua solicitação de inscrição foi recebida com sucesso! Aguarde retorno por e-mail."

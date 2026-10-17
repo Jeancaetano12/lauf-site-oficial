@@ -2,7 +2,7 @@
 
 import { useAuth } from "../context/AuthContext";
 import { FaHandSparkles, FaShieldAlt } from "react-icons/fa";
-import { formatarNomeCurso, formatarTelefone, formatarGenero } from "../utils/formatters";
+import { formatarNomeCurso, formatarTelefone } from "../utils/formatters";
 
 export default function BoasVindas() {
     const { user, logout } = useAuth();

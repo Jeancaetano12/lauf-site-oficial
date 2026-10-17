@@ -1,4 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException, Logger, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
@@ -11,33 +18,36 @@ import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name)
+  private readonly logger = new Logger(AuthService.name);
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
-  ) { }
+  ) {}
 
   async solicitarInscricao(dto: SolicitarInscricaoDto) {
-    const solicitacaoExistente = await this.prisma.solicitacaoInscricao.findFirst({
-      where: {
-        OR: [{ email: dto.email }, { matricula: dto.matricula }],
-      },
-      select: {
-        id: true,
-        status: true,
-        tokenRegistroExpiraEm: true,
-        email: true,
-        nome: true,
-      },
-    });
+    const solicitacaoExistente =
+      await this.prisma.solicitacaoInscricao.findFirst({
+        where: {
+          OR: [{ email: dto.email }, { matricula: dto.matricula }],
+        },
+        select: {
+          id: true,
+          status: true,
+          tokenRegistroExpiraEm: true,
+          email: true,
+          nome: true,
+        },
+      });
 
     if (solicitacaoExistente && solicitacaoExistente.status === 'PENDENTE') {
       this.logger.log(
         `[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} barrado pois já existe uma solicitação pendente`,
       );
-      throw new BadRequestException('Já existe uma solicitação com este e-mail ou matrícula.');
+      throw new BadRequestException(
+        'Já existe uma solicitação com este e-mail ou matrícula.',
+      );
     }
 
     if (solicitacaoExistente && solicitacaoExistente.status === 'APROVADA') {
@@ -49,11 +59,16 @@ export class AuthService {
         this.logger.log(
           `[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} foi barrado porque já é usuário`,
         );
-        throw new BadRequestException('Já existe um usuário cadastrado com esta matrícula.');
+        throw new BadRequestException(
+          'Já existe um usuário cadastrado com esta matrícula.',
+        );
       }
 
       // Se a solicitação está aprovada mas o token expirou, renovamos e reenviamos o e-mail
-      if (solicitacaoExistente.tokenRegistroExpiraEm && solicitacaoExistente.tokenRegistroExpiraEm < new Date()) {
+      if (
+        solicitacaoExistente.tokenRegistroExpiraEm &&
+        solicitacaoExistente.tokenRegistroExpiraEm < new Date()
+      ) {
         const tokenRegistro = randomBytes(32).toString('hex');
         const tokenRegistroExpiraEm = new Date();
         tokenRegistroExpiraEm.setDate(tokenRegistroExpiraEm.getDate() + 7); // +7 dias
@@ -66,7 +81,9 @@ export class AuthService {
           },
         });
 
-        this.logger.log(`[DEBUG] Renovando token de inscrição expirado para email: ${solicitacaoExistente.email}`);
+        this.logger.log(
+          `[DEBUG] Renovando token de inscrição expirado para email: ${solicitacaoExistente.email}`,
+        );
         const emailAprovacao = await this.mailService.enviarEmailAprovacao(
           solicitacaoExistente.email,
           solicitacaoExistente.nome,
@@ -81,7 +98,9 @@ export class AuthService {
               tokenRegistroExpiraEm: null,
             },
           });
-          this.logger.error(`Erro ao reenviar e-mail de aprovação para ${solicitacaoExistente.email}`);
+          this.logger.error(
+            `Erro ao reenviar e-mail de aprovação para ${solicitacaoExistente.email}`,
+          );
           throw new InternalServerErrorException(
             'Não foi possível reenviar o e-mail de aprovação. Tente novamente mais tarde.',
           );
@@ -104,7 +123,7 @@ export class AuthService {
     if (solicitacaoExistente && solicitacaoExistente.status === 'REJEITADA') {
       const solicitacao2 = await this.prisma.solicitacaoInscricao.create({
         data: {
-          nome: dto.nome.toUpperCase(),
+          nome: dto.nome.trim().toUpperCase(),
           email: dto.email.toLowerCase(),
           matricula: dto.matricula,
           telefone: dto.telefone.trim(),
@@ -114,24 +133,36 @@ export class AuthService {
         },
       });
 
-      this.logger.log(`[DEBUG] Solicitacao de inscricao criada com sucesso. email: ${dto.email}, Disparando email...`);
-      const emailConfirmacaoSolicitacao2 = await this.mailService.enviarEmailConfirmacaoSolicitacao(solicitacao2.email, solicitacao2.nome)
+      this.logger.log(
+        `[DEBUG] Solicitacao de inscricao criada com sucesso. email: ${dto.email}, Disparando email...`,
+      );
+      const emailConfirmacaoSolicitacao2 =
+        await this.mailService.enviarEmailConfirmacaoSolicitacao(
+          solicitacao2.email,
+          solicitacao2.nome,
+        );
 
       if (emailConfirmacaoSolicitacao2 === 0) {
         await this.prisma.solicitacaoInscricao.delete({
-          where: { id: solicitacao2.id }
-        })
-        this.logger.error(`Solicitacao de inscricao excluida devido a falha no envio do email. email: ${dto.email}`);
-        throw new InternalServerErrorException('Não foi possível enviar o e-mail de confirmação de solicitação. Tente novamente mais tarde.');
+          where: { id: solicitacao2.id },
+        });
+        this.logger.error(
+          `Solicitacao de inscricao excluida devido a falha no envio do email. email: ${dto.email}`,
+        );
+        throw new InternalServerErrorException(
+          'Não foi possível enviar o e-mail de confirmação de solicitação. Tente novamente mais tarde.',
+        );
       }
 
-      this.logger.log(`[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} solicitou inscrição novamente`)
+      this.logger.log(
+        `[DEBUG] Usuario: ${dto.nome}, email: ${dto.email}, matricula: ${dto.matricula} solicitou inscrição novamente`,
+      );
       return { message: 'Solicitação enviada novamente.', id: solicitacao2.id };
     }
 
     const solicitacao = await this.prisma.solicitacaoInscricao.create({
       data: {
-        nome: dto.nome.toUpperCase(),
+        nome: dto.nome.trim().toUpperCase(),
         email: dto.email.toLowerCase(),
         matricula: dto.matricula,
         telefone: dto.telefone.trim(),
@@ -141,18 +172,30 @@ export class AuthService {
       },
     });
 
-    this.logger.log(`[DEBUG] Solicitacao de inscricao criada com sucesso. email: ${dto.email}, Disparando email...`);
-    const emailConfirmacaoSolicitacao = await this.mailService.enviarEmailConfirmacaoSolicitacao(solicitacao.email, solicitacao.nome)
+    this.logger.log(
+      `[DEBUG] Solicitacao de inscricao criada com sucesso. email: ${dto.email}, Disparando email...`,
+    );
+    const emailConfirmacaoSolicitacao =
+      await this.mailService.enviarEmailConfirmacaoSolicitacao(
+        solicitacao.email,
+        solicitacao.nome,
+      );
 
     if (emailConfirmacaoSolicitacao === 0) {
       await this.prisma.solicitacaoInscricao.delete({
-        where: { id: solicitacao.id }
-      })
-      this.logger.error(`Solicitacao de inscricao excluida devido a falha no envio do email. email: ${dto.email}`);
-      throw new InternalServerErrorException('Não foi possível enviar o e-mail de confirmação de solicitação. Tente novamente mais tarde.');
+        where: { id: solicitacao.id },
+      });
+      this.logger.error(
+        `Solicitacao de inscricao excluida devido a falha no envio do email. email: ${dto.email}`,
+      );
+      throw new InternalServerErrorException(
+        'Não foi possível enviar o e-mail de confirmação de solicitação. Tente novamente mais tarde.',
+      );
     }
 
-    this.logger.log(`[DEBUG] Solicitacao de inscricao criada com sucesso. ID: ${solicitacao.id}`);
+    this.logger.log(
+      `[DEBUG] Solicitacao de inscricao criada com sucesso. ID: ${solicitacao.id}`,
+    );
     return { message: 'Solicitação criada com sucesso.', id: solicitacao.id };
   }
 
@@ -162,12 +205,16 @@ export class AuthService {
     });
 
     if (!solicitacao) {
-      this.logger.log(`[DEBUG] Solicitacao de inscricao com o id ${id} nao foi encontrada para aprovacao`);
+      this.logger.log(
+        `[DEBUG] Solicitacao de inscricao com o id ${id} nao foi encontrada para aprovacao`,
+      );
       throw new NotFoundException('Solicitação não encontrada.');
     }
 
     if (solicitacao.status !== 'PENDENTE') {
-      this.logger.log(`[DEBUG] Solicitacao de inscricao com o id ${id} ja foi processada`);
+      this.logger.log(
+        `[DEBUG] Solicitacao de inscricao com o id ${id} ja foi processada`,
+      );
       throw new BadRequestException('Esta solicitação já foi processada.');
     }
 
@@ -185,8 +232,14 @@ export class AuthService {
       },
     });
 
-    this.logger.log(`[DEBUG] Solicitacao de inscricao aprovada com sucesso. email: ${solicitacao.email}, Disparando email...`);
-    const emailAprovacao = await this.mailService.enviarEmailAprovacao(solicitacao.email, solicitacao.nome, tokenRegistro)
+    this.logger.log(
+      `[DEBUG] Solicitacao de inscricao aprovada com sucesso. email: ${solicitacao.email}, Disparando email...`,
+    );
+    const emailAprovacao = await this.mailService.enviarEmailAprovacao(
+      solicitacao.email,
+      solicitacao.nome,
+      tokenRegistro,
+    );
 
     if (emailAprovacao === 0) {
       await this.prisma.solicitacaoInscricao.update({
@@ -196,28 +249,37 @@ export class AuthService {
           tokenRegistroExpiraEm: null,
         },
       });
-      this.logger.error(`Token de inscricao removido devido a falha no envio do email. email: ${solicitacao.email}`);
-      throw new InternalServerErrorException('Não foi possível enviar o e-mail de aprovação. Tente novamente mais tarde.');
+      this.logger.error(
+        `Token de inscricao removido devido a falha no envio do email. email: ${solicitacao.email}`,
+      );
+      throw new InternalServerErrorException(
+        'Não foi possível enviar o e-mail de aprovação. Tente novamente mais tarde.',
+      );
     }
 
     return {
-      message: 'Solicitação aprovada.', tokenGerado: tokenRegistro
+      message: 'Solicitação aprovada.',
+      tokenGerado: tokenRegistro,
     };
   }
 
   async rejeitarSolicitacao(id: string, processadoPor?: string) {
     const solicitacao = await this.prisma.solicitacaoInscricao.findUnique({
       where: { id },
-      select: { status: true, email: true, nome: true }
+      select: { status: true, email: true, nome: true },
     });
 
     if (!solicitacao) {
-      this.logger.log(`[DEBUG] Solicitacao de inscricao com o id ${id} nao foi encontrada para rejeicao`);
-      throw new NotFoundException('Solicitação não encontrada.')
+      this.logger.log(
+        `[DEBUG] Solicitacao de inscricao com o id ${id} nao foi encontrada para rejeicao`,
+      );
+      throw new NotFoundException('Solicitação não encontrada.');
     }
 
     if (solicitacao.status === 'APROVADA') {
-      this.logger.log(`[DEBUG] Solicitacao de inscricao com o id ${id} ja foi aprovada`);
+      this.logger.log(
+        `[DEBUG] Solicitacao de inscricao com o id ${id} ja foi aprovada`,
+      );
       throw new BadRequestException('Esta solicitação já foi aprovada.');
     }
 
@@ -230,16 +292,26 @@ export class AuthService {
         },
       });
 
-      this.logger.log(`[DEBUG] Solicitacao de inscricao rejeitada para o email: ${solicitacao.email}, id: ${id}, Disparando email...`);
-      const emailRejeicao = await this.mailService.enviarEmailRejeicao(solicitacao.email, solicitacao.nome)
+      this.logger.log(
+        `[DEBUG] Solicitacao de inscricao rejeitada para o email: ${solicitacao.email}, id: ${id}, Disparando email...`,
+      );
+      const emailRejeicao = await this.mailService.enviarEmailRejeicao(
+        solicitacao.email,
+        solicitacao.nome,
+      );
 
       if (emailRejeicao === 0) {
-        this.logger.error(`Falha no envio do email de rejeicao. email: ${solicitacao.email}`);
-        throw new InternalServerErrorException('Não foi possível enviar o e-mail de rejeição. Tente novamente mais tarde.');
+        this.logger.error(
+          `Falha no envio do email de rejeicao. email: ${solicitacao.email}`,
+        );
+        throw new InternalServerErrorException(
+          'Não foi possível enviar o e-mail de rejeição. Tente novamente mais tarde.',
+        );
       }
 
       return {
-        message: 'Solicitação rejeitada', id: rejeitar.id
+        message: 'Solicitação rejeitada',
+        id: rejeitar.id,
       };
     }
   }
@@ -250,13 +322,17 @@ export class AuthService {
     });
 
     if (!usuario) {
-      this.logger.log(`[DEBUG] Usuario com a matricula ${dto.matricula} nao foi encontrado para login`);
+      this.logger.log(
+        `[DEBUG] Usuario com a matricula ${dto.matricula} nao foi encontrado para login`,
+      );
       throw new UnauthorizedException('Credenciais inválidas.');
     }
 
     const senhaCorreta = await bcrypt.compare(dto.senha, usuario.senha);
     if (!senhaCorreta) {
-      this.logger.log(`[DEBUG] Usuario com a matricula ${dto.matricula} inseriu senha incorreta`);
+      this.logger.log(
+        `[DEBUG] Usuario com a matricula ${dto.matricula} inseriu senha incorreta`,
+      );
       throw new UnauthorizedException('Credenciais inválidas.');
     }
 
@@ -269,8 +345,18 @@ export class AuthService {
       // throw new InternalServerErrorException('Não foi possível enviar o e-mail de login. Tente novamente mais tarde.');
     } */
 
-    this.logger.log(`[DEBUG] Usuario com a matricula ${dto.matricula} logou com sucesso, Sessão iniciada...`);
-    return this.gerarTokensESessao(usuario.id, usuario.matricula, usuario.cargo, usuario.email, usuario.nome, usuario.telefone, usuario.curso);
+    this.logger.log(
+      `[DEBUG] Usuario com a matricula ${dto.matricula} logou com sucesso, Sessão iniciada...`,
+    );
+    return this.gerarTokensESessao(
+      usuario.id,
+      usuario.matricula,
+      usuario.cargo,
+      usuario.email,
+      usuario.nome,
+      usuario.telefone,
+      usuario.curso,
+    );
   }
 
   async refreshToken(refreshToken: string) {
@@ -280,25 +366,43 @@ export class AuthService {
     });
 
     if (!sessao) {
-      this.logger.log(`[DEBUG] Tentativa de uso de Refresh Token inválido ou revogado: ${refreshToken}`);
-      throw new UnauthorizedException('Refresh token inválido ou sessão revogada.');
+      this.logger.log(
+        `[DEBUG] Tentativa de uso de Refresh Token inválido ou revogado: ${refreshToken}`,
+      );
+      throw new UnauthorizedException(
+        'Refresh token inválido ou sessão revogada.',
+      );
     }
 
     if (sessao.expiraEm < new Date()) {
-      this.logger.log(`[DEBUG] Tentativa de uso de Refresh Token expirado: ${refreshToken}`);
+      this.logger.log(
+        `[DEBUG] Tentativa de uso de Refresh Token expirado: ${refreshToken}`,
+      );
       await this.prisma.sessao.update({
         where: { id: sessao.id },
         data: { valido: false },
       });
-      throw new UnauthorizedException('Refresh token expirado. Faça login novamente.');
+      throw new UnauthorizedException(
+        'Refresh token expirado. Faça login novamente.',
+      );
     }
 
     // Rotaciona o token e invalida a sessão anterior para segurança
     await this.prisma.sessao.delete({ where: { id: sessao.id } });
 
     const { usuario } = sessao;
-    this.logger.log(`[DEBUG] Refresh Token validado. Gerando novos tokens para o usuario ID: ${usuario.id}`);
-    return this.gerarTokensESessao(usuario.id, usuario.matricula, usuario.cargo, usuario.email, usuario.nome, usuario.telefone, usuario.curso);
+    this.logger.log(
+      `[DEBUG] Refresh Token validado. Gerando novos tokens para o usuario ID: ${usuario.id}`,
+    );
+    return this.gerarTokensESessao(
+      usuario.id,
+      usuario.matricula,
+      usuario.cargo,
+      usuario.email,
+      usuario.nome,
+      usuario.telefone,
+      usuario.curso,
+    );
   }
 
   async validarSessao(refreshToken: string) {
@@ -308,12 +412,16 @@ export class AuthService {
     });
 
     if (!sessao) {
-      this.logger.log(`[DEBUG] Tentativa de validar sessão com Refresh Token inválido ou revogado: ${refreshToken}`);
+      this.logger.log(
+        `[DEBUG] Tentativa de validar sessão com Refresh Token inválido ou revogado: ${refreshToken}`,
+      );
       throw new UnauthorizedException('Sessão inválida ou revogada.');
     }
 
     if (sessao.expiraEm < new Date()) {
-      this.logger.log(`[DEBUG] Tentativa de validar sessão com Refresh Token expirado: ${refreshToken}`);
+      this.logger.log(
+        `[DEBUG] Tentativa de validar sessão com Refresh Token expirado: ${refreshToken}`,
+      );
       await this.prisma.sessao.update({
         where: { id: sessao.id },
         data: { valido: false },
@@ -333,12 +441,21 @@ export class AuthService {
     });
 
     if (!solicitacao) {
-      this.logger.log(`[DEBUG] Usuario com o token de registro ${dto.tokenRegistro} nao foi encontrado para concluir cadastro`);
-      throw new NotFoundException('Token de registro inválido ou não encontrado.');
+      this.logger.log(
+        `[DEBUG] Usuario com o token de registro ${dto.tokenRegistro} nao foi encontrado para concluir cadastro`,
+      );
+      throw new NotFoundException(
+        'Token de registro inválido ou não encontrado.',
+      );
     }
 
-    if (solicitacao.tokenRegistroExpiraEm && solicitacao.tokenRegistroExpiraEm < new Date()) {
-      this.logger.log(`[DEBUG] Usuario com o token de registro ${dto.tokenRegistro} inseriu token de registro expirado`);
+    if (
+      solicitacao.tokenRegistroExpiraEm &&
+      solicitacao.tokenRegistroExpiraEm < new Date()
+    ) {
+      this.logger.log(
+        `[DEBUG] Usuario com o token de registro ${dto.tokenRegistro} inseriu token de registro expirado`,
+      );
       throw new BadRequestException('O token de registro expirou.');
     }
 
@@ -365,7 +482,9 @@ export class AuthService {
 
     // Remover senha do objeto retornado
     const { senha, ...userWithoutPassword } = usuario;
-    this.logger.log(`[DEBUG] Usuario com a matricula ${usuario.matricula} concluiu cadastro com sucesso`);
+    this.logger.log(
+      `[DEBUG] Usuario com a matricula ${usuario.matricula} concluiu cadastro com sucesso`,
+    );
     return {
       message: 'Cadastro concluído com sucesso.',
       usuario: userWithoutPassword,
@@ -378,9 +497,13 @@ export class AuthService {
     });
 
     if (!usuario) {
-      this.logger.log(`[DEBUG] Usuario com o email ${dto.email} e matricula ${dto.matricula} nao foi encontrado para recuperar senha`);
+      this.logger.log(
+        `[DEBUG] Usuario com o email ${dto.email} e matricula ${dto.matricula} nao foi encontrado para recuperar senha`,
+      );
       // Retornamos mensagem de sucesso para não revelar se o email existe ou não (segurança)
-      return { message: 'Se o e-mail existir, um link de recuperação foi enviado.' };
+      return {
+        message: 'Se o e-mail existir, um link de recuperação foi enviado.',
+      };
     }
 
     const tokenRecuperacaoSenha = randomBytes(32).toString('hex');
@@ -395,8 +518,14 @@ export class AuthService {
       },
     });
 
-    this.logger.log(`[DEBUG] Solicitacao de recuperacao de senha gerada para o email: ${dto.email}, Disparando email...`);
-    const emailRecuperacaoSenha = await this.mailService.enviarEmailRecuperacaoSenha(usuario.email, tokenRecuperacaoSenha);
+    this.logger.log(
+      `[DEBUG] Solicitacao de recuperacao de senha gerada para o email: ${dto.email}, Disparando email...`,
+    );
+    const emailRecuperacaoSenha =
+      await this.mailService.enviarEmailRecuperacaoSenha(
+        usuario.email,
+        tokenRecuperacaoSenha,
+      );
 
     if (emailRecuperacaoSenha === 0) {
       await this.prisma.usuario.update({
@@ -406,24 +535,39 @@ export class AuthService {
           tokenRecuperacaoExpiraEm: null,
         },
       });
-      this.logger.error(`Token de recuperacao de senha removido devido a falha no envio do email. email: ${usuario.email}`);
-      throw new InternalServerErrorException('Não foi possível enviar o e-mail de recuperação de senha. Tente novamente mais tarde.');
+      this.logger.error(
+        `Token de recuperacao de senha removido devido a falha no envio do email. email: ${usuario.email}`,
+      );
+      throw new InternalServerErrorException(
+        'Não foi possível enviar o e-mail de recuperação de senha. Tente novamente mais tarde.',
+      );
     }
 
-    this.logger.log(`[DEBUG] Solicitacao de recuperacao de senha gerada para o email: ${dto.email}`);
-    return { message: 'Se o e-mail existir, um link de recuperação foi enviado.', tokenGerado: tokenRecuperacaoSenha };
+    this.logger.log(
+      `[DEBUG] Solicitacao de recuperacao de senha gerada para o email: ${dto.email}`,
+    );
+    return {
+      message: 'Se o e-mail existir, um link de recuperação foi enviado.',
+      tokenGerado: tokenRecuperacaoSenha,
+    };
   }
 
   async logOff(usuarioId: string) {
-    this.logger.log(`[DEBUG] Realizando LogOff do usuario com o ID: ${usuarioId}`);
+    this.logger.log(
+      `[DEBUG] Realizando LogOff do usuario com o ID: ${usuarioId}`,
+    );
     const sessoes = await this.prisma.sessao.deleteMany({
       where: { usuarioId: usuarioId },
     });
     if (sessoes.count === 0) {
-      this.logger.log(`[DEBUG] Usuario com o ID ${usuarioId} nao tem sessoes ativas`);
+      this.logger.log(
+        `[DEBUG] Usuario com o ID ${usuarioId} nao tem sessoes ativas`,
+      );
       return { message: 'Usuario nao tem sessoes ativas' };
     }
-    this.logger.log(`[DEBUG] LogOff realizado com sucesso para o usuario com o ID: ${usuarioId}`);
+    this.logger.log(
+      `[DEBUG] LogOff realizado com sucesso para o usuario com o ID: ${usuarioId}`,
+    );
     return { message: 'LogOff realizado com sucesso' };
   }
 
@@ -432,10 +576,14 @@ export class AuthService {
       where: { refreshToken },
     });
     if (sessao.count === 0) {
-      this.logger.warn(`[WARN] Sessão ${refreshToken} não encontrada ou já encerrada`);
+      this.logger.warn(
+        `[WARN] Sessão ${refreshToken} não encontrada ou já encerrada`,
+      );
       return { message: 'Sessão não encontrada ou já encerrada' };
     }
-    this.logger.log(`[DEBUG] LogOut da sessao ${refreshToken} realizado com sucesso`);
+    this.logger.log(
+      `[DEBUG] LogOut da sessao ${refreshToken} realizado com sucesso`,
+    );
     return { message: 'LogOut realizado com sucesso' };
   }
 
@@ -445,12 +593,19 @@ export class AuthService {
     });
 
     if (!usuario) {
-      this.logger.log(`[DEBUG] Tentativa falha de redefinir senha. Token invalido.`);
+      this.logger.log(
+        `[DEBUG] Tentativa falha de redefinir senha. Token invalido.`,
+      );
       throw new NotFoundException('Token inválido ou expirado.');
     }
 
-    if (!usuario.tokenRecuperacaoExpiraEm || usuario.tokenRecuperacaoExpiraEm < new Date()) {
-      this.logger.log(`[DEBUG] Tentativa falha de redefinir senha. Token expirado.`);
+    if (
+      !usuario.tokenRecuperacaoExpiraEm ||
+      usuario.tokenRecuperacaoExpiraEm < new Date()
+    ) {
+      this.logger.log(
+        `[DEBUG] Tentativa falha de redefinir senha. Token expirado.`,
+      );
       await this.prisma.usuario.update({
         where: { id: usuario.id },
         data: {
@@ -476,19 +631,43 @@ export class AuthService {
       },
     });
 
-    this.logger.log(`[DEBUG] Senha redefinida e sessoes revogadas com sucesso para o ID: ${usuario.id}`);
+    this.logger.log(
+      `[DEBUG] Senha redefinida e sessoes revogadas com sucesso para o ID: ${usuario.id}`,
+    );
 
-    const emailRecuperacaoSenhaSucesso = await this.mailService.enviarEmailRecuperacaoSenhaSucesso(usuario.email, usuario.nome);
+    const emailRecuperacaoSenhaSucesso =
+      await this.mailService.enviarEmailRecuperacaoSenhaSucesso(
+        usuario.email,
+        usuario.nome,
+      );
     if (emailRecuperacaoSenhaSucesso === 0) {
-      this.logger.error(`Falha no envio do email de recuperacao de senha. email: ${usuario.email}`);
+      this.logger.error(
+        `Falha no envio do email de recuperacao de senha. email: ${usuario.email}`,
+      );
       // throw new InternalServerErrorException('Não foi possível enviar o e-mail de recuperação de senha. Tente novamente mais tarde.');
     }
 
     return { message: 'Senha redefinida com sucesso. Faça login novamente.' };
   }
 
-  private async gerarTokensESessao(usuarioId: string, matricula: string, cargo: string, email: string, nome: string, telefone: string, curso: string) {
-    const payload = { sub: usuarioId, matricula, cargo, email, nome, telefone, curso };
+  private async gerarTokensESessao(
+    usuarioId: string,
+    matricula: string,
+    cargo: string,
+    email: string,
+    nome: string,
+    telefone: string,
+    curso: string,
+  ) {
+    const payload = {
+      sub: usuarioId,
+      matricula,
+      cargo,
+      email,
+      nome,
+      telefone,
+      curso,
+    };
 
     const accessToken = this.jwtService.sign(payload);
 
@@ -505,11 +684,21 @@ export class AuthService {
         expiraEm: dataExpiracao,
       },
     });
-    this.logger.log(`[DEBUG] Tokens gerados com sucesso para o usuario com matricula: ${matricula}, email: ${email}, cargo: ${cargo}, telefone: ${telefone}, curso: ${curso}`)
+    this.logger.log(
+      `[DEBUG] Tokens gerados com sucesso para o usuario com matricula: ${matricula}, email: ${email}, cargo: ${cargo}, telefone: ${telefone}, curso: ${curso}`,
+    );
     return {
       accessToken,
       refreshToken,
-      usuario: { id: usuarioId, matricula, cargo, email, nome, telefone, curso }
+      usuario: {
+        id: usuarioId,
+        matricula,
+        cargo,
+        email,
+        nome,
+        telefone,
+        curso,
+      },
     };
   }
 }

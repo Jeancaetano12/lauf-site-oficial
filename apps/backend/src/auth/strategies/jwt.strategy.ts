@@ -7,7 +7,9 @@ import type { Request } from 'express';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     if (!process.env.JWT_SECRET) {
-      throw new Error('JWT_SECRET não está definido nas variaveis de ambiente ou nao foi encontrada.')
+      throw new Error(
+        'JWT_SECRET não está definido nas variaveis de ambiente ou nao foi encontrada.',
+      );
     }
 
     super({
@@ -34,7 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       telefone: payload.telefone,
       cargo: payload.cargo,
       email: payload.email,
-      curso: payload.curso
+      curso: payload.curso,
     };
   }
 }

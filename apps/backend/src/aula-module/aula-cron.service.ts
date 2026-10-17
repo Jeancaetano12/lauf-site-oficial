@@ -6,11 +6,13 @@ import { PrismaService } from '../prisma/prisma.service';
 export class AulaCronService {
   private readonly logger = new Logger(AulaCronService.name);
 
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   @Cron(CronExpression.EVERY_30_MINUTES)
   async cancelarAulasVencidas() {
-    this.logger.warn('[CronJob] Iniciando varredura de aulas vencidas (sem presença após 5h do horário marcado)');
+    this.logger.warn(
+      '[CronJob] Iniciando varredura de aulas vencidas (sem presença após 5h do horário marcado)',
+    );
 
     try {
       // 5 horas atrás
@@ -32,12 +34,19 @@ export class AulaCronService {
       });
 
       if (resultado.count > 0) {
-        this.logger.warn(`[CronJob] Canceladas ${resultado.count} aula(s) vencidas e sem presença.`);
+        this.logger.warn(
+          `[CronJob] Canceladas ${resultado.count} aula(s) vencidas e sem presença.`,
+        );
       } else {
-        this.logger.warn('[CronJob] Nenhuma aula vencida precisava de cancelamento automático.');
+        this.logger.warn(
+          '[CronJob] Nenhuma aula vencida precisava de cancelamento automático.',
+        );
       }
     } catch (error) {
-      this.logger.error('[CronJob] Erro ao executar o cronjob de cancelamento de aulas.', error);
+      this.logger.error(
+        '[CronJob] Erro ao executar o cronjob de cancelamento de aulas.',
+        error,
+      );
     }
   }
 }

@@ -7,13 +7,14 @@ const FRONTEND_URL = process.env.FRONTEND_URL;
 export class MailService {
   private readonly logger = new Logger(MailService.name);
 
-  constructor(private readonly mailerService: MailerService) { }
+  constructor(private readonly mailerService: MailerService) {}
 
   async enviarEmailConfirmacaoSolicitacao(email: string, nome: string) {
-    return await this.mailerService.sendMail({
-      to: email,
-      subject: 'LAUF - Confirmação de Solicitação de Inscrição',
-      html: `
+    return await this.mailerService
+      .sendMail({
+        to: email,
+        subject: 'LAUF - Confirmação de Solicitação de Inscrição',
+        html: `
         <h3>Olá, ${nome}!</h3>
         <p>Recebemos sua solicitação de inscrição na Liga de Arduino Uninassau Fortaleza (LAUF).</p>
         <p>Sua solicitação será analisada pela nossa equipe e em breve você receberá um e-mail com o resultado.</p>
@@ -21,22 +22,30 @@ export class MailService {
         <p>Atenciosamente,</p>
         <p>Equipe LAUF</p>
       `,
-    }).then(() => {
-      this.logger.log(`E-mail de confirmação de solicitação enviado com sucesso para ${email}`);
-      return 1;
-    }).catch((e) => {
-      this.logger.error(`Erro ao enviar e-mail de confirmação de solicitação para ${email}: ${e.message}`, e.stack);
-      return 0;
-    });
+      })
+      .then(() => {
+        this.logger.log(
+          `E-mail de confirmação de solicitação enviado com sucesso para ${email}`,
+        );
+        return 1;
+      })
+      .catch((e) => {
+        this.logger.error(
+          `Erro ao enviar e-mail de confirmação de solicitação para ${email}: ${e.message}`,
+          e.stack,
+        );
+        return 0;
+      });
   }
 
   async enviarEmailAprovacao(email: string, nome: string, token: string) {
     const url = `${FRONTEND_URL}/confirmar-inscricao?token=${token}`;
 
-    return await this.mailerService.sendMail({
-      to: email,
-      subject: 'Bem-vindo(a) à LAUF - Inscrição Aprovada!',
-      html: `
+    return await this.mailerService
+      .sendMail({
+        to: email,
+        subject: 'Bem-vindo(a) à LAUF - Inscrição Aprovada!',
+        html: `
         <h3>Olá, ${nome}!</h3>
         <p>Sua solicitação de inscrição na Liga de Arduino Uninassau Fortaleza (LAUF) foi <strong>APROVADA</strong>.</p>
         <p>Para concluir seu cadastro e criar sua senha de acesso ao sistema, clique no link abaixo:</p>
@@ -45,22 +54,30 @@ export class MailService {
         <p>Atenciosamente,</p>
         <p>Equipe LAUF</p>
       `,
-    }).then(() => {
-      this.logger.log(`E-mail de aprovação enviado com sucesso para ${email}`);
-      return 1;
-    }).catch((e) => {
-      this.logger.error(`Erro ao enviar e-mail de aprovação para ${email}: ${e.message}`, e.stack);
-      return 0;
-    });
+      })
+      .then(() => {
+        this.logger.log(
+          `E-mail de aprovação enviado com sucesso para ${email}`,
+        );
+        return 1;
+      })
+      .catch((e) => {
+        this.logger.error(
+          `Erro ao enviar e-mail de aprovação para ${email}: ${e.message}`,
+          e.stack,
+        );
+        return 0;
+      });
   }
 
   async enviarEmailRecuperacaoSenha(email: string, token: string) {
     const url = `${FRONTEND_URL}/redefinir-senha?token=${token}`;
 
-    return await this.mailerService.sendMail({
-      to: email,
-      subject: 'LAUF - Recuperação de Senha',
-      html: `
+    return await this.mailerService
+      .sendMail({
+        to: email,
+        subject: 'LAUF - Recuperação de Senha',
+        html: `
         <p>Você solicitou a recuperação da sua senha no sistema da LAUF.</p>
         <p>Clique no link abaixo para criar uma nova senha:</p>
         <p><a href="${url}">Redefinir Minha Senha</a></p>
@@ -70,20 +87,28 @@ export class MailService {
         <p>Atenciosamente,</p>
         <p>Equipe LAUF</p>
       `,
-    }).then(() => {
-      this.logger.log(`E-mail de recuperação de senha enviado com sucesso para ${email}`);
-      return 1;
-    }).catch((e) => {
-      this.logger.error(`Erro ao enviar e-mail de recuperação de senha para ${email}: ${e.message}`, e.stack);
-      return 0;
-    });
+      })
+      .then(() => {
+        this.logger.log(
+          `E-mail de recuperação de senha enviado com sucesso para ${email}`,
+        );
+        return 1;
+      })
+      .catch((e) => {
+        this.logger.error(
+          `Erro ao enviar e-mail de recuperação de senha para ${email}: ${e.message}`,
+          e.stack,
+        );
+        return 0;
+      });
   }
 
   async enviarEmailRecuperacaoSenhaSucesso(email: string, nome: string) {
-    return await this.mailerService.sendMail({
-      to: email,
-      subject: 'LAUF - Recuperação de Senha',
-      html: `
+    return await this.mailerService
+      .sendMail({
+        to: email,
+        subject: 'LAUF - Recuperação de Senha',
+        html: `
         <h3>Olá, ${nome}!</h3>
         <p>Sua senha foi redefinida com sucesso no sistema da LAUF.</p>
         <p>Se você não foi você quem redefiniu a senha, entre em contato conosco no grupo do whatsapp</p>
@@ -91,20 +116,28 @@ export class MailService {
         <p>Atenciosamente,</p>
         <p>Equipe LAUF</p>
       `,
-    }).then(() => {
-      this.logger.log(`E-mail de recuperação de senha enviado com sucesso para ${email}`);
-      return 1;
-    }).catch((e) => {
-      this.logger.error(`Erro ao enviar e-mail de recuperação de senha para ${email}: ${e.message}`, e.stack);
-      return 0;
-    });
+      })
+      .then(() => {
+        this.logger.log(
+          `E-mail de recuperação de senha enviado com sucesso para ${email}`,
+        );
+        return 1;
+      })
+      .catch((e) => {
+        this.logger.error(
+          `Erro ao enviar e-mail de recuperação de senha para ${email}: ${e.message}`,
+          e.stack,
+        );
+        return 0;
+      });
   }
 
   async enviarEmailRejeicao(email: string, nome: string) {
-    return await this.mailerService.sendMail({
-      to: email,
-      subject: 'LAUF - Solicitação de Inscrição Rejeitada',
-      html: `
+    return await this.mailerService
+      .sendMail({
+        to: email,
+        subject: 'LAUF - Solicitação de Inscrição Rejeitada',
+        html: `
         <h3>Olá, ${nome}!</h3>
         <p>Infelizmente sua solicitação de inscrição na Liga de Arduino Uninassau Fortaleza (LAUF) foi <strong>rejeitada</strong>.</p>
         <br />
@@ -113,20 +146,26 @@ export class MailService {
         <p>Atenciosamente,</p>
         <p>Equipe LAUF</p>
       `,
-    }).then(() => {
-      this.logger.log(`E-mail de rejeição enviado com sucesso para ${email}`);
-      return 1;
-    }).catch((e) => {
-      this.logger.error(`Erro ao enviar e-mail de rejeição para ${email}: ${e.message}`, e.stack);
-      return 0;
-    });
+      })
+      .then(() => {
+        this.logger.log(`E-mail de rejeição enviado com sucesso para ${email}`);
+        return 1;
+      })
+      .catch((e) => {
+        this.logger.error(
+          `Erro ao enviar e-mail de rejeição para ${email}: ${e.message}`,
+          e.stack,
+        );
+        return 0;
+      });
   }
 
   async enviarEmailLogin(email: string, nome: string) {
-    return await this.mailerService.sendMail({
-      to: email,
-      subject: 'LAUF - Login',
-      html: `
+    return await this.mailerService
+      .sendMail({
+        to: email,
+        subject: 'LAUF - Login',
+        html: `
         <h3>Olá, ${nome}!</h3>
         <p>Você logou no sistema da LAUF.</p>
         <p>Se você não foi você quem logou, redefina sua senha clicando em <a href="${FRONTEND_URL}/recuperar-senha">REDEFINIR SENHA</a></p>
@@ -134,12 +173,17 @@ export class MailService {
         <p>Atenciosamente,</p>
         <p>Equipe LAUF</p>
       `,
-    }).then(() => {
-      this.logger.log(`E-mail de login enviado com sucesso para ${email}`);
-      return 1;
-    }).catch((e) => {
-      this.logger.error(`Erro ao enviar e-mail de login para ${email}: ${e.message}`, e.stack);
-      return 0;
-    });
+      })
+      .then(() => {
+        this.logger.log(`E-mail de login enviado com sucesso para ${email}`);
+        return 1;
+      })
+      .catch((e) => {
+        this.logger.error(
+          `Erro ao enviar e-mail de login para ${email}: ${e.message}`,
+          e.stack,
+        );
+        return 0;
+      });
   }
 }

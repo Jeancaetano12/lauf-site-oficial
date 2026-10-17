@@ -19,10 +19,12 @@ import { ScheduleModule } from '@nestjs/schedule';
     PrismaModule,
     AuthModule,
     MailModule,
-    ThrottlerModule.forRoot([{
-      ttl: 60000, // 1 minute
-      limit: 45,  // max 45 requests per minute by default per IP
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1 minute
+        limit: 45, // max 45 requests per minute by default per IP
+      },
+    ]),
     AulaModule,
     PresencaModule,
     UsuariosModule,
@@ -36,4 +38,4 @@ import { ScheduleModule } from '@nestjs/schedule';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

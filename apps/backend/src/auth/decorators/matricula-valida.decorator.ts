@@ -46,7 +46,7 @@ export class MatriculaValidaConstraint implements ValidatorConstraintInterface {
 
 // Decorator customizado para facilitar o uso nos DTOs
 export function IsMatriculaValida(validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,

@@ -16,13 +16,15 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       useFactory: () => {
         // Verificação de segurança, garantindo que o token seja gerado apenas se o JWT_SECRET estiver definido
         if (!process.env.JWT_SECRET) {
-          throw new Error('JWT_SECRET não está definido nas variaveis de ambiente ou nao foi encontrada.')
+          throw new Error(
+            'JWT_SECRET não está definido nas variaveis de ambiente ou nao foi encontrada.',
+          );
         }
 
         return {
           secret: process.env.JWT_SECRET,
           signOptions: { expiresIn: '15m' }, // Token expira em 15min
-        }
+        };
       },
     }),
   ],
@@ -30,4 +32,4 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   providers: [AuthService, JwtStrategy],
   exports: [AuthService],
 })
-export class AuthModule { }
+export class AuthModule {}

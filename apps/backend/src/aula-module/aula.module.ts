@@ -7,26 +7,27 @@ import { AulaService } from './aula.service';
 import { AulaCronService } from './aula-cron.service';
 import { JwtStrategy } from '../auth/strategies/jwt.strategy';
 
-
 @Module({
-    imports: [
-        PrismaModule,
-        PassportModule,
-        JwtModule.registerAsync({
-            useFactory: () => {
-                if (!process.env.JWT_SECRET) {
-                    throw new Error('JWT_SECRET não está definido nas variaveis de ambiente ou nao foi encontrada.')
-                }
+  imports: [
+    PrismaModule,
+    PassportModule,
+    JwtModule.registerAsync({
+      useFactory: () => {
+        if (!process.env.JWT_SECRET) {
+          throw new Error(
+            'JWT_SECRET não está definido nas variaveis de ambiente ou nao foi encontrada.',
+          );
+        }
 
-                return {
-                    secret: process.env.JWT_SECRET,
-                    signOptions: { expiresIn: '15m' }, // Token expira em 15min
-                }
-            },
-        })
-    ],
-    controllers: [AulaController],
-    providers: [AulaService, AulaCronService, JwtStrategy],
-    exports: [AulaService],
+        return {
+          secret: process.env.JWT_SECRET,
+          signOptions: { expiresIn: '15m' }, // Token expira em 15min
+        };
+      },
+    }),
+  ],
+  controllers: [AulaController],
+  providers: [AulaService, AulaCronService, JwtStrategy],
+  exports: [AulaService],
 })
-export class AulaModule { }
+export class AulaModule {}

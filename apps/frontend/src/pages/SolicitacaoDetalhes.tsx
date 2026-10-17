@@ -40,7 +40,7 @@ export default function SolicitacaoDetalhes() {
         if (!id) return;
         try {
             setLoading(true);
-            const response = await api.get(`usuarios/solicitacoes/${id}`);
+            const response = await api.get(`/usuarios/solicitacoes/${id}`);
             setSolicitacao(response.data);
         } catch (err: any) {
             console.error('Error buscando solicitacao:', err);

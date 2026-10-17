@@ -28,3 +28,4 @@ plano-acao
 *.sw?
 /node_modules
 node_modules
+.planning
