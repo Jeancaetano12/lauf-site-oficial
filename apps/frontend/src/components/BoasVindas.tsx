@@ -29,7 +29,6 @@ export default function BoasVindas() {
                 <br />
                 <strong>Telefone:</strong> {formatarTelefone(user?.telefone)}
                 <br />
-                <strong>Gênero:</strong> {formatarGenero(user?.genero)}
                 <br />
                 <span className="font-semibold text-red-700">Notou algo errado? Entre em contato no grupo do whatsapp da liga para corrigirmos!</span>
             </p>
