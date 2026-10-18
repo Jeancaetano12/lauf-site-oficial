@@ -337,43 +337,41 @@ export class SolicitacoesService {
       throw new NotFoundException('Solicitação não encontrada.');
     }
 
-    if (solicitacao.status === 'APROVADA') {
+    if (solicitacao.status !== 'PENDENTE') {
       this.logger.log(
-        `[DEBUG] Solicitacao de inscricao com o id ${id} ja foi aprovada`,
+        `[DEBUG] Solicitacao de inscricao com o id ${id} ja foi processada`,
       );
-      throw new BadRequestException('Esta solicitação já foi aprovada.');
+      throw new BadRequestException('Esta solicitação já foi processada.');
     }
 
-    if (solicitacao.status === 'PENDENTE') {
-      const rejeitar = await this.prisma.solicitacaoInscricao.update({
-        where: { id },
-        data: {
-          status: 'REJEITADA',
-          processadoPor,
-        },
-      });
+    const rejeitar = await this.prisma.solicitacaoInscricao.update({
+      where: { id },
+      data: {
+        status: 'REJEITADA',
+        processadoPor,
+      },
+    });
 
-      this.logger.log(
-        `[DEBUG] Solicitacao de inscricao rejeitada para o email: ${solicitacao.email}, id: ${id}, Disparando email...`,
+    this.logger.log(
+      `[DEBUG] Solicitacao de inscricao rejeitada para o email: ${solicitacao.email}, id: ${id}, Disparando email...`,
+    );
+    const emailRejeicao = await this.mailService.enviarEmailRejeicao(
+      solicitacao.email,
+      solicitacao.nome,
+    );
+
+    if (emailRejeicao === 0) {
+      this.logger.error(
+        `Falha no envio do email de rejeicao. email: ${solicitacao.email}`,
       );
-      const emailRejeicao = await this.mailService.enviarEmailRejeicao(
-        solicitacao.email,
-        solicitacao.nome,
+      throw new InternalServerErrorException(
+        'Não foi possível enviar o e-mail de rejeição. Tente novamente mais tarde.',
       );
-
-      if (emailRejeicao === 0) {
-        this.logger.error(
-          `Falha no envio do email de rejeicao. email: ${solicitacao.email}`,
-        );
-        throw new InternalServerErrorException(
-          'Não foi possível enviar o e-mail de rejeição. Tente novamente mais tarde.',
-        );
-      }
-
-      return {
-        message: 'Solicitação rejeitada',
-        id: rejeitar.id,
-      };
     }
+
+    return {
+      message: 'Solicitação rejeitada',
+      id: rejeitar.id,
+    };
   }
 }

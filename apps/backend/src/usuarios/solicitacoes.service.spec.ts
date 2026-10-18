@@ -449,6 +449,18 @@ describe('SolicitacoesService', () => {
       );
     });
 
+    it('deve lançar erro se a solicitacao ja estiver rejeitada', async () => {
+      mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
+        status: 'REJEITADA',
+        email: 'joao@teste.com',
+        nome: 'João',
+      });
+
+      await expect(service.rejeitarSolicitacao('id-1')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
     it('deve lançar erro caso ocorra falha no envio do email de rejeicao', async () => {
       mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
         status: 'PENDENTE',
