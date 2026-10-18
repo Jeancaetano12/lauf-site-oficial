@@ -40,6 +40,16 @@ export default function Solicitacoes() {
         buscarSolicitacoes(filtroAtivo, pagina);
     }, [filtroAtivo, pagina, buscarSolicitacoes]);
 
+    const handleAprovar = async (id: string) => {
+        await aprovarSolicitacao(id);
+        await buscarSolicitacoes(filtroAtivo, pagina);
+    };
+
+    const handleReprovar = async (id: string) => {
+        await reprovarSolicitacao(id);
+        await buscarSolicitacoes(filtroAtivo, pagina);
+    };
+
     const formatarData = (iso: string) => {
         return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
     };
@@ -168,18 +178,18 @@ export default function Solicitacoes() {
                                             <FiEye className="w-4 h-4" /> Detalhes
                                         </button>
                                         <button
-                                            onClick={() => { aprovarSolicitacao(solicitante.id) }}
+                                            onClick={() => { handleAprovar(solicitante.id) }}
                                             disabled={isLoading}
                                             title="Aceitar solicitação"
-                                            className="cursor-pointer flex items-center justify-center gap-2 text-white bg-emerald-600 hover:bg-emerald-700 transition-all font-semibold px-4 py-2 rounded-lg text-sm shadow-sm"
+                                            className="cursor-pointer flex items-center justify-center gap-2 text-white bg-emerald-600 hover:bg-emerald-700 transition-all font-semibold px-4 py-2 rounded-lg text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             <FiCheck className="w-4 h-4" /> Aceitar
                                         </button>
                                         <button
-                                            onClick={() => { reprovarSolicitacao(solicitante.id) }}
+                                            onClick={() => { handleReprovar(solicitante.id) }}
                                             disabled={isLoading}
                                             title="Recusar solicitação"
-                                            className="cursor-pointer flex items-center justify-center gap-2 text-white bg-red-500 hover:bg-red-600 transition-all font-semibold px-4 py-2 rounded-lg text-sm shadow-sm"
+                                            className="cursor-pointer flex items-center justify-center gap-2 text-white bg-red-500 hover:bg-red-600 transition-all font-semibold px-4 py-2 rounded-lg text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             <FiX className="w-4 h-4" /> Recusar
                                         </button>

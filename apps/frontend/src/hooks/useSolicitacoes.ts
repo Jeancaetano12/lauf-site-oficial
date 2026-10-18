@@ -77,6 +77,9 @@ export function useSolicitacoes() {
         setError(null)
         try {
             const response = await api.patch(`/auth/solicitacoes/${id}/aprovar`)
+            setSolicitacoes(prev =>
+                prev.map(item => item.id === id ? { ...item, status: 'APROVADA' } : item)
+            );
             return response.data;
         } catch (err: any) {
             setError(err.response?.data?.message || 'Erro ao aprovar solicitação.');
@@ -91,6 +94,9 @@ export function useSolicitacoes() {
         setError(null)
         try {
             const response = await api.patch(`/auth/solicitacoes/${id}/rejeitar`)
+            setSolicitacoes(prev =>
+                prev.map(item => item.id === id ? { ...item, status: 'REJEITADA' } : item)
+            );
             return response.data;
         } catch (err: any) {
             setError(err.response?.data?.message || 'Erro ao reprovar solicitação.');

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useSolicitacoes, type SolicitacaoInscricao } from "../hooks/useSolicitacoes";
@@ -29,29 +29,42 @@ const formatarData = (iso: string) => {
 };
 
 export default function SolicitacaoDetalhes() {
-    const { aprovarSolicitacao, reprovarSolicitacao } = useSolicitacoes();
+    const { aprovarSolicitacao, reprovarSolicitacao, isLoading } = useSolicitacoes();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [solicitacao, setSolicitacao] = useState<SolicitacaoInscricao | null>(null);
     const [idCopiado, setIdCopiado] = useState(false);
 
-    const fetchSolicitacaoDetalhes = async () => {
+    const fetchSolicitacaoDetalhes = useCallback(async () => {
         if (!id) return;
         try {
-            setLoading(true);
             const response = await api.get(`/usuarios/solicitacoes/${id}`);
             setSolicitacao(response.data);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error buscando solicitacao:', err);
         } finally {
             setLoading(false);
         }
+    }, [id]);
+
+    const handleAprovar = async () => {
+        if (!solicitacao) return;
+        await aprovarSolicitacao(solicitacao.id);
+        setSolicitacao(prev => prev ? { ...prev, status: 'APROVADA' } : prev);
+        await fetchSolicitacaoDetalhes();
+    };
+
+    const handleRejeitar = async () => {
+        if (!solicitacao) return;
+        await reprovarSolicitacao(solicitacao.id);
+        setSolicitacao(prev => prev ? { ...prev, status: 'REJEITADA' } : prev);
+        await fetchSolicitacaoDetalhes();
     };
 
     useEffect(() => {
         fetchSolicitacaoDetalhes();
-    }, [id]);
+    }, [fetchSolicitacaoDetalhes]);
 
     if (loading) {
         return (
@@ -130,14 +143,16 @@ export default function SolicitacaoDetalhes() {
                         {solicitacao.status === 'PENDENTE' && (
                             <div className="flex items-center gap-3 w-full sm:w-auto">
                                 <button
-                                    onClick={() => { aprovarSolicitacao(solicitacao.id); window.location.reload() }}
-                                    className="cursor-pointer flex-1 sm:flex-none flex items-center justify-center text-white transition-all font-semibold bg-emerald-500/90 hover:bg-emerald-600 px-4 py-2 rounded-lg text-sm shadow-sm"
+                                    onClick={handleAprovar}
+                                    disabled={loading || isLoading}
+                                    className="cursor-pointer flex-1 sm:flex-none flex items-center justify-center text-white transition-all font-semibold bg-emerald-500/90 hover:bg-emerald-600 px-4 py-2 rounded-lg text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <FiCheck className="mr-2" /> Aprovar
                                 </button>
                                 <button
-                                    onClick={() => { reprovarSolicitacao(solicitacao.id); window.location.reload() }}
-                                    className="cursor-pointer sm:flex-none flex items-center justify-center text-white transition-all font-semibold bg-red-600 hover:bg-red-800 px-4 py-2 rounded-lg text-sm shadow-sm"
+                                    onClick={handleRejeitar}
+                                    disabled={loading || isLoading}
+                                    className="cursor-pointer sm:flex-none flex items-center justify-center text-white transition-all font-semibold bg-red-600 hover:bg-red-800 px-4 py-2 rounded-lg text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <FiX className="mr-2" /> Rejeitar
                                 </button>
