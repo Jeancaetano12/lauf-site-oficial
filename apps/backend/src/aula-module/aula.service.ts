@@ -95,10 +95,6 @@ export class AulaService {
         },
       });
 
-      if (aulas.length === 0) {
-        throw new NotFoundException('Nenhuma aula encontrada');
-      }
-
       this.logger.log(`[AUDIT] Aulas listadas para ${auditoria}`);
       return aulas;
     } catch (error) {
@@ -264,10 +260,6 @@ export class AulaService {
         },
       });
 
-      if (professores.length === 0) {
-        throw new NotFoundException('Nenhum professor encontrado');
-      }
-
       this.logger.log(`[AUDIT] Professores listados para ${auditoria}`);
       return professores;
     } catch (error) {
@@ -314,34 +306,6 @@ export class AulaService {
           qrCodeExpiraEm,
         },
       });
-
-      // Timer simples para atualizar o status após os 15 minutos
-      setTimeout(async () => {
-        try {
-          const aulaAtual = await this.prisma.aula.findUnique({
-            where: { id },
-          });
-          // Garante que ainda está agendada (se o professor já não alterou) e que o QR code ativo é o mesmo (ou se ainda está ativo)
-          if (
-            aulaAtual &&
-            aulaAtual.status === 'AGENDADA' &&
-            aulaAtual.qrCodeAtivo
-          ) {
-            await this.prisma.aula.update({
-              where: { id },
-              data: {
-                qrCodeAtivo: false,
-                status: 'CONCLUIDA',
-              },
-            });
-            this.logger.warn(
-              `[TIMEOUT] Aula ${id} expirou e foi marcada como CONCLUIDA.`,
-            );
-          }
-        } catch (e) {
-          this.logger.error(`[TIMEOUT ERRO] Falha ao concluir aula ${id}: `, e);
-        }
-      }, 15 * 60000);
 
       this.logger.log(
         `[AUDIT] Chamada iniciada para a aula ${id} por ${auditoria}`,
@@ -420,6 +384,24 @@ export class AulaService {
         throw new ForbiddenException(
           'Você não tem permissão para visualizar o QR Code desta aula.',
         );
+      }
+
+      // Expiração preguiçosa: caso o cron ainda não tenha rodado, encerra a chamada agora
+      if (
+        aula.qrCodeAtivo &&
+        aula.qrCodeExpiraEm &&
+        aula.qrCodeExpiraEm < new Date()
+      ) {
+        await this.prisma.aula.update({
+          where: { id },
+          data: {
+            qrCodeAtivo: false,
+            qrCodeToken: null,
+            qrCodeExpiraEm: null,
+            status: 'CONCLUIDA',
+          },
+        });
+        aula.qrCodeAtivo = false;
       }
 
       if (!aula.qrCodeAtivo) {

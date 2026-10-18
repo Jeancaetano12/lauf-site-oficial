@@ -65,13 +65,8 @@ export function useAulas() {
             globalAulas = response.data; // Atualiza o cache
             setAulas(response.data);
         } catch (err: any) {
-            if (err.response?.status === 404) {
-                globalAulas = [];
-                setAulas([]);
-            } else {
-                setError(err.response?.data?.message || 'Erro ao buscar as aulas.');
-                console.error("Falha ao buscar aulas:", err);
-            }
+            setError(err.response?.data?.message || 'Erro ao buscar as aulas.');
+            console.error("Falha ao buscar aulas:", err);
         } finally {
             setIsLoading(false);
         }

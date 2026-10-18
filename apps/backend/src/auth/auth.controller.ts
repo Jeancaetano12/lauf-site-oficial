@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
+import { SolicitacoesService } from '../usuarios/solicitacoes.service';
 import { Throttle } from '@nestjs/throttler';
 import { SolicitarInscricaoDto } from './dto/solicitar-inscricao.dto';
 import { LoginDto } from './dto/login.dto';
@@ -30,7 +31,10 @@ import { CurrentUser } from './decorators/current-user.decorator';
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly solicitacoesService: SolicitacoesService,
+  ) {}
 
   @Post('solicitar-inscricao')
   @Throttle({ default: { limit: 3, ttl: 60000 } })
@@ -38,7 +42,7 @@ export class AuthController {
     this.logger.log(
       `[DEBUG] Solicitação de inscrição recebida com os seguintes dados: ${dto.matricula}, ${dto.email}`,
     );
-    return this.authService.solicitarInscricao(dto);
+    return this.solicitacoesService.solicitarInscricao(dto);
   }
 
   @Patch('solicitacoes/:id/aprovar')
@@ -49,7 +53,7 @@ export class AuthController {
     this.logger.log(
       `[AUDIT] Aprovação de solicitação recebida para o ID: ${id} pelo usuário: ${auditoria}`,
     );
-    return this.authService.aprovarSolicitacao(id, auditoria);
+    return this.solicitacoesService.aprovarSolicitacao(id, auditoria);
   }
 
   @Patch('solicitacoes/:id/rejeitar')
@@ -60,7 +64,7 @@ export class AuthController {
     this.logger.log(
       `[AUDIT] Rejeição de solicitação recebida para o ID: ${id} pelo usuário: ${auditoria}`,
     );
-    return this.authService.rejeitarSolicitacao(id, auditoria);
+    return this.solicitacoesService.rejeitarSolicitacao(id, auditoria);
   }
 
   @Post('login')

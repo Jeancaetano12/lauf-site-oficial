@@ -8,6 +8,36 @@ export class AulaCronService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  @Cron(CronExpression.EVERY_MINUTE)
+  async concluirChamadasExpiradas() {
+    try {
+      const resultado = await this.prisma.aula.updateMany({
+        where: {
+          status: 'AGENDADA',
+          qrCodeAtivo: true,
+          qrCodeExpiraEm: { lt: new Date() },
+        },
+        data: {
+          qrCodeAtivo: false,
+          qrCodeToken: null,
+          qrCodeExpiraEm: null,
+          status: 'CONCLUIDA',
+        },
+      });
+
+      if (resultado.count > 0) {
+        this.logger.warn(
+          `[CronJob] ${resultado.count} chamada(s) expirada(s) concluída(s).`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        '[CronJob] Erro ao concluir chamadas expiradas.',
+        error,
+      );
+    }
+  }
+
   @Cron(CronExpression.EVERY_30_MINUTES)
   async cancelarAulasVencidas() {
     this.logger.warn(

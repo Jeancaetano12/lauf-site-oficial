@@ -90,7 +90,7 @@ export function useSolicitacoes() {
         setIsLoading(true)
         setError(null)
         try {
-            const response = await api.patch(`/auth/solicitacoes/${id}/reprovar`)
+            const response = await api.patch(`/auth/solicitacoes/${id}/rejeitar`)
             return response.data;
         } catch (err: any) {
             setError(err.response?.data?.message || 'Erro ao reprovar solicitação.');

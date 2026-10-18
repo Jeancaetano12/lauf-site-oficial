@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { SolicitacoesService } from '../usuarios/solicitacoes.service';
 import { RedefinirSenhaDto } from './dto/redefinir-senha.dto';
 import { SolicitarInscricaoDto } from './dto/solicitar-inscricao.dto';
 import { LoginDto } from './dto/login.dto';
@@ -22,12 +23,15 @@ const mockRequest = (cookies: any = {}) => {
 // Como já testamos todas as lógicas no arquivo auth.service.spec.ts,
 // aqui no Controller não precisamos testar se as regras funcionam.
 // O objetivo é testar se o Controller chamou o Service corretamente!
-const mockAuthService = {
+const mockSolicitacoesService = {
   solicitarInscricao: jest
     .fn()
     .mockResolvedValue({ message: 'Sucesso', id: '123' }),
   aprovarSolicitacao: jest.fn().mockResolvedValue({ message: 'Aprovada' }),
   rejeitarSolicitacao: jest.fn().mockResolvedValue({ message: 'Rejeitada' }),
+};
+
+const mockAuthService = {
   login: jest
     .fn()
     .mockResolvedValue({ accessToken: 'token', refreshToken: 'ref' }),
@@ -46,6 +50,7 @@ const mockAuthService = {
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: typeof mockAuthService;
+  let solicitacoesService: typeof mockSolicitacoesService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -55,11 +60,16 @@ describe('AuthController', () => {
           provide: AuthService,
           useValue: mockAuthService,
         },
+        {
+          provide: SolicitacoesService,
+          useValue: mockSolicitacoesService,
+        },
       ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
     authService = module.get(AuthService);
+    solicitacoesService = module.get(SolicitacoesService);
   });
 
   afterEach(() => {
@@ -80,7 +90,7 @@ describe('AuthController', () => {
     const resultado = await controller.solicitarInscricao(dto);
 
     // Valida se o Controller chamou o service enviando os parametros corretos
-    expect(authService.solicitarInscricao).toHaveBeenCalledWith(dto);
+    expect(solicitacoesService.solicitarInscricao).toHaveBeenCalledWith(dto);
     expect(resultado).toEqual({ message: 'Sucesso', id: '123' });
   });
 
@@ -94,7 +104,7 @@ describe('AuthController', () => {
 
     await controller.aprovarSolicitacao(id, mockUser);
 
-    expect(authService.aprovarSolicitacao).toHaveBeenCalledWith(
+    expect(solicitacoesService.aprovarSolicitacao).toHaveBeenCalledWith(
       id,
       'Admin (admin@lauf.com - 11111111)',
     );
@@ -110,7 +120,7 @@ describe('AuthController', () => {
 
     await controller.rejeitarSolicitacao(id, mockUser);
 
-    expect(authService.rejeitarSolicitacao).toHaveBeenCalledWith(
+    expect(solicitacoesService.rejeitarSolicitacao).toHaveBeenCalledWith(
       id,
       'Admin (admin@lauf.com - 11111111)',
     );

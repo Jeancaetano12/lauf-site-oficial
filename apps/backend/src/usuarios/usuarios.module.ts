@@ -4,12 +4,14 @@ import { UsuariosService } from './usuarios.service';
 import { SolicitacoesController } from './solicitacoes.controller';
 import { SolicitacoesService } from './solicitacoes.service';
 import { PrismaModule } from '../prisma/prisma.module';
+import { MailModule } from '../mail/mail.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
     PrismaModule,
+    MailModule,
     PassportModule,
     JwtModule.registerAsync({
       useFactory: () => {

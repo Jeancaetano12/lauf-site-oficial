@@ -107,11 +107,9 @@ describe('AulaService', () => {
       expect(result.length).toBeGreaterThan(0);
     });
 
-    it('deve lançar erro se não houver aulas', async () => {
+    it('deve retornar array vazio (200 OK) se não houver aulas', async () => {
       mockPrismaService.aula.findMany.mockResolvedValue([]);
-      await expect(service.listarAulas('Teste User')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.listarAulas('Teste User')).resolves.toEqual([]);
     });
   });
 
@@ -216,10 +214,10 @@ describe('AulaService', () => {
       expect(result.length).toBeGreaterThan(0);
     });
 
-    it('deve lançar erro se nenhum professor for encontrado', async () => {
+    it('deve retornar array vazio (200 OK) se nenhum professor for encontrado', async () => {
       mockPrismaService.usuario.findMany.mockResolvedValue([]);
-      await expect(service.listarProfessores('Teste User')).rejects.toThrow(
-        NotFoundException,
+      await expect(service.listarProfessores('Teste User')).resolves.toEqual(
+        [],
       );
     });
   });
@@ -241,6 +239,8 @@ describe('AulaService', () => {
 
       const result = await service.iniciarChamada('uuid-aula', user);
       expect(result).toBeDefined();
+      // Expiração é responsabilidade do AulaCronService, sem timers em memória
+      expect(jest.getTimerCount()).toBe(0);
 
       jest.clearAllTimers();
       jest.useRealTimers();
@@ -323,6 +323,30 @@ describe('AulaService', () => {
       });
       const result = await service.obterQrCode('uuid-aula', user);
       expect(result).toBeDefined();
+    });
+
+    it('deve concluir a aula imediatamente se o QR Code já expirou (lazy expiration)', async () => {
+      mockPrismaService.aula.findUnique.mockResolvedValue({
+        id: 'uuid-aula',
+        qrCodeToken: 'token',
+        qrCodeAtivo: true,
+        qrCodeExpiraEm: new Date(Date.now() - 1000),
+        professorId: 'uuid-prof',
+      });
+      mockPrismaService.aula.update.mockResolvedValue({});
+
+      const result = await service.obterQrCode('uuid-aula', user);
+
+      expect(mockPrismaService.aula.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'uuid-aula' },
+          data: expect.objectContaining({
+            qrCodeAtivo: false,
+            status: 'CONCLUIDA',
+          }),
+        }),
+      );
+      expect(result).toEqual(expect.objectContaining({ qrCodeAtivo: false }));
     });
 
     it('deve lançar erro se aula não existir', async () => {
