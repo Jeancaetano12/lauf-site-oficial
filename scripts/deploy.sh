@@ -1,49 +1,40 @@
 #!/bin/bash
-set -e # Aborta o script no primeiro erro encontrado, evitando builds incompletos
+set -e # Aborta o script no primeiro erro encontrado, evitando deploys incompletos
 
-# Script de Deploy Simplificado para VPS
+# Script de Deploy para VPS (Ubuntu / Debian / Oracle Cloud)
 # Este script deve ser executado na raiz do projeto na VPS sempre que houver atualização na branch main.
 
 echo "🚀 Iniciando processo de deploy..."
 
 # 1. Puxar as últimas alterações do repositório (Branch Main)
-echo "📥 Atualizando código da branch main..."
+echo "📥 1. Atualizando código da branch main..."
 git checkout main
 git pull origin main
 
-# 2. Instalar dependências (Monorepo)
-echo "📦 Instalando dependências..."
-npm install
+# 2. Instalar dependências (Monorepo pnpm)
+echo "📦 2. Instalando dependências com pnpm..."
+pnpm install --frozen-lockfile
 
-# 3. Build do Banco de Dados (Prisma)
-echo "🗄️ Atualizando banco de dados (Prisma Generate e Migrate)..."
-cd apps/backend
-npx prisma generate
-npx prisma migrate deploy
-cd ../..
+# 3. Build do Pacote Compartilhado (@lauf/shared)
+echo "🧱 3. Compilando o pacote compartilhado (@lauf/shared)..."
+pnpm --filter @lauf/shared build
 
-# 4. Build do Backend (NestJS)
-echo "⚙️ Compilando o Backend (NestJS)..."
-cd apps/backend
-npm run build
-cd ../..
+# 4. Build do Frontend (Vite + React)
+echo "🎨 4. Compilando o Frontend (React + Vite)..."
+pnpm --filter frontend build
 
-# 5. Build do Frontend (Vite + React)
-echo "🎨 Compilando o Frontend (React + Vite)..."
-cd apps/frontend
-npm run build
-cd ../..
-
-# 6. Reiniciar o serviço do Backend no PM2
-# pm2 reload garante um recarregamento com "zero downtime".
-echo "🔄 Reiniciando o Backend (PM2)..."
-cd apps/backend
-pm2 reload lauf-backend --update-env || (
-  echo "⚠️ Processo não encontrado. Iniciando um novo do zero..."
-  pm2 start dist/main.js --name "lauf-backend"
-  pm2 save
-) || echo "⚠️ PM2 não conseguiu reiniciar ou iniciar o backend."
-cd ../..
+# 5. Build e Inicialização dos Containers (Backend NestJS + PostgreSQL)
+echo "🐳 5. Subindo/atualizando containers com Docker Compose..."
+if command -v docker &>/dev/null && docker compose version &>/dev/null; then
+  docker compose -f docker-compose.prod.yml up -d --build
+  echo "🗄️ 6. Aplicando migrations do Prisma no banco de produção..."
+  docker compose -f docker-compose.prod.yml exec -T backend pnpm exec prisma migrate deploy
+else
+  docker-compose -f docker-compose.prod.yml up -d --build
+  echo "🗄️ 6. Aplicando migrations do Prisma no banco de produção..."
+  docker-compose -f docker-compose.prod.yml exec -T backend pnpm exec prisma migrate deploy
+fi
 
 echo "✅ Deploy concluído com sucesso!"
-echo "Lembre-se: O Frontend (pasta apps/frontend/dist) já deve estar sendo servido pelo seu Nginx."
+echo "Lembre-se: O Frontend (pasta apps/frontend/dist) está sendo servido pelo Nginx,"
+echo "e o Backend está rodando em container isolado na porta 127.0.0.1:3000."

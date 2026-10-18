@@ -1,14 +1,16 @@
+import { Curso, Genero } from '@lauf/shared';
+
 export const formatarNomeCurso = (curso: string | undefined | null): string => {
   if (!curso) return '';
 
   const mapaCursos: Record<string, string> = {
-    'ANALISE_E_DESENVOLVIMENTO_DE_SISTEMAS': 'Análise e Desenvolvimento de Sistemas',
-    'BANCO_DE_DADOS': 'Banco de Dados',
-    'CIENCIAS_AERONAUTICAS': 'Ciências Aeronáuticas',
-    'ENGENHARIA_DA_COMPUTACAO': 'Engenharia da Computação',
-    'GESTAO_DA_TECNOLOGIA_DA_INFORMACAO': 'Gestão da Tecnologia da Informação',
-    'JOGOS_DIGITAIS': 'Jogos Digitais',
-    'SEGURANCA_DA_INFORMACAO': 'Segurança da Informação'
+    [Curso.ANALISE_E_DESENVOLVIMENTO_DE_SISTEMAS]: 'Análise e Desenvolvimento de Sistemas',
+    [Curso.BANCO_DE_DADOS]: 'Banco de Dados',
+    [Curso.CIENCIAS_AERONAUTICAS]: 'Ciências Aeronáuticas',
+    [Curso.ENGENHARIA_DA_COMPUTACAO]: 'Engenharia da Computação',
+    [Curso.GESTAO_DA_TECNOLOGIA_DA_INFORMACAO]: 'Gestão da Tecnologia da Informação',
+    [Curso.JOGOS_DIGITAIS]: 'Jogos Digitais',
+    [Curso.SEGURANCA_DA_INFORMACAO]: 'Segurança da Informação'
   };
 
   // Se existir no mapa, retorna com a acentuação correta
@@ -42,11 +44,12 @@ export const formatarGenero = (genero: string | undefined | null): string => {
   if (!genero) return '';
 
   const mapaGeneros: Record<string, string> = {
-    'MASCULINO': 'Masculino',
-    'FEMININO': 'Feminino',
-    'OUTRO': 'Outro',
-    'NAO_BINARIO': 'Não-binário',
-    'PREFIRO_NAO_DIZER': 'Prefiro não dizer'
+    [Genero.MASCULINO]: 'Masculino',
+    [Genero.FEMININO]: 'Feminino',
+    [Genero.OUTRO]: 'Outro',
+    [Genero.NAO_BINARIO]: 'Não-binário',
+    [Genero.PREFIRO_NAO_INFORMAR]: 'Prefiro não informar',
+    'PREFIRO_NAO_DIZER': 'Prefiro não informar'
   };
 
   // Se existir no mapa, retorna com a acentuação correta

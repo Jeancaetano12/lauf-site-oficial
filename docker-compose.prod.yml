@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -10,13 +8,60 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-lauf_db}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432" # Restrito ao loopback local (acessível externamente via SSH Tunnel no DBeaver)
     volumes:
       - postgres_data_prod:/var/lib/postgresql/data
+    mem_limit: 450m
     deploy:
       resources:
         limits:
-          memory: 450M # Proteje sua VPS limitando quantia de RAM do banco de dados
+          memory: 450M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-lauf_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - lauf_network
+
+  backend:
+    container_name: lauf_backend_prod
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./apps/backend/.env
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-lauf_db}?schema=public
+    ports:
+      - "127.0.0.1:3000:3000" # Exposto no loopback local para ser consumido pelo Nginx
+    mem_limit: 350m
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - lauf_network
 
 volumes:
   postgres_data_prod:
+
+networks:
+  lauf_network:
+    driver: bridge
