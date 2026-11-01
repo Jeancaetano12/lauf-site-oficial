@@ -53,7 +53,7 @@ enum Genero {
 }
 
 model SolicitacaoInscricao {
-  id              String            @id @default(uuid())
+  id              String            @id
   nome            String
   email           String            @unique
   matricula       String            @unique
@@ -102,7 +102,7 @@ model Usuario {
 }
 
 model Aula {
-  id             String     @id @default(uuid())
+  id             String     @id
   titulo         String
   local          String
   descricao      String?    @db.VarChar(140)
@@ -125,7 +125,7 @@ model Aula {
 }
 
 model PresencaAula {
-  id           String   @id @default(uuid())
+  id           String   @id
   aulaId       String
   usuarioId    String
   confirmadoEm DateTime @default(now())
@@ -149,7 +149,7 @@ model Certificado {
 // --- Eventos Externos ---
 
 model Evento {
-  id             String       @id @default(uuid())
+  id             String       @id
   titulo         String
   local          String
   status         StatusEvento @default(AGENDADO)
@@ -171,7 +171,7 @@ model Evento {
 }
 
 model ParticipanteExterno {
-  id    String @id @default(uuid())
+  id    String @id
   nome  String
   email String // identificador por evento; não precisa ser único globalmente
 
@@ -180,7 +180,7 @@ model ParticipanteExterno {
 }
 
 model PresencaEvento {
-  id             String   @id @default(uuid())
+  id             String   @id
   eventoId       String
   participanteId String
   confirmadoEm   DateTime @default(now())
