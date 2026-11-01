@@ -52,16 +52,19 @@ describe('PresencaService', () => {
 
     it('deve confirmar a presença com sucesso', async () => {
       mockPrismaService.aula.findFirst.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         qrCodeToken: 'token-abc',
         qrCodeAtivo: true,
         qrCodeExpiraEm: new Date(new Date().getTime() + 10 * 60000),
       });
       mockPrismaService.presencaAula.findUnique.mockResolvedValue(null);
-      mockPrismaService.presencaAula.create.mockResolvedValue({
-        aulaId: 'uuid-aula',
-        usuarioId,
-      });
+      mockPrismaService.presencaAula.create.mockImplementation(
+        async ({ data }) => ({
+          id: data.id,
+          aulaId: data.aulaId,
+          usuarioId: data.usuarioId,
+        }),
+      );
 
       const result = await service.confirmarPresencaAula(
         dto,
@@ -69,7 +72,15 @@ describe('PresencaService', () => {
         auditoria,
       );
       expect(result).toBeDefined();
-      expect(result.aulaId).toBe('uuid-aula');
+      expect(result.id).toMatch(/^praula_[0-9a-z]{16}$/);
+      expect(mockPrismaService.presencaAula.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          id: expect.stringMatching(/^praula_[0-9a-z]{16}$/),
+          aulaId: 'aula_1234567890abcdef',
+          usuarioId,
+        }),
+      });
+      expect(result.aulaId).toBe('aula_1234567890abcdef');
     });
 
     it('deve lançar erro se QR code for inválido ou aula não encontrada', async () => {
@@ -81,7 +92,7 @@ describe('PresencaService', () => {
 
     it('deve lançar erro se chamada estiver encerrada (qrCodeAtivo=false)', async () => {
       mockPrismaService.aula.findFirst.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         qrCodeAtivo: false,
       });
       await expect(
@@ -91,7 +102,7 @@ describe('PresencaService', () => {
 
     it('deve lançar erro se o QR Code estiver expirado', async () => {
       mockPrismaService.aula.findFirst.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         qrCodeAtivo: true,
         qrCodeExpiraEm: new Date(new Date().getTime() - 10000),
       });
@@ -102,12 +113,12 @@ describe('PresencaService', () => {
 
     it('deve lançar erro se presença já estiver confirmada', async () => {
       mockPrismaService.aula.findFirst.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         qrCodeAtivo: true,
         qrCodeExpiraEm: new Date(new Date().getTime() + 10000),
       });
       mockPrismaService.presencaAula.findUnique.mockResolvedValue({
-        aulaId: 'uuid-aula',
+        aulaId: 'aula_1234567890abcdef',
         usuarioId,
       });
       await expect(

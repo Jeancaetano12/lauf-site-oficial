@@ -67,14 +67,21 @@ describe('AulaService', () => {
 
     it('deve criar uma aula com sucesso', async () => {
       mockPrismaService.aula.findFirst.mockResolvedValue(null);
-      mockPrismaService.aula.create.mockResolvedValue({
-        id: 'uuid-aula',
+      mockPrismaService.aula.create.mockImplementation(async ({ data }) => ({
+        id: data.id,
         ...dto,
-      });
+      }));
 
       const result = await service.criarAula(dto, criadorId, auditoria);
       expect(result).toBeDefined();
-      expect(result.id).toBe('uuid-aula');
+      expect(result.id).toMatch(/^aula_[0-9a-z]{16}$/);
+      expect(mockPrismaService.aula.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          id: expect.stringMatching(/^aula_[0-9a-z]{16}$/),
+          titulo: dto.titulo.toUpperCase(),
+          criadorId,
+        }),
+      });
     });
 
     it('deve lançar erro se dataHora for no passado', async () => {
@@ -101,7 +108,7 @@ describe('AulaService', () => {
   describe('listarAulas', () => {
     it('deve listar aulas com sucesso', async () => {
       mockPrismaService.aula.findMany.mockResolvedValue([
-        { id: 'uuid-aula', titulo: 'Aula Teste' },
+        { id: 'aula_1234567890abcdef', titulo: 'Aula Teste' },
       ]);
       const result = await service.listarAulas('Teste User');
       expect(result.length).toBeGreaterThan(0);
@@ -116,10 +123,10 @@ describe('AulaService', () => {
   describe('detalheAula', () => {
     it('deve detalhar uma aula com sucesso', async () => {
       mockPrismaService.aula.findUnique.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         titulo: 'Aula Teste',
       });
-      const result = await service.detalheAula('uuid-aula', 'Teste User');
+      const result = await service.detalheAula('aula_1234567890abcdef', 'Teste User');
       expect(result).toBeDefined();
     });
 
@@ -136,17 +143,17 @@ describe('AulaService', () => {
 
     it('deve atualizar uma aula com sucesso', async () => {
       mockPrismaService.aula.findUnique.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         status: StatusAula.AGENDADA,
       });
       mockPrismaService.aula.findFirst.mockResolvedValue(null);
       mockPrismaService.aula.update.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         ...dto,
       });
 
       const result = await service.atualizarAula(
-        'uuid-aula',
+        'aula_1234567890abcdef',
         dto,
         'Teste User',
       );
@@ -156,7 +163,7 @@ describe('AulaService', () => {
     it('deve lançar erro se tentar reagendar para o passado', async () => {
       const pastDto = { dataHora: new Date(new Date().getTime() - 10000) };
       await expect(
-        service.atualizarAula('uuid-aula', pastDto, 'Teste User'),
+        service.atualizarAula('aula_1234567890abcdef', pastDto, 'Teste User'),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -168,11 +175,11 @@ describe('AulaService', () => {
     });
 
     it('deve lançar erro se professor não for encontrado', async () => {
-      mockPrismaService.aula.findUnique.mockResolvedValue({ id: 'uuid-aula' });
+      mockPrismaService.aula.findUnique.mockResolvedValue({ id: 'aula_1234567890abcdef' });
       mockPrismaService.usuario.findUnique.mockResolvedValue(null);
       await expect(
         service.atualizarAula(
-          'uuid-aula',
+          'aula_1234567890abcdef',
           { professorId: 'invalid-prof' },
           'Teste',
         ),
@@ -180,13 +187,13 @@ describe('AulaService', () => {
     });
 
     it('deve lançar erro se aula já estiver cancelada ou concluída e tentar mudar status', async () => {
-      mockPrismaService.aula.findUnique.mockResolvedValue({ id: 'uuid-aula' });
+      mockPrismaService.aula.findUnique.mockResolvedValue({ id: 'aula_1234567890abcdef' });
       mockPrismaService.aula.findFirst.mockResolvedValue({
         status: 'CANCELADA',
       });
       await expect(
         service.atualizarAula(
-          'uuid-aula',
+          'aula_1234567890abcdef',
           { status: StatusAula.AGENDADA },
           'Teste',
         ),
@@ -195,12 +202,12 @@ describe('AulaService', () => {
 
     it('deve lançar erro se alteração causar sobreposição', async () => {
       mockPrismaService.aula.findUnique.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         dataHora: new Date(),
       });
       mockPrismaService.aula.findFirst.mockResolvedValue({ id: 'conflito' });
       await expect(
-        service.atualizarAula('uuid-aula', { local: 'Sala 2' }, 'Teste'),
+        service.atualizarAula('aula_1234567890abcdef', { local: 'Sala 2' }, 'Teste'),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -228,16 +235,16 @@ describe('AulaService', () => {
     it('deve iniciar chamada com sucesso', async () => {
       jest.useFakeTimers();
       mockPrismaService.aula.findUnique.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         status: StatusAula.AGENDADA,
         professorId: 'uuid-prof',
       });
       mockPrismaService.aula.update.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         qrCodeAtivo: true,
       });
 
-      const result = await service.iniciarChamada('uuid-aula', user);
+      const result = await service.iniciarChamada('aula_1234567890abcdef', user);
       expect(result).toBeDefined();
       // Expiração é responsabilidade do AulaCronService, sem timers em memória
       expect(jest.getTimerCount()).toBe(0);
@@ -255,21 +262,21 @@ describe('AulaService', () => {
 
     it('deve lançar erro se aula não estiver AGENDADA', async () => {
       mockPrismaService.aula.findUnique.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         status: StatusAula.CONCLUIDA,
       });
-      await expect(service.iniciarChamada('uuid-aula', user)).rejects.toThrow(
+      await expect(service.iniciarChamada('aula_1234567890abcdef', user)).rejects.toThrow(
         BadRequestException,
       );
     });
 
     it('deve lançar erro se o usuário for PROFESSOR e não for o dono da aula', async () => {
       mockPrismaService.aula.findUnique.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         status: StatusAula.AGENDADA,
         professorId: 'outro-prof',
       });
-      await expect(service.iniciarChamada('uuid-aula', user)).rejects.toThrow(
+      await expect(service.iniciarChamada('aula_1234567890abcdef', user)).rejects.toThrow(
         ForbiddenException,
       );
     });
@@ -280,16 +287,16 @@ describe('AulaService', () => {
 
     it('deve encerrar chamada com sucesso', async () => {
       mockPrismaService.aula.findUnique.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         professorId: 'uuid-prof',
       });
       mockPrismaService.aula.update.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         qrCodeAtivo: false,
         status: StatusAula.CONCLUIDA,
       });
 
-      const result = await service.encerrarChamada('uuid-aula', user);
+      const result = await service.encerrarChamada('aula_1234567890abcdef', user);
       expect(result).toBeDefined();
     });
 
@@ -302,10 +309,10 @@ describe('AulaService', () => {
 
     it('deve lançar erro se o usuário for PROFESSOR e não for o dono da aula', async () => {
       mockPrismaService.aula.findUnique.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         professorId: 'outro-prof',
       });
-      await expect(service.encerrarChamada('uuid-aula', user)).rejects.toThrow(
+      await expect(service.encerrarChamada('aula_1234567890abcdef', user)).rejects.toThrow(
         ForbiddenException,
       );
     });
@@ -316,18 +323,18 @@ describe('AulaService', () => {
 
     it('deve obter QR code com sucesso', async () => {
       mockPrismaService.aula.findUnique.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         qrCodeToken: 'token',
         qrCodeAtivo: true,
         professorId: 'uuid-prof',
       });
-      const result = await service.obterQrCode('uuid-aula', user);
+      const result = await service.obterQrCode('aula_1234567890abcdef', user);
       expect(result).toBeDefined();
     });
 
     it('deve concluir a aula imediatamente se o QR Code já expirou (lazy expiration)', async () => {
       mockPrismaService.aula.findUnique.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         qrCodeToken: 'token',
         qrCodeAtivo: true,
         qrCodeExpiraEm: new Date(Date.now() - 1000),
@@ -335,11 +342,11 @@ describe('AulaService', () => {
       });
       mockPrismaService.aula.update.mockResolvedValue({});
 
-      const result = await service.obterQrCode('uuid-aula', user);
+      const result = await service.obterQrCode('aula_1234567890abcdef', user);
 
       expect(mockPrismaService.aula.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { id: 'uuid-aula' },
+          where: { id: 'aula_1234567890abcdef' },
           data: expect.objectContaining({
             qrCodeAtivo: false,
             status: 'CONCLUIDA',
@@ -358,10 +365,10 @@ describe('AulaService', () => {
 
     it('deve lançar erro se o usuário for PROFESSOR e não for o dono da aula', async () => {
       mockPrismaService.aula.findUnique.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         professorId: 'outro-prof',
       });
-      await expect(service.obterQrCode('uuid-aula', user)).rejects.toThrow(
+      await expect(service.obterQrCode('aula_1234567890abcdef', user)).rejects.toThrow(
         ForbiddenException,
       );
     });
@@ -372,7 +379,7 @@ describe('AulaService', () => {
 
     it('deve obter lista de presença com sucesso', async () => {
       mockPrismaService.aula.findUnique.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         professorId: 'uuid-prof',
       });
       mockPrismaService.presencaAula.findMany.mockResolvedValue([
@@ -382,7 +389,7 @@ describe('AulaService', () => {
         },
       ]);
 
-      const result = await service.obterListaDePresenca('uuid-aula', user);
+      const result = await service.obterListaDePresenca('aula_1234567890abcdef', user);
       expect(result.length).toBeGreaterThan(0);
     });
 
@@ -395,11 +402,11 @@ describe('AulaService', () => {
 
     it('deve lançar erro se o usuário for PROFESSOR e não for o dono da aula', async () => {
       mockPrismaService.aula.findUnique.mockResolvedValue({
-        id: 'uuid-aula',
+        id: 'aula_1234567890abcdef',
         professorId: 'outro-prof',
       });
       await expect(
-        service.obterListaDePresenca('uuid-aula', user),
+        service.obterListaDePresenca('aula_1234567890abcdef', user),
       ).rejects.toThrow(ForbiddenException);
     });
   });

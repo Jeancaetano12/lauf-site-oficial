@@ -8,6 +8,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import { generateEntityId, ID_PREFIXES } from '@lauf/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { CriarAulaDto } from './dto/criar-aula.dto';
 import { AtualizarAulaDto } from './dto/atualizar-aula.dto';
@@ -55,6 +56,7 @@ export class AulaService {
 
       const aula = await this.prisma.aula.create({
         data: {
+          id: generateEntityId(ID_PREFIXES.aula),
           professorId: dto.professorId,
           titulo: dto.titulo.toUpperCase(),
           local: dto.local.toUpperCase(),

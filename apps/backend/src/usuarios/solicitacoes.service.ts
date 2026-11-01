@@ -5,6 +5,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { generateEntityId, ID_PREFIXES } from '@lauf/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { StatusSolicitacao } from '@prisma/client';
@@ -185,6 +186,7 @@ export class SolicitacoesService {
     if (solicitacaoExistente && solicitacaoExistente.status === 'REJEITADA') {
       const solicitacao2 = await this.prisma.solicitacaoInscricao.create({
         data: {
+          id: generateEntityId(ID_PREFIXES.solicitacao),
           nome: dto.nome.trim().toUpperCase(),
           email: dto.email.toLowerCase(),
           matricula: dto.matricula,
@@ -224,6 +226,7 @@ export class SolicitacoesService {
 
     const solicitacao = await this.prisma.solicitacaoInscricao.create({
       data: {
+        id: generateEntityId(ID_PREFIXES.solicitacao),
         nome: dto.nome.trim().toUpperCase(),
         email: dto.email.toLowerCase(),
         matricula: dto.matricula,

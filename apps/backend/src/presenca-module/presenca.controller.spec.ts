@@ -40,7 +40,7 @@ describe('PresencaController', () => {
       const mockUser = { id: 'uuid-user', nome: 'Teste User' };
 
       mockPresencaService.confirmarPresencaAula.mockResolvedValue({
-        id: 'uuid-presenca',
+        id: 'praula_1234567890abcdef',
       });
 
       const result = await controller.confirmarPresencaAula(dto, mockUser);

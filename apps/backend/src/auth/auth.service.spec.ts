@@ -81,7 +81,7 @@ describe('AuthService', () => {
       dataFutura.setDate(dataFutura.getDate() + 1); // 1 dia no futuro (não expirou)
 
       mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
-        id: 'id-1',
+        id: 'sol_1234567890abcdef',
         tokenRegistro: 'meu-token',
         tokenRegistroExpiraEm: dataFutura,
         nome: 'João',
@@ -119,7 +119,7 @@ describe('AuthService', () => {
       dataPassada.setDate(dataPassada.getDate() - 1); // 1 dia no passado (expirou)
 
       mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
-        id: 'id-1',
+        id: 'sol_1234567890abcdef',
         tokenRegistro: 'meu-token',
         tokenRegistroExpiraEm: dataPassada,
         nome: 'João',

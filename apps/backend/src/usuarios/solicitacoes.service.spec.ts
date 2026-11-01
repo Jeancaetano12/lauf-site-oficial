@@ -97,16 +97,16 @@ describe('SolicitacoesService', () => {
   describe('findById', () => {
     it('deve retornar a solicitacao pelo ID', async () => {
       mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
-        id: 'id-1',
+        id: 'sol_1234567890abcdef',
       });
-      await expect(service.findById('id-1')).resolves.toEqual({ id: 'id-1' });
+      await expect(service.findById('sol_1234567890abcdef')).resolves.toEqual({ id: 'sol_1234567890abcdef' });
     });
 
     it('deve repropagar erros do banco', async () => {
       mockPrismaService.solicitacaoInscricao.findUnique.mockRejectedValue(
         new Error('db'),
       );
-      await expect(service.findById('id-1')).rejects.toThrow('db');
+      await expect(service.findById('sol_1234567890abcdef')).rejects.toThrow('db');
     });
   });
 
@@ -115,9 +115,12 @@ describe('SolicitacoesService', () => {
       // Configuração: Simular que findFirst retornou vazio (não existe)
       mockPrismaService.solicitacaoInscricao.findFirst.mockResolvedValue(null);
       // Simular retorno da criação
-      mockPrismaService.solicitacaoInscricao.create.mockResolvedValue({
-        id: 'id-solicitacao',
-      });
+      mockPrismaService.solicitacaoInscricao.create.mockImplementation(
+        async ({ data }) => ({
+          id: data.id,
+          ...data,
+        }),
+      );
 
       const dto: SolicitarInscricaoDto = {
         nome: 'João',
@@ -134,12 +137,18 @@ describe('SolicitacoesService', () => {
       expect(
         mockPrismaService.solicitacaoInscricao.findFirst,
       ).toHaveBeenCalled();
-      expect(mockPrismaService.solicitacaoInscricao.create).toHaveBeenCalled();
+      expect(mockPrismaService.solicitacaoInscricao.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            id: expect.stringMatching(/^sol_[0-9a-z]{16}$/),
+          }),
+        }),
+      );
       expect(
         mockMailService.enviarEmailConfirmacaoSolicitacao,
       ).toHaveBeenCalled();
       expect(resultado.message).toBe('Solicitação criada com sucesso.');
-      expect(resultado.id).toBe('id-solicitacao');
+      expect(resultado.id).toMatch(/^sol_[0-9a-z]{16}$/);
     });
 
     it('deve rejeitar se o usuario ja estiver cadastrado', async () => {
@@ -288,9 +297,12 @@ describe('SolicitacoesService', () => {
       mockPrismaService.solicitacaoInscricao.findFirst.mockResolvedValue({
         status: 'REJEITADA',
       });
-      mockPrismaService.solicitacaoInscricao.create.mockResolvedValue({
-        id: 'id-solicitacao',
-      });
+      mockPrismaService.solicitacaoInscricao.create.mockImplementation(
+        async ({ data }) => ({
+          id: data.id,
+          ...data,
+        }),
+      );
 
       const dto: SolicitarInscricaoDto = {
         nome: 'João',
@@ -304,26 +316,32 @@ describe('SolicitacoesService', () => {
 
       const resultado = await service.solicitarInscricao(dto);
 
-      expect(mockPrismaService.solicitacaoInscricao.create).toHaveBeenCalled();
+      expect(mockPrismaService.solicitacaoInscricao.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            id: expect.stringMatching(/^sol_[0-9a-z]{16}$/),
+          }),
+        }),
+      );
       expect(
         mockMailService.enviarEmailConfirmacaoSolicitacao,
       ).toHaveBeenCalled();
       expect(resultado.message).toBe('Solicitação enviada novamente.');
-      expect(resultado.id).toBe('id-solicitacao');
+      expect(resultado.id).toMatch(/^sol_[0-9a-z]{16}$/);
     });
   });
 
   describe('aprovarSolicitacao', () => {
     it('deve aprovar a solicitacao e gerar o tokenRegistro', async () => {
       mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
-        id: 'id-1',
+        id: 'sol_1234567890abcdef',
         status: 'PENDENTE',
       });
       mockPrismaService.solicitacaoInscricao.update.mockResolvedValue({
         status: 'APROVADA',
       });
 
-      const resultado = await service.aprovarSolicitacao('id-1');
+      const resultado = await service.aprovarSolicitacao('sol_1234567890abcdef');
 
       expect(mockPrismaService.solicitacaoInscricao.update).toHaveBeenCalled();
       expect(mockMailService.enviarEmailAprovacao).toHaveBeenCalled();
@@ -333,7 +351,7 @@ describe('SolicitacoesService', () => {
 
     it('deve rejeitar se ocorrer erro ao enviar o email de aprovacao, revertendo a aprovacao', async () => {
       mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
-        id: 'id-1',
+        id: 'sol_1234567890abcdef',
         status: 'PENDENTE',
       });
       mockPrismaService.solicitacaoInscricao.update.mockResolvedValue({
@@ -341,11 +359,11 @@ describe('SolicitacoesService', () => {
       });
       mockMailService.enviarEmailAprovacao.mockResolvedValue(0);
       mockPrismaService.solicitacaoInscricao.update.mockResolvedValue({
-        id: 'id-1',
+        id: 'sol_1234567890abcdef',
         data: { tokenRegistro: null, tokenRegistroExpiraEm: null },
       });
 
-      await expect(service.aprovarSolicitacao('id-1')).rejects.toThrow(
+      await expect(service.aprovarSolicitacao('sol_1234567890abcdef')).rejects.toThrow(
         InternalServerErrorException,
       );
     });
@@ -360,22 +378,22 @@ describe('SolicitacoesService', () => {
 
     it('deve rejeitar se a solicitacao ja estiver aprovada', async () => {
       mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
-        id: 'id-1',
+        id: 'sol_1234567890abcdef',
         status: 'APROVADA',
       });
 
-      await expect(service.aprovarSolicitacao('id-1')).rejects.toThrow(
+      await expect(service.aprovarSolicitacao('sol_1234567890abcdef')).rejects.toThrow(
         BadRequestException,
       );
     });
 
     it('deve rejeitar se a solicitacao ja estiver rejeitada', async () => {
       mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
-        id: 'id-1',
+        id: 'sol_1234567890abcdef',
         status: 'REJEITADA',
       });
 
-      await expect(service.aprovarSolicitacao('id-1')).rejects.toThrow(
+      await expect(service.aprovarSolicitacao('sol_1234567890abcdef')).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -390,17 +408,17 @@ describe('SolicitacoesService', () => {
       });
 
       mockPrismaService.solicitacaoInscricao.update.mockResolvedValue({
-        id: 'id-1',
+        id: 'sol_1234567890abcdef',
       });
 
       mockMailService.enviarEmailRejeicao.mockResolvedValue(1);
 
-      const resultado = await service.rejeitarSolicitacao('id-1');
+      const resultado = await service.rejeitarSolicitacao('sol_1234567890abcdef');
 
       expect(
         mockPrismaService.solicitacaoInscricao.findUnique,
       ).toHaveBeenCalledWith({
-        where: { id: 'id-1' },
+        where: { id: 'sol_1234567890abcdef' },
         select: {
           status: true,
           email: true,
@@ -411,7 +429,7 @@ describe('SolicitacoesService', () => {
       expect(
         mockPrismaService.solicitacaoInscricao.update,
       ).toHaveBeenCalledWith({
-        where: { id: 'id-1' },
+        where: { id: 'sol_1234567890abcdef' },
         data: {
           status: 'REJEITADA',
           processadoPor: undefined,
@@ -425,7 +443,7 @@ describe('SolicitacoesService', () => {
 
       expect(resultado).toEqual({
         message: 'Solicitação rejeitada',
-        id: 'id-1',
+        id: 'sol_1234567890abcdef',
       });
     });
 
@@ -444,7 +462,7 @@ describe('SolicitacoesService', () => {
         nome: 'João',
       });
 
-      await expect(service.rejeitarSolicitacao('id-1')).rejects.toThrow(
+      await expect(service.rejeitarSolicitacao('sol_1234567890abcdef')).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -456,7 +474,7 @@ describe('SolicitacoesService', () => {
         nome: 'João',
       });
 
-      await expect(service.rejeitarSolicitacao('id-1')).rejects.toThrow(
+      await expect(service.rejeitarSolicitacao('sol_1234567890abcdef')).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -469,12 +487,12 @@ describe('SolicitacoesService', () => {
       });
 
       mockPrismaService.solicitacaoInscricao.update.mockResolvedValue({
-        id: 'id-1',
+        id: 'sol_1234567890abcdef',
       });
 
       mockMailService.enviarEmailRejeicao.mockResolvedValueOnce(0);
 
-      await expect(service.rejeitarSolicitacao('id-1')).rejects.toThrow(
+      await expect(service.rejeitarSolicitacao('sol_1234567890abcdef')).rejects.toThrow(
         InternalServerErrorException,
       );
 

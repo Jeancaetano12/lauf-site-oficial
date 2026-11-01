@@ -55,7 +55,7 @@ describe('AulaController', () => {
         status: StatusAula.AGENDADA,
         dataHora: new Date(),
       };
-      mockAulaService.criarAula.mockResolvedValue({ id: 'uuid-aula' });
+      mockAulaService.criarAula.mockResolvedValue({ id: 'aula_1234567890abcdef' });
 
       const result = await controller.criarAula(dto, mockUser);
       expect(result).toBeDefined();
@@ -69,7 +69,7 @@ describe('AulaController', () => {
 
   describe('listarAulas', () => {
     it('deve chamar aulaService.listarAulas', async () => {
-      mockAulaService.listarAulas.mockResolvedValue([{ id: 'uuid-aula' }]);
+      mockAulaService.listarAulas.mockResolvedValue([{ id: 'aula_1234567890abcdef' }]);
       const result = await controller.listarAulas(mockUser);
       expect(result).toBeDefined();
       expect(service.listarAulas).toHaveBeenCalledWith(
@@ -93,11 +93,11 @@ describe('AulaController', () => {
 
   describe('detalheAula', () => {
     it('deve chamar aulaService.detalheAula', async () => {
-      mockAulaService.detalheAula.mockResolvedValue({ id: 'uuid-aula' });
-      const result = await controller.detalheAula('uuid-aula', mockUser);
+      mockAulaService.detalheAula.mockResolvedValue({ id: 'aula_1234567890abcdef' });
+      const result = await controller.detalheAula('aula_1234567890abcdef', mockUser);
       expect(result).toBeDefined();
       expect(service.detalheAula).toHaveBeenCalledWith(
-        'uuid-aula',
+        'aula_1234567890abcdef',
         `${mockUser.nome} (Id: ${mockUser.matricula})`,
       );
     });
@@ -106,11 +106,11 @@ describe('AulaController', () => {
   describe('atualizarAula', () => {
     it('deve chamar aulaService.atualizarAula', async () => {
       const dto: AtualizarAulaDto = { titulo: 'Novo' };
-      mockAulaService.atualizarAula.mockResolvedValue({ id: 'uuid-aula' });
-      const result = await controller.atualizarAula('uuid-aula', dto, mockUser);
+      mockAulaService.atualizarAula.mockResolvedValue({ id: 'aula_1234567890abcdef' });
+      const result = await controller.atualizarAula('aula_1234567890abcdef', dto, mockUser);
       expect(result).toBeDefined();
       expect(service.atualizarAula).toHaveBeenCalledWith(
-        'uuid-aula',
+        'aula_1234567890abcdef',
         dto,
         `${mockUser.nome} (Id: ${mockUser.id})`,
       );
@@ -119,11 +119,11 @@ describe('AulaController', () => {
 
   describe('iniciarChamada', () => {
     it('deve chamar aulaService.iniciarChamada', async () => {
-      mockAulaService.iniciarChamada.mockResolvedValue({ id: 'uuid-aula' });
-      const result = await controller.iniciarChamada('uuid-aula', mockUser);
+      mockAulaService.iniciarChamada.mockResolvedValue({ id: 'aula_1234567890abcdef' });
+      const result = await controller.iniciarChamada('aula_1234567890abcdef', mockUser);
       expect(result).toBeDefined();
       expect(service.iniciarChamada).toHaveBeenCalledWith(
-        'uuid-aula',
+        'aula_1234567890abcdef',
         mockUser,
       );
     });
@@ -131,11 +131,11 @@ describe('AulaController', () => {
 
   describe('encerrarChamada', () => {
     it('deve chamar aulaService.encerrarChamada', async () => {
-      mockAulaService.encerrarChamada.mockResolvedValue({ id: 'uuid-aula' });
-      const result = await controller.encerrarChamada('uuid-aula', mockUser);
+      mockAulaService.encerrarChamada.mockResolvedValue({ id: 'aula_1234567890abcdef' });
+      const result = await controller.encerrarChamada('aula_1234567890abcdef', mockUser);
       expect(result).toBeDefined();
       expect(service.encerrarChamada).toHaveBeenCalledWith(
-        'uuid-aula',
+        'aula_1234567890abcdef',
         mockUser,
       );
     });
@@ -143,10 +143,10 @@ describe('AulaController', () => {
 
   describe('obterQrCode', () => {
     it('deve chamar aulaService.obterQrCode', async () => {
-      mockAulaService.obterQrCode.mockResolvedValue({ id: 'uuid-aula' });
-      const result = await controller.obterQrCode('uuid-aula', mockUser);
+      mockAulaService.obterQrCode.mockResolvedValue({ id: 'aula_1234567890abcdef' });
+      const result = await controller.obterQrCode('aula_1234567890abcdef', mockUser);
       expect(result).toBeDefined();
-      expect(service.obterQrCode).toHaveBeenCalledWith('uuid-aula', mockUser);
+      expect(service.obterQrCode).toHaveBeenCalledWith('aula_1234567890abcdef', mockUser);
     });
   });
 
@@ -156,12 +156,12 @@ describe('AulaController', () => {
         { id: 'uuid-aluno' },
       ]);
       const result = await controller.obterListaDePresenca(
-        'uuid-aula',
+        'aula_1234567890abcdef',
         mockUser,
       );
       expect(result).toBeDefined();
       expect(service.obterListaDePresenca).toHaveBeenCalledWith(
-        'uuid-aula',
+        'aula_1234567890abcdef',
         mockUser,
       );
     });

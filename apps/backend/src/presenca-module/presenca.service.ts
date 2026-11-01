@@ -7,6 +7,7 @@ import {
   HttpException,
   ConflictException,
 } from '@nestjs/common';
+import { generateEntityId, ID_PREFIXES } from '@lauf/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfirmarPresencaDto } from './dto/confirmar-presenca.dto';
 
@@ -53,6 +54,7 @@ export class PresencaService {
 
       const presenca = await this.prisma.presencaAula.create({
         data: {
+          id: generateEntityId(ID_PREFIXES.presencaAula),
           aulaId: aula.id,
           usuarioId: usuarioId,
         },
