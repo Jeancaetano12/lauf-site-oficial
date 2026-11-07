@@ -4,6 +4,16 @@ Resolve a Issue: #<!-- Insira o número da issue que este PR resolve (ex: #12) p
 
 ---
 
+## 🥞 PR Empilhado (Stacked PR)
+
+Este PR faz parte de uma cadeia de PRs empilhados?
+- [ ] Não (PR único / independente apontando para `main`)
+- [ ] Sim (indique os dados da pilha abaixo):
+  - **PR Base (dependência anterior):** #<!-- Número do PR anterior ou N/A se for o primeiro da pilha -->
+  - **Próximo PR da pilha:** #<!-- Número do próximo PR se já aberto, ou N/A se for o último -->
+
+---
+
 ## 📌 Tipo de Mudança
 
 Marque a opção que melhor descreve a sua contribuição:
@@ -42,7 +52,8 @@ Descreva resumidamente o que foi implementado neste Pull Request e a justificati
 Antes de solicitar a revisão de um mantenedor da LAUF, confirme se você realizou os seguintes passos:
 
 - [ ] Meu código segue as convenções e boas práticas estabelecidas no [CONTRIBUTING.md](../CONTRIBUTING.md).
+- [ ] **Rastreabilidade e Limites:** O PR contém no máximo **800 linhas de diff** e toca em até **8 arquivos de código efetivo** (ou está devidamente dividido em PRs Empilhados).
+- [ ] Executei a validação de lint e tipos (`pnpm lint` e `pnpm typecheck`) sem novos erros.
 - [ ] Executei a suíte de testes unitários localmente (`pnpm test`) e todos os testes passaram com sucesso.
-- [ ] Verifiquei a compilação e tipagem estrita sem novos erros ou advertências.
 - [ ] Confirmo que **NENHUM** segredo, chave privada, token de autenticação ou arquivo `.env` sensível foi incluído neste commit.
 - [ ] Testei manualmente o fluxo alterado na minha máquina local com o ambiente rodando (`pnpm dev`).

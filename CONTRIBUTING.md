@@ -18,6 +18,9 @@ Toda contribuição — seja corrigindo um bug, sugerindo uma melhoria, escreven
 6. [Taxonomia Oficial de Labels](#-taxonomia-oficial-de-labels)
 7. [Padrões de Código e Qualidade](#-padrões-de-código-e-qualidade)
 8. [Política de Code Review e Pull Requests](#-política-de-code-review-e-pull-requests)
+   - [8.1 Requisitos de Submissão e Aprovação](#1-requisitos-de-submissão-e-aprovação)
+   - [8.2 Rastreabilidade e Limites de Tamanho de PR (800 linhas / 8 arquivos)](#2-rastreabilidade-e-limites-de-tamanho-de-pr)
+   - [8.3 Funcionamento e Regras para PRs Empilhados (Stacked PRs)](#3-funcionamento-e-regras-para-prs-empilhados-stacked-prs)
 
 ---
 
@@ -188,13 +191,43 @@ Para manter o repositório organizado e facilitar o direcionamento de tarefas, u
 
 ## 🔍 Política de Code Review e Pull Requests
 
-1. **Antes de Submeter o PR:**
-   - Certifique-se de que sua branch está atualizada com a `main`.
-   - Rode a suíte de testes: `pnpm test`.
-   - Verifique se não há erros de tipagem com TypeScript.
-   - Preencha integralmente o template de PR ([`.github/pull_request_template.md`](.github/pull_request_template.md)).
-2. **Requisitos de Aprovação:**
-   - Todo Pull Request necessita de **pelo menos 1 aprovação** de um mantenedor ou líder técnico da Liga para que o merge seja liberado.
-   - As verificações automatizadas do pipeline de CI devem estar verdes.
-3. **Ambiente de Aprendizado:**
-   - As revisões de código na LAUF são feitas com foco pedagógico. Sugestões e comentários buscam compartilhar boas práticas e acelerar o aprendizado dos novos integrantes!
+### 1. Requisitos de Submissão e Aprovação
+- **Status do CI:** O pipeline automatizado do GitHub Actions deve estar completamente verde (`pnpm lint`, `pnpm typecheck`, `pnpm build` e `pnpm test`).
+- **Aprovação Obrigatória:** Todo Pull Request necessita de **pelo menos 1 aprovação** de um mantenedor ou líder técnico da Liga para que o merge seja liberado.
+- **Ambiente de Aprendizado:** As revisões de código na LAUF são feitas com foco pedagógico. Sugestões e comentários buscam compartilhar boas práticas e acelerar o aprendizado dos novos integrantes.
+
+---
+
+### 2. Rastreabilidade e Limites de Tamanho de PR
+Para garantir revisões humanas de alta qualidade, reduzir o tempo de feedback e manter a rastreabilidade limpa no histórico do Git, adotamos limites estritos para cada Pull Request:
+
+- **Limite de Linhas:** No máximo **800 linhas de diff** (somatório de linhas adicionadas e removidas).
+- **Limite de Arquivos:** No máximo **8 arquivos de código efetivo** modificados.
+  - *O que conta como código efetivo:* arquivos `.ts`, `.tsx`, `.js`, `.css`, arquivos de configuração ou controllers/services/componentes.
+  - *Exceções não contabilizadas no limite de arquivos:* arquivos de trava (`pnpm-lock.yaml`), schemas ou migrations geradas pelo Prisma, e arquivos de assets/imagens.
+- **Se sua demanda exceder esses limites:** O PR **não** deve ser aberto como um monolito. Ele **deve** ser obrigatoriamente decomposto em **PRs Empilhados (Stacked PRs)**.
+
+---
+
+### 3. Funcionamento e Regras para PRs Empilhados (Stacked PRs)
+Quando uma funcionalidade ou refatoração for ampla demais para caber nos limites de 800 linhas / 8 arquivos, o fluxo correto é criar uma **cadeia de PRs atômicos e incrementais**, onde cada etapa resolve uma fatia coesa da solução.
+
+#### 💡 Exemplo de Decomposição:
+Para uma funcionalidade complexa (ex: Emissão de Certificados com QR Code):
+- **PR 1:** Contratos, tipos e enums no `@lauf/shared` (base: `main`).
+- **PR 2:** Modelagem no Prisma, migrations e endpoints no `apps/backend` (base: branch do PR 1).
+- **PR 3:** Componentes de interface e hooks no `apps/frontend` (base: branch do PR 2).
+
+#### 📋 Regras Obrigatórias para a Pilha:
+1. **Configuração de Base no GitHub:**
+   - O primeiro PR da pilha aponta a branch base para `main`.
+   - Os PRs subsequentes da pilha devem apontar temporariamente a sua *base branch* no GitHub para a branch do PR imediatamente anterior. Dessa forma, o revisor visualiza **apenas o diff delta daquela etapa**.
+2. **Sinalização no Template de PR:**
+   - Preencha a seção `🥞 PR Empilhado (Stacked PR)` no [template de Pull Request](.github/pull_request_template.md), indicando explicitamente qual é o PR anterior e qual é o próximo.
+3. **Autonomia, Compilação e CI Verde em Cada PR:**
+   - Cada PR individual da pilha **deve compilar e passar no CI de forma independente** (`pnpm lint`, `pnpm typecheck` e `pnpm test`). Nunca envie um PR quebrado ou que dependa de correções de compilação no PR seguinte.
+4. **Ordem Estrita de Merge e Atualização de Base:**
+   - Os PRs devem ser revisados e mergeados **estritamente em ordem sequencial** (da base para o topo: PR 1 → PR 2 → PR 3).
+   - Quando o PR 1 for mergeado na `main`, o autor deve:
+     1. Acessar o PR 2 no GitHub e alterar a *base branch* para `main`.
+     2. Fazer o rebase ou sincronização local da branch do PR 2 com a `main` atualizada (`git pull --rebase origin main`) e subir o push.
