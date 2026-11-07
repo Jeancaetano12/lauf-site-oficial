@@ -1,4 +1,4 @@
-# Portal LAUF — Liga Acadêmica de Urgência e Farmácia (UFCSPA)
+# Portal LAUF — Liga de Arduino Uninassau Fortaleza
 
 [![Node.js Version](https://img.shields.io/badge/node-22.x_LTS-339933?logo=node.js)](https://nodejs.org/)
 [![pnpm Version](https://img.shields.io/badge/pnpm-9%2B-F69220?logo=pnpm)](https://pnpm.io/)
@@ -8,7 +8,7 @@
 [![PostgreSQL Version](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker)](https://www.docker.com/)
 
-Bem-vindo ao repositório oficial do **Portal LAUF**! Este sistema é uma plataforma completa e moderna para apoiar a gestão acadêmica da **Liga Acadêmica de Urgência e Farmácia (LAUF)** da UFCSPA, centralizando:
+Bem-vindo ao repositório oficial do **Portal LAUF**! Este sistema é uma plataforma completa e moderna para apoiar a gestão acadêmica da **Liga de Arduino Uninassau Fortaleza (LAUF)**, centralizando:
 - 👥 **Gestão de Membros e Diretoria**: Controle de acesso por cargos (`ALUNO`, `PROFESSOR`, `MONITOR`, `COORDENADOR`).
 - 📚 **Catálogo de Aulas & Eventos**: Agendamento, histórico e visualização de aulas ministradas.
 - 📱 **Controle de Presença em Tempo Real**: Validação de presença ágil via QR Code dinâmico e código numérico.
@@ -85,7 +85,7 @@ Siga o passo a passo abaixo para clonar, configurar e rodar o projeto localmente
 Abra o terminal e execute:
 
 ```bash
-git clone https://github.com/LAUF-UFCSPA/lauf-site-oficial.git
+git clone https://github.com/Jeancaetano12/lauf-site-oficial.git
 cd lauf-site-oficial
 pnpm install
 ```
@@ -237,10 +237,10 @@ Quer contribuir com novas funcionalidades, melhorias de design ou correções no
 
 - 📖 **Diretrizes de Contribuição**: Leia o [`CONTRIBUTING.md`](./CONTRIBUTING.md) para conhecer o fluxo de branches (`tipo/issue-id-descricao`), Conventional Commits em português e a taxonomia de labels.
 - 📜 **Código de Conduta**: Seguimos o padrão inclusivo do Contributor Covenant v2.1 documentado em [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md).
-- 💬 **Dúvidas & Comunidade**: Acesse o canal de desenvolvimento no Discord oficial da LAUF ou abra uma issue utilizando nossos [Formulários Estruturados no GitHub](https://github.com/LAUF-UFCSPA/lauf-site-oficial/issues/new/choose).
+- 💬 **Dúvidas & Comunidade**: Acesse o canal de desenvolvimento no Discord oficial da LAUF ou abra uma issue utilizando nossos [Formulários Estruturados no GitHub](https://github.com/Jeancaetano12/lauf-site-oficial/issues/new/choose).
 
 ---
 
 <div align="center">
-  <p>Desenvolvido com carinho pela Diretoria e Membros da <b>LAUF — Liga Acadêmica de Urgência e Farmácia</b>.</p>
+  <p>Desenvolvido com carinho pela Diretoria e Membros da <b>LAUF — Liga de Arduino Uninassau Fortaleza</b>.</p>
 </div>
