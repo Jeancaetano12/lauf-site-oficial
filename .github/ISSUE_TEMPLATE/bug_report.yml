@@ -1,0 +1,91 @@
+name: Relato de Bug
+description: Crie um relatório para nos ajudar a identificar e corrigir um problema no Portal LAUF.
+title: "[Bug]: "
+labels: ["tipo: bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por dedicar seu tempo para relatar este problema!
+        > ⚠️ **Atenção:** Nunca compartilhe credenciais, senhas, tokens de autenticação ou variáveis de ambiente privadas nos relatórios.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição do Problema
+      description: Uma explicação clara e objetiva sobre o que está acontecendo de errado.
+      placeholder: Exemplo - Ao clicar no botão de confirmar presença via QR Code, a tela fica carregando indefinidamente...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passos para Reproduzir
+      description: Descreva o passo a passo exato para reproduzir o comportamento reportado.
+      placeholder: |
+        1. Acesse '...'
+        2. Faça login como 'Aluno'
+        3. Navegue até a tela '...'
+        4. Observe o erro
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento Esperado
+      description: O que você esperava que acontecesse normalmente.
+      placeholder: Exemplo - O modal de confirmação de presença deveria ser exibido com mensagem de sucesso.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Onde o problema ocorre?
+      description: Selecione a área principal do monorepo afetada.
+      options:
+        - "Frontend (React / Vite)"
+        - "Backend (NestJS / Prisma)"
+        - "Pacote Compartilhado (@lauf/shared)"
+        - "Banco de Dados (PostgreSQL / Migrations)"
+        - "Infraestrutura / Docker"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severidade do Bug
+      description: Qual o nível de impacto deste problema nas funcionalidades?
+      options:
+        - "Alta (Bloqueia o uso do portal ou fluxo essencial)"
+        - "Média (Funcionalidade com falha, mas há contorno)"
+        - "Baixa (Ajuste visual, estético ou detalhe secundário)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs-screenshots
+    attributes:
+      label: Screenshots ou Logs de Erro
+      description: Cole capturas de tela ou trechos de logs do console do navegador / terminal (se aplicável).
+      placeholder: Arraste imagens ou cole mensagens de erro do terminal aqui.
+
+  - type: input
+    id: environment
+    attributes:
+      label: Informações de Ambiente
+      description: Qual seu Sistema Operacional, Navegador e versão do Node.js?
+      placeholder: Ex: Ubuntu 24.04 / Chrome 128 / Node 22.11.0
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmações
+      options:
+        - label: Verifiquei se não existe uma issue aberta semelhante antes de abrir esta.
+          required: true
+        - label: Confirmo que não incluí nenhuma informação sensível ou credenciais privadas neste relato.
+          required: true

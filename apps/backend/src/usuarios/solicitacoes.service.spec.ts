@@ -99,14 +99,18 @@ describe('SolicitacoesService', () => {
       mockPrismaService.solicitacaoInscricao.findUnique.mockResolvedValue({
         id: 'sol_1234567890abcdef',
       });
-      await expect(service.findById('sol_1234567890abcdef')).resolves.toEqual({ id: 'sol_1234567890abcdef' });
+      await expect(service.findById('sol_1234567890abcdef')).resolves.toEqual({
+        id: 'sol_1234567890abcdef',
+      });
     });
 
     it('deve repropagar erros do banco', async () => {
       mockPrismaService.solicitacaoInscricao.findUnique.mockRejectedValue(
         new Error('db'),
       );
-      await expect(service.findById('sol_1234567890abcdef')).rejects.toThrow('db');
+      await expect(service.findById('sol_1234567890abcdef')).rejects.toThrow(
+        'db',
+      );
     });
   });
 
@@ -137,7 +141,9 @@ describe('SolicitacoesService', () => {
       expect(
         mockPrismaService.solicitacaoInscricao.findFirst,
       ).toHaveBeenCalled();
-      expect(mockPrismaService.solicitacaoInscricao.create).toHaveBeenCalledWith(
+      expect(
+        mockPrismaService.solicitacaoInscricao.create,
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             id: expect.stringMatching(/^sol_[0-9a-z]{16}$/),
@@ -316,7 +322,9 @@ describe('SolicitacoesService', () => {
 
       const resultado = await service.solicitarInscricao(dto);
 
-      expect(mockPrismaService.solicitacaoInscricao.create).toHaveBeenCalledWith(
+      expect(
+        mockPrismaService.solicitacaoInscricao.create,
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             id: expect.stringMatching(/^sol_[0-9a-z]{16}$/),
@@ -341,7 +349,9 @@ describe('SolicitacoesService', () => {
         status: 'APROVADA',
       });
 
-      const resultado = await service.aprovarSolicitacao('sol_1234567890abcdef');
+      const resultado = await service.aprovarSolicitacao(
+        'sol_1234567890abcdef',
+      );
 
       expect(mockPrismaService.solicitacaoInscricao.update).toHaveBeenCalled();
       expect(mockMailService.enviarEmailAprovacao).toHaveBeenCalled();
@@ -363,9 +373,9 @@ describe('SolicitacoesService', () => {
         data: { tokenRegistro: null, tokenRegistroExpiraEm: null },
       });
 
-      await expect(service.aprovarSolicitacao('sol_1234567890abcdef')).rejects.toThrow(
-        InternalServerErrorException,
-      );
+      await expect(
+        service.aprovarSolicitacao('sol_1234567890abcdef'),
+      ).rejects.toThrow(InternalServerErrorException);
     });
 
     it('deve rejeitar se a solicitacao nao existir', async () => {
@@ -382,9 +392,9 @@ describe('SolicitacoesService', () => {
         status: 'APROVADA',
       });
 
-      await expect(service.aprovarSolicitacao('sol_1234567890abcdef')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.aprovarSolicitacao('sol_1234567890abcdef'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('deve rejeitar se a solicitacao ja estiver rejeitada', async () => {
@@ -393,9 +403,9 @@ describe('SolicitacoesService', () => {
         status: 'REJEITADA',
       });
 
-      await expect(service.aprovarSolicitacao('sol_1234567890abcdef')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.aprovarSolicitacao('sol_1234567890abcdef'),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -413,7 +423,9 @@ describe('SolicitacoesService', () => {
 
       mockMailService.enviarEmailRejeicao.mockResolvedValue(1);
 
-      const resultado = await service.rejeitarSolicitacao('sol_1234567890abcdef');
+      const resultado = await service.rejeitarSolicitacao(
+        'sol_1234567890abcdef',
+      );
 
       expect(
         mockPrismaService.solicitacaoInscricao.findUnique,
@@ -462,9 +474,9 @@ describe('SolicitacoesService', () => {
         nome: 'João',
       });
 
-      await expect(service.rejeitarSolicitacao('sol_1234567890abcdef')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.rejeitarSolicitacao('sol_1234567890abcdef'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('deve lançar erro se a solicitacao ja estiver rejeitada', async () => {
@@ -474,9 +486,9 @@ describe('SolicitacoesService', () => {
         nome: 'João',
       });
 
-      await expect(service.rejeitarSolicitacao('sol_1234567890abcdef')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.rejeitarSolicitacao('sol_1234567890abcdef'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('deve lançar erro caso ocorra falha no envio do email de rejeicao', async () => {
@@ -492,9 +504,9 @@ describe('SolicitacoesService', () => {
 
       mockMailService.enviarEmailRejeicao.mockResolvedValueOnce(0);
 
-      await expect(service.rejeitarSolicitacao('sol_1234567890abcdef')).rejects.toThrow(
-        InternalServerErrorException,
-      );
+      await expect(
+        service.rejeitarSolicitacao('sol_1234567890abcdef'),
+      ).rejects.toThrow(InternalServerErrorException);
 
       expect(mockMailService.enviarEmailRejeicao).toHaveBeenCalledWith(
         'joao@teste.com',

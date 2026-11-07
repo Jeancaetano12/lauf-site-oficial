@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Comunidade Discord LAUF
+    url: https://discord.gg/lauf
+    about: Tire dúvidas, converse com outros membros da liga ou alinhe ideias antes de abrir uma issue!

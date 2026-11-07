@@ -11,7 +11,7 @@ on:
 
 jobs:
   build-and-test:
-    name: Validar Código (Build e Testes)
+    name: Validar Código (Lint, Tipagem, Build e Testes)
     runs-on: ubuntu-latest
 
     steps:
@@ -38,11 +38,14 @@ jobs:
       - name: 🗄️ Gerar Prisma Client
         run: pnpm --filter backend exec prisma generate
 
-      - name: 🏗️ Build do Backend (NestJS)
-        run: pnpm --filter backend build
+      - name: 🔍 Validar Lint (Backend e Frontend)
+        run: pnpm lint
 
-      - name: 🎨 Build do Frontend (Vite)
-        run: pnpm --filter frontend build
+      - name: 🏷️ Validar Tipagem Estrita (Typecheck)
+        run: pnpm typecheck
+
+      - name: 🏗️ Build de Todos os Workspaces
+        run: pnpm build
 
       - name: 🧪 Rodar Testes Unitários
         run: pnpm test

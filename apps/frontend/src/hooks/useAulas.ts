@@ -104,7 +104,7 @@ export function useAulas() {
                 msg = msg.join(', ');
             }
             setError(msg);
-            throw new Error(msg);
+            throw new Error(msg, { cause: err });
         } finally {
             setIsCreating(false);
         }
@@ -125,7 +125,7 @@ export function useAulas() {
             }
             console.log("mensagem de erro do usuario", msg)
             setError(msg);
-            throw new Error(msg);
+            throw new Error(msg, { cause: err });
         } finally {
             setIsUpdating(false);
         }
