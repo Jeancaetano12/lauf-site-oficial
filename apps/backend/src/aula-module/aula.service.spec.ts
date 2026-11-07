@@ -126,7 +126,10 @@ describe('AulaService', () => {
         id: 'aula_1234567890abcdef',
         titulo: 'Aula Teste',
       });
-      const result = await service.detalheAula('aula_1234567890abcdef', 'Teste User');
+      const result = await service.detalheAula(
+        'aula_1234567890abcdef',
+        'Teste User',
+      );
       expect(result).toBeDefined();
     });
 
@@ -175,7 +178,9 @@ describe('AulaService', () => {
     });
 
     it('deve lançar erro se professor não for encontrado', async () => {
-      mockPrismaService.aula.findUnique.mockResolvedValue({ id: 'aula_1234567890abcdef' });
+      mockPrismaService.aula.findUnique.mockResolvedValue({
+        id: 'aula_1234567890abcdef',
+      });
       mockPrismaService.usuario.findUnique.mockResolvedValue(null);
       await expect(
         service.atualizarAula(
@@ -187,7 +192,9 @@ describe('AulaService', () => {
     });
 
     it('deve lançar erro se aula já estiver cancelada ou concluída e tentar mudar status', async () => {
-      mockPrismaService.aula.findUnique.mockResolvedValue({ id: 'aula_1234567890abcdef' });
+      mockPrismaService.aula.findUnique.mockResolvedValue({
+        id: 'aula_1234567890abcdef',
+      });
       mockPrismaService.aula.findFirst.mockResolvedValue({
         status: 'CANCELADA',
       });
@@ -207,7 +214,11 @@ describe('AulaService', () => {
       });
       mockPrismaService.aula.findFirst.mockResolvedValue({ id: 'conflito' });
       await expect(
-        service.atualizarAula('aula_1234567890abcdef', { local: 'Sala 2' }, 'Teste'),
+        service.atualizarAula(
+          'aula_1234567890abcdef',
+          { local: 'Sala 2' },
+          'Teste',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -244,7 +255,10 @@ describe('AulaService', () => {
         qrCodeAtivo: true,
       });
 
-      const result = await service.iniciarChamada('aula_1234567890abcdef', user);
+      const result = await service.iniciarChamada(
+        'aula_1234567890abcdef',
+        user,
+      );
       expect(result).toBeDefined();
       // Expiração é responsabilidade do AulaCronService, sem timers em memória
       expect(jest.getTimerCount()).toBe(0);
@@ -265,9 +279,9 @@ describe('AulaService', () => {
         id: 'aula_1234567890abcdef',
         status: StatusAula.CONCLUIDA,
       });
-      await expect(service.iniciarChamada('aula_1234567890abcdef', user)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.iniciarChamada('aula_1234567890abcdef', user),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('deve lançar erro se o usuário for PROFESSOR e não for o dono da aula', async () => {
@@ -276,9 +290,9 @@ describe('AulaService', () => {
         status: StatusAula.AGENDADA,
         professorId: 'outro-prof',
       });
-      await expect(service.iniciarChamada('aula_1234567890abcdef', user)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.iniciarChamada('aula_1234567890abcdef', user),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
@@ -296,7 +310,10 @@ describe('AulaService', () => {
         status: StatusAula.CONCLUIDA,
       });
 
-      const result = await service.encerrarChamada('aula_1234567890abcdef', user);
+      const result = await service.encerrarChamada(
+        'aula_1234567890abcdef',
+        user,
+      );
       expect(result).toBeDefined();
     });
 
@@ -312,9 +329,9 @@ describe('AulaService', () => {
         id: 'aula_1234567890abcdef',
         professorId: 'outro-prof',
       });
-      await expect(service.encerrarChamada('aula_1234567890abcdef', user)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.encerrarChamada('aula_1234567890abcdef', user),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
@@ -368,9 +385,9 @@ describe('AulaService', () => {
         id: 'aula_1234567890abcdef',
         professorId: 'outro-prof',
       });
-      await expect(service.obterQrCode('aula_1234567890abcdef', user)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.obterQrCode('aula_1234567890abcdef', user),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
@@ -389,7 +406,10 @@ describe('AulaService', () => {
         },
       ]);
 
-      const result = await service.obterListaDePresenca('aula_1234567890abcdef', user);
+      const result = await service.obterListaDePresenca(
+        'aula_1234567890abcdef',
+        user,
+      );
       expect(result.length).toBeGreaterThan(0);
     });
 

@@ -13,13 +13,10 @@ import { Cargo, Curso, Genero } from '@prisma/client';
 export class SolicitarInscricaoDto {
   @IsString({ message: 'O nome deve ser uma string.' })
   @IsNotEmpty({ message: 'O nome é obrigatório.' })
-  @Matches(
-    /^\s*(?!([A-Za-zÀ-ÿ])\1+\s*$)[A-Za-zÀ-ÿ]+(?:\s+[A-Za-zÀ-ÿ]+)*\s*$/,
-    {
-      message:
-        'O nome deve conter apenas letras e espaços, e não deve conter letras repetidas em sequência.',
-    },
-  )
+  @Matches(/^\s*(?!([A-Za-zÀ-ÿ])\1+\s*$)[A-Za-zÀ-ÿ]+(?:\s+[A-Za-zÀ-ÿ]+)*\s*$/, {
+    message:
+      'O nome deve conter apenas letras e espaços, e não deve conter letras repetidas em sequência.',
+  })
   nome: string;
 
   @IsEmail({}, { message: 'Forneça um e-mail válido.' })
