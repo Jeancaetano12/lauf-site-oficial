@@ -177,6 +177,9 @@ importers:
 
   apps/frontend:
     dependencies:
+      '@fullcalendar/core':
+        specifier: ^6.1.22
+        version: 6.1.22
       '@fullcalendar/daygrid':
         specifier: ^6.1.21
         version: 6.1.22(@fullcalendar/core@6.1.22)
