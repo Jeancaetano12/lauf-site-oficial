@@ -20,7 +20,8 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
-    "test": "node --experimental-strip-types --test test/**/*.spec.ts"
+    "test": "node --experimental-strip-types --test test/**/*.spec.ts",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "nanoid": "^3.3.8",
