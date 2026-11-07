@@ -57,14 +57,24 @@ O projeto utiliza **`pnpm workspaces`** e é estruturado em três pacotes princi
 ## 🚀 Primeiros Passos (Setup Local)
 
 1. **Pré-requisitos:**
-   - Node.js versão **24** ou superior.
-   - Gerenciador de pacotes **pnpm** instalado (`corepack enable` ou `npm install -g pnpm@11`).
-   - Docker e Docker Compose instalados (para o banco de dados).
+   - Node.js versão **>= 24** (Node 24 LTS recomendada).
+   - Gerenciador de pacotes **pnpm** pinado em `pnpm@11.19.0` (ativado automaticamente via Corepack pelo bootstrap).
+   - Docker e Docker Compose instalados manualmente (utilizados para o banco de dados; o bootstrap apenas verifica e orienta a instalação).
+   - Distribuições fora de Debian/Ubuntu com `apt-get` ou Windows com `winget` recebem diagnóstico e orientação para instalação manual oficial do Node >= 24.
 
-2. **Instalação das dependências:**
-   ```bash
-   pnpm install
-   ```
+2. **Bootstrap e Instalação de Dependências:**
+   Após clonar o repositório, execute o script de bootstrap antes de `pnpm install`:
+
+   - **No Linux (Debian / Ubuntu):**
+     ```bash
+     bash scripts/bootstrap-dev.sh
+     ```
+   - **No Windows (PowerShell):**
+     ```powershell
+     powershell -ExecutionPolicy Bypass -File scripts/bootstrap-dev.ps1
+     ```
+
+   O script valida o Node.js >= 24, ativa o pin `pnpm@11.19.0`, diagnostica Docker/Compose e executa `pnpm install` em todos os workspaces.
 
 3. **Ambiente e Banco de Dados:**
    ```bash
@@ -74,8 +84,20 @@ O projeto utiliza **`pnpm workspaces`** e é estruturado em três pacotes princi
    pnpm db:migrate
    pnpm db:seed
    ```
+   *Nota:* O comando `pnpm db:seed` é aditivo e preserva dados já existentes. Caso precise restaurar as credenciais originais em uma base já existente, utilize:
+   ```bash
+   pnpm db:seed --force
+   ```
 
-4. **Rodando a aplicação em desenvolvimento:**
+4. **Credenciais Oficiais de Teste (Seed):**
+
+   | Cargo / Perfil | E-mail | Matrícula | Senha |
+   |---|---|---|---|
+   | **Coordenador (Admin)** | `admin@lauf.com` | `240581739` | `senha123` |
+   | **Professor** | `professor@lauf.com` | `240694182` | `senha123` |
+   | **Aluno** | `aluno@lauf.com` | `25047381` | `senha123` |
+
+5. **Rodando a aplicação em desenvolvimento:**
    ```bash
    pnpm dev
    ```
