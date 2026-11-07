@@ -1,0 +1,63 @@
+name: Sugestão de Funcionalidade
+description: Sugira uma nova ideia, tela ou melhoria para o Portal LAUF.
+title: "[Feature]: "
+labels: ["tipo: feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por ajudar a evoluir a plataforma da Liga de Arduino Uninassau Fortaleza!
+        Explique sua ideia em detalhes para que possamos planejar sua implementação.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Qual problema ou necessidade esta funcionalidade resolve?
+      description: Uma descrição clara e concisa da dor enfrentada ou da oportunidade de melhoria.
+      placeholder: Exemplo - Alunos e professores têm dificuldade de acompanhar o histórico de presenças em formato de calendário...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solução Proposta
+      description: Como você imagina que essa funcionalidade deve funcionar?
+      placeholder: Exemplo - Adicionar uma aba no painel do aluno exibindo um calendário interativo com dias destacados em verde...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: target-workspace
+    attributes:
+      label: Qual escopo principal do monorepo será impactado?
+      options:
+        - "Frontend (Interface do Usuário)"
+        - "Backend (Endpoints / Regra de Negócio)"
+        - "Fullstack (Frontend + Backend + Shared)"
+        - "Infraestrutura e DevOps"
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas Consideradas
+      description: Existem outras soluções ou ferramentas alternativas que você considerou?
+      placeholder: Descreva abordagens alternativas avaliadas.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Contexto Adicional ou Mockups
+      description: Anexe rascunhos visuais, links de referência ou detalhes complementares.
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmações
+      options:
+        - label: Verifiquei se não existe uma sugestão parecida no backlog ou em issues abertas.
+          required: true
+        - label: Esta funcionalidade beneficia a comunidade da LAUF ou seus processos acadêmicos.
+          required: true

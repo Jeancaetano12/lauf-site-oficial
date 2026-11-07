@@ -1,0 +1,50 @@
+name: Tarefa Técnica ou Chore
+description: Registre uma tarefa de manutenção, atualização de dependências, refatoração ou débito técnico.
+title: "[Task]: "
+labels: ["tipo: chore"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use este modelo para registrar tarefas técnicas internas que não sejam necessariamente bugs reportados por usuários nem novas features.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição da Tarefa
+      description: Uma explicação clara do que precisa ser executado.
+      placeholder: Exemplo - Atualizar a versão do TailwindCSS ou refatorar o serviço de expiração de chamadas...
+    validations:
+      required: true
+
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Checklist de Entregáveis
+      description: Liste os itens concretos que compõem a conclusão desta tarefa.
+      placeholder: |
+        - [ ] Atualizar dependência X no packages/shared
+        - [ ] Rodar suíte de testes unitários
+        - [ ] Atualizar documentação relevante
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área Afetada
+      options:
+        - "Infraestrutura / CI/CD"
+        - "Backend (NestJS / Prisma)"
+        - "Frontend (React / Vite)"
+        - "Shared (@lauf/shared)"
+        - "Documentação / Governança"
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivação / Contexto
+      description: Por que essa tarefa é necessária e qual benefício ela traz ao monorepo?
+      placeholder: Ex: Melhorar a manutenibilidade, reduzir avisos de depreciação ou acelerar o tempo de build.
