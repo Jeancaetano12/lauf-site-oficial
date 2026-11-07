@@ -1,16 +1,26 @@
 #!/bin/bash
+set -e
 
 # ==============================================================================
 # SCRIPT DE PROVISIONAMENTO INICIAL DA VPS (UBUNTU / DEBIAN / ORACLE CLOUD)
 # Como usar:
 # 1. Acesse sua VPS via SSH
-# 2. Crie um arquivo com: nano setup-vps.sh
-# 3. Cole este código dentro dele e salve
-# 4. Dê permissão: chmod +x setup-vps.sh
-# 5. Execute: sudo ./setup-vps.sh
+# 2. Dê permissão de execução: chmod +x scripts/setup-vps.sh
+# 3. Execute: sudo ./scripts/setup-vps.sh
 # ==============================================================================
 
-echo "🚀 Iniciando a preparação da VPS..."
+# Salvaguarda: Detecção de sessão SSH com escape explícito (D-15)
+if [ -z "$SSH_CLIENT" ] && [ -z "$SSH_TTY" ] && [ "$1" != "--force-vps" ]; then
+  echo "🚨 ALERTA DE SEGURANÇA: Nenhuma sessão SSH detectada!"
+  echo "Este script instala serviços nativos (Nginx, Swap, etc.) e é exclusivo para a VPS."
+  echo "Para forçar a execução localmente (ex: VM de teste), utilize: sudo ./scripts/setup-vps.sh --force-vps"
+  exit 1
+fi
+
+# Identificação do usuário real não-root (D-18)
+TARGET_USER="${SUDO_USER:-$USER}"
+
+echo "🚀 Iniciando a preparação da VPS para o usuário: $TARGET_USER..."
 
 echo "📦 1. Atualizando repositórios do sistema..."
 sudo apt update && sudo apt upgrade -y
@@ -18,18 +28,22 @@ sudo apt update && sudo apt upgrade -y
 echo "🛠️ 2. Instalando ferramentas essenciais (Git, Curl, Nginx)..."
 sudo apt install -y git curl unzip nginx software-properties-common
 
+# Idempotência na configuração de Swap (D-17)
 echo "💾 3. Configurando Swap de 2GB (Rede de segurança para memória)..."
 if [ ! -f /swapfile ]; then
   sudo fallocate -l 2G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
   sudo chmod 600 /swapfile
   sudo mkswap /swapfile
   sudo swapon /swapfile
-  echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+  if ! grep -q "/swapfile" /etc/fstab; then
+    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+  fi
   echo "✅ Swap de 2GB ativado com sucesso!"
 else
   echo "ℹ️ Swapfile já existente, mantendo configuração atual."
 fi
 
+# Padronização em Node.js 24 (D-16)
 echo "🟢 4. Instalando Node.js (v24) e habilitando PNPM via Corepack..."
 curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt install -y nodejs
@@ -40,15 +54,16 @@ echo "🐳 5. Instalando Docker e Docker Compose..."
 sudo apt install -y docker.io docker-compose-v2 || sudo apt install -y docker.io docker-compose
 sudo systemctl enable docker
 sudo systemctl start docker
-# Adiciona o usuário atual ao grupo docker para não precisar usar sudo em todo comando
-sudo usermod -aG docker $USER
+# Adiciona o usuário real ao grupo docker para não precisar usar sudo em todo comando (D-18)
+sudo usermod -aG docker "$TARGET_USER"
 
 echo "🔒 6. Instalando Certbot (Para o certificado HTTPS / SSL gratuito)..."
 sudo apt install -y certbot python3-certbot-nginx
 
+# Permissões adequadas com o usuário alvo (D-18)
 echo "📁 7. Preparando diretório seguro para a aplicação em /var/www..."
 sudo mkdir -p /var/www/lauf-site-oficial
-sudo chown -R $USER:www-data /var/www/lauf-site-oficial
+sudo chown -R "$TARGET_USER":www-data /var/www/lauf-site-oficial
 sudo chmod -R 755 /var/www/lauf-site-oficial
 
 echo "✅ Instalação concluída com sucesso!"

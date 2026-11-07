@@ -8,7 +8,10 @@
     "start": "pnpm --filter backend start:prod",
     "test": "pnpm --filter @lauf/shared test && pnpm --filter backend test",
     "lint": "pnpm --filter backend lint && pnpm --filter frontend lint",
-    "typecheck": "pnpm --filter @lauf/shared typecheck && pnpm --filter backend typecheck && pnpm --filter frontend typecheck"
+    "typecheck": "pnpm --filter @lauf/shared typecheck && pnpm --filter backend typecheck && pnpm --filter frontend typecheck",
+    "db:seed": "pnpm --filter backend run seed",
+    "db:migrate": "pnpm --filter backend exec prisma migrate dev",
+    "db:studio": "pnpm --filter backend exec prisma studio"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
