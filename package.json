@@ -6,7 +6,8 @@
     "dev": "pnpm --filter @lauf/shared build && concurrently \"pnpm --filter frontend dev\" \"pnpm --filter backend start:dev\"",
     "build": "pnpm --filter @lauf/shared build && pnpm --filter backend build && pnpm --filter frontend build",
     "start": "pnpm --filter backend start:prod",
-    "test": "pnpm --filter @lauf/shared test && pnpm --filter backend test"
+    "test": "pnpm --filter @lauf/shared test && pnpm --filter backend test",
+    "lint": "pnpm --filter backend lint && pnpm --filter frontend lint"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
