@@ -152,6 +152,25 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
+    it('deve rejeitar aluno com matrícula de 9 dígitos antes de comparar a senha', async () => {
+      mockPrismaService.usuario.findUnique.mockResolvedValue({
+        id: 'user-id',
+        matricula: '250473810',
+        senha: 'hash',
+        cargo: 'ALUNO',
+        email: 'aluno@lauf.com',
+      });
+
+      await expect(
+        service.login({ matricula: '250473810', senha: 'senha123' }),
+      ).rejects.toThrow(UnauthorizedException);
+
+      expect(mockPrismaService.usuario.findUnique).toHaveBeenCalledWith({
+        where: { matricula: '250473810' },
+      });
+      expect(bcrypt.compare).not.toHaveBeenCalled();
+    });
+
     it('deve retornar accessToken e refreshToken para credenciais validas', async () => {
       mockPrismaService.usuario.findUnique.mockResolvedValue({
         id: 'user-id',
