@@ -43,19 +43,60 @@ Todas as chamadas ao backend **devem** utilizar a instância exportada em `src/s
 O `AuthContext` é o "Cérebro" da sessão do lado do Cliente:
 - **Sem LocalStorage**: A sessão não é baseada em dados persistentes vulneráveis do lado do cliente (como `localStorage` ou `jwt-decode`).
 - **Validação com o Backend**: Ao iniciar a página, o contexto realiza uma validação (`/auth/validar-sessao`) que envia os cookies para o backend, retornando os dados seguros do usuário para popular o estado caso a sessão seja válida.
-- Fornece as funções e métodos de fluxo como `login`, `logout` e `solicitarInscricao`.
+- Fornece as funções e métodos de fluxo como `login` e `logout`.
 
 ### 5.3. Redirecionamento e Proteção
 - **Página de Login**: Deve verificar se `isAuthenticated` é true e redirecionar para o Hub imediatamente para evitar que o usuário logue duas vezes.
 - **Rotas Protegidas**: Utilize o componente `ProtectedRoute` (em `src/components/ProtectedRoute.tsx`) para envolver rotas que exigem autenticação. Ele gerencia o estado de carregamento e redireciona automaticamente para o `/login` caso não haja uma sessão válida.
 
 ```tsx
-<Route 
-  path="/privadas" 
+{/* Rota Pai que carrega o Layout de Navegação */}
+<Route
   element={
     <ProtectedRoute>
-      <SuaPaginaPrivada />
+      <HubLayout />
     </ProtectedRoute>
-  } 
-/>
+  }
+>
+  {/* Todas as rotas que precisam do menu lateral/bottom-bar entram aqui como filhas */}
+  <Route path="/hub" element={<LaufHub />} />
+  <Route path="/aulas" element={<Aulas />} />
+  <Route path="/perfil" element={<Perfil />} />
+  <Route path="/solicitacoes" element={<Solicitacoes />} />
+  <Route path="/solicitacoes/:id" element={<SolicitacaoDetalhes />} />
+  <Route path="/extras" element={<Extras />} />
+  <Route path="/aulas/:id" element={<AulaDetalhes />} />
+  <Route path="/confirmar-presenca" element={<ConfirmarPresenca />} />
+  {/* <Route path="/calendario" element={<Calendario />} /> */}
 ```
+
+## Hooks:
+O proprio `AuthContext` é um hook, e ele é o único hook que deve ser usado para autenticação.
+Ele possui o seguinte estado:
+- `user`: Dados do usuário
+- `isAuthenticated`: Verifica se o usuário está autenticado
+- `isLoading`: Verifica se o usuário está carregando
+- `login`: Método de login
+- `logout`: Método de logout
+- `validarSessao`: Método de validação de sessão
+
+### useAulas:
+Responsavel por gerenciar as aulas, ele trabalha junto com o componente de calendario para exibir as aulas.
+Ele possui os seguintes métodos:
+- `buscarAulas`: Busca as aulas, sempre retorna as aulas ordenadas por data e hora
+- `buscarProfessores`: Busca os professores
+- `criarAula`: Cria uma aula
+- `updateAula`: Atualiza uma aula
+- `refetch`: Recarrega as aulas
+- `isLoading`: Verifica se está carregando
+- `error`: Verifica se houve erro
+
+### useSolicitacoes:
+Responsavel por gerenciar as solicitações de inscrição, e requisições de usuarios sem login.
+Ele possui os seguintes métodos:
+- `buscarSolicitacoes`: Busca as solicitações de inscrição, sempre retorna as solicitações ordenadas por data e hora
+- `solicitarInscricao`: Cria uma solicitação de inscrição
+- `aprovarSolicitacao`: Aprova uma solicitação
+- `reprovarSolicitacao`: Reprova uma solicitação
+- `isLoading`: Verifica se está carregando
+- `error`: Verifica se houve erro

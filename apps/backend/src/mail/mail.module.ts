@@ -22,4 +22,4 @@ import { MailerModule } from '@nestjs-modules/mailer';
   providers: [MailService],
   exports: [MailService], // Exporta o MailService para ser usado no AuthModule
 })
-export class MailModule { }
+export class MailModule {}

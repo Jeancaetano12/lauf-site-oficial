@@ -1,6 +1,6 @@
 # Padrões de Deploy para Produção
 
-Este documento detalha as estratégias, a arquitetura e os scripts relacionados ao processo de implantação (Deploy) da aplicação na VPS de produção.
+Este documento detalha as estratégias, a arquitetura e os scripts relacionados ao processo de implantação (Deploy) da aplicação na VPS de produção (Ubuntu / Debian / Oracle Cloud Free Tier).
 
 ## 1. Estratégia de Branches (Git Flow)
 
@@ -21,23 +21,35 @@ bash scripts/deploy.sh
 
 **O que o script faz nos bastidores?**
 1. **Pull Automatizado:** Executa `git checkout main` e `git pull origin main` para pegar o código mais recente.
-2. **Dependências:** Executa `npm install` na raiz para instalar os pacotes (graças ao NPM Workspaces, isso resolve para backend e frontend).
-3. **Prisma Migrate:** Roda `npx prisma migrate deploy` na pasta do backend para refletir eventuais atualizações da modelagem (`schema.prisma`) no banco de dados com total segurança, diferente do `migrate dev`.
-4. **Build do Backend:** Roda o processo de compilação do NestJS (`npm run build`).
-5. **Build do Frontend:** Roda a compilação final do Vite + React (`npm run build`), gerando as versões mais recentes dos arquivos visuais dentro da pasta `dist` (arquivos que o seu Nginx está servindo).
-6. **Reload do PM2:** Reinicia o processo principal chamado `lauf-backend` no PM2 para aplicar a nova versão da API de forma imediata (evitando indisponibilidade prolongada).
+2. **Dependências:** Executa `pnpm install --frozen-lockfile` na raiz para resolver dependências de todos os workspaces com velocidade e economia de RAM.
+3. **Build do Pacote Compartilhado:** Compila `@lauf/shared` (`pnpm --filter @lauf/shared build`) para disponibilizar Enums e contratos para os demais pacotes.
+4. **Build do Frontend:** Roda a compilação final do Vite + React (`pnpm --filter frontend build`), gerando a pasta `apps/frontend/dist` estática servida pelo Nginx.
+5. **Containers Docker:** Sobe e atualiza os containers via `docker compose -f docker-compose.prod.yml up -d --build` (iniciando o PostgreSQL e a imagem Docker do backend NestJS).
+6. **Prisma Migrate:** Executa `docker compose exec -T backend pnpm exec prisma migrate deploy` para aplicar migrations com segurança.
 
 ## 3. Preparando o Terreno (Primeira vez na VPS)
 
-Se esta for a primeira vez que você está configurando a VPS, boa parte do processo manual foi automatizado!
+Na primeira configuração da VPS (Ubuntu tradicional ou Oracle Cloud Free Tier):
 
-**SOLICITE** o documento **`vps-setup-guide.md`** a um dos responsáveis pelo projeto para ter acesso ao roteiro detalhado de `setup da VPS`.
-A preparação inicial agora se resume a:
+1. Executar o script **`setup-vps.sh`** para instalar automaticamente as dependências da máquina (Node.js 24, PNPM via Corepack, Docker, Docker Compose, Nginx, Certbot e Swap de 2GB).
+2. Clonar o repositório em `/var/www/lauf-site-oficial` utilizando uma chave SSH (nunca na pasta `/root`, seguindo o padrão de segurança FHS).
+3. Configurar as variáveis de ambiente (`.env` na raiz e `apps/backend/.env`).
+4. Rodar `bash scripts/deploy.sh` em `/var/www/lauf-site-oficial` para subir o banco, a API no Docker e o build do frontend.
+5. Configurar o Nginx (`nginx-poc.conf`) e gerar o certificado HTTPS gratuitamente com o Certbot.
 
-1. Executar o script **`setup-vps.sh`** para instalar automaticamente todas as dependências da máquina (Node.js, Docker, Nginx, PM2, Certbot, etc.).
-2. Clonar o repositório utilizando uma chave SSH.
-3. Configurar as variáveis de ambiente (`.env`).
-4. Iniciar a infraestrutura primária (Banco de Dados, compilar a API no PM2 e fazer o build do Frontend).
-5. Configurar o Nginx e gerar o certificado HTTPS gratuitamente com o Certbot.
+## 4. Acesso ao Banco de Dados de Produção via DBeaver (SSH Tunnel)
 
-Após essa preparação inicial (detalhada no guia), o seu dia a dia de atualizações da aplicação se resume puramente em garantir que as alterações estejam na branch `main` e rodar `bash scripts/deploy.sh` na raiz do projeto na VPS!
+Por segurança, o PostgreSQL roda com a porta vinculada exclusivamente em `127.0.0.1:5432:5432` no `docker-compose.prod.yml`, ficando invisível para scanners da internet pública.
+
+**Como conectar com o DBeaver do seu computador:**
+1. Na configuração de conexão do PostgreSQL no DBeaver, vá até a aba **SSH**.
+2. Marque **Use SSH Tunnel**:
+   - **Host/IP:** IP da VPS (ou domínio `laufoficial.site`)
+   - **Port:** `22`
+   - **User:** seu usuário SSH da VPS (`root` ou `ubuntu`)
+   - **Authentication:** Senha ou Private Key da VPS.
+3. Na aba **Main** do PostgreSQL:
+   - **Host:** `127.0.0.1` (ou `localhost`)
+   - **Port:** `5432`
+   - **Database / User / Password:** credenciais do seu banco de dados.
+4. Clique em **Test Connection** e conecte-se com total segurança!

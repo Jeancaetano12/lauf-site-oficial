@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaUser, FaEnvelope, FaIdCard, FaPhone, FaGraduationCap, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
-import { useAuth } from "../context/AuthContext";
+import { useSolicitacoes } from "../hooks/useSolicitacoes";
 
 export default function SolicitarInscricao() {
-  const { solicitarInscricao } = useAuth();
+  const { solicitarInscricao } = useSolicitacoes();
   const navigate = useNavigate();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -25,7 +25,15 @@ export default function SolicitarInscricao() {
     setLoading(true);
     setFeedback({ type: null, message: "" });
     try {
-      const response = await solicitarInscricao({ nome, email, matricula, telefone, curso, cargoPretendido: cargo, genero });
+      const response = await solicitarInscricao({
+        nome: nome.trim(),
+        email: email.trim(),
+        matricula: matricula.trim(),
+        telefone: telefone.trim(),
+        curso,
+        cargoPretendido: cargo,
+        genero,
+      });
       setFeedback({
         type: "success",
         message: response?.message || "Sua solicitação de inscrição foi recebida com sucesso! Aguarde retorno por e-mail."
@@ -274,7 +282,8 @@ export default function SolicitarInscricao() {
             <div className="md:col-span-2 pt-6">
               <button
                 type="submit"
-                className="w-full bg-brand-purple hover:bg-brand-purple-hover text-white py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-brand-purple/20"
+                disabled={loading}
+                className="cursor-pointer w-full bg-brand-purple hover:bg-brand-purple-hover text-white py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-brand-purple/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <div className="flex items-center justify-center gap-2">

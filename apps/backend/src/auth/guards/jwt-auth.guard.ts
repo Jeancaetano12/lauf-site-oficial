@@ -1,4 +1,8 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
@@ -9,7 +13,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const secretToken = process.env.DEVELOPER_BYPASS_TOKEN;
 
     // Segurança adicional: O token deve estar configurado e ter pelo menos 16 caracteres para ser válido.
-    if (secretToken && secretToken.trim().length >= 16 && bypassToken === secretToken) {
+    if (
+      secretToken &&
+      secretToken.trim().length >= 16 &&
+      bypassToken === secretToken
+    ) {
       request.user = {
         id: 'developer-bypass-id',
         nome: 'DESENVOLVEDOR (BYPASS)',
@@ -26,7 +34,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   handleRequest(err: any, user: any, info: any) {
     if (err || !user) {
-      throw err || new UnauthorizedException('Acesso negado. Token inválido ou não fornecido.');
+      throw (
+        err ||
+        new UnauthorizedException(
+          'Acesso negado. Token inválido ou não fornecido.',
+        )
+      );
     }
     return user;
   }

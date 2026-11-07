@@ -53,3 +53,24 @@ Sempre que a funcionalidade envolver segurança e controle de acesso, atente-se 
 - Os disparos de emails solicitado nos requisitos funcionais estão implementados e escritos em um modulo próprio `MailService`, que já foi integrado ao sistema.
 - Sempre que for necessário enviar um email, utilize o `MailService` já disponível.
 - O `MailService` está configurado para utilizar o SMTP da google, limitado a 500 envios por dia.
+
+## 6. Agendamento de Aulas (AulaModule)
+
+Modulo responsavel por gerenciar aulas e eventos do sistema. Segue as seguintes regras:
+
+### 6.1 Processos em Background (CronJobs)
+- O modulo de Aulas possui um job configurado via `@nestjs/schedule` que roda a cada 30 minutos (`@Cron(CronExpression.EVERY_30_MINUTES)`).
+- **Cancelamento Automático:** Este job varre o banco buscando por aulas que tenham passado 5 horas do seu início e que não possuam nenhuma presença registrada. Tais aulas têm o seu status atualizado de `AGENDADA` para `CANCELADA` automaticamente, evitando retenção de aulas antigas abertas.
+
+## 7. Registro de presença (PresencaModule)
+
+Modulo responsavel por registrar a presença dos usuários em aulas. Segue as seguintes regras:
+
+## 8. Modulo de Usuarios (UsuariosModule)
+
+Modulo responsavel por gerenciar usuarios do sistema. Segue as seguintes regras:
+
+### 8.1 Modulo de Solicitações (UsuariosModule) 
+
+Um submodulo de usuarios criado para tratar solicitações de inscrição para alunos interessados em participar de um curso oferecido pelo LAUF.
+Segue as seguintes regras:

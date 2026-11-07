@@ -12,7 +12,7 @@ dist-ssr
 scripts/vps-setup-guide.md
 apps/backend/docs/agent-skills/seguranca.md
 *.local
-
+plano-acao
 .env
 .env.local
 
@@ -28,3 +28,6 @@ apps/backend/docs/agent-skills/seguranca.md
 *.sw?
 /node_modules
 node_modules
+.planning
+.gsd
+.continue-here.md

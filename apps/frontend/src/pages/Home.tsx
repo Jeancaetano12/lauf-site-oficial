@@ -53,13 +53,13 @@ export default function Home() {
           <div className="flex justify-center items-center relative h-full min-h-[300px] md:min-h-[400px]">
             {/* brilho de fundo */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-purple/30 blur-[100px] rounded-full w-[250px] h-[250px] md:w-[400px] md:h-[400px] z-0"></div>
-            
+
             {/* imagem do robo */}
             <div className="relative z-10 flex items-center justify-center">
-              <img 
-                src={roboImg} 
-                alt="Robô Engenharia LAUF" 
-                className="w-[18rem] md:w-[24rem] lg:w-[30rem] object-contain drop-shadow-[0_0_30px_rgba(110,64,201,0.4)] transition-all duration-700 hover:scale-110 hover:-translate-y-4" 
+              <img
+                src={roboImg}
+                alt="Robô Engenharia LAUF"
+                className="w-[18rem] md:w-[24rem] lg:w-120 object-contain drop-shadow-[0_0_30px_rgba(110,64,201,0.4)] transition-all duration-700 hover:scale-110 hover:-translate-y-4"
               />
             </div>
           </div>
@@ -78,13 +78,13 @@ export default function Home() {
               </p>
             </div>
             <div className="w-full md:w-1/2 flex justify-center relative">
-               {/* brilho de fundo opcional para combinar com os outros */}
-               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-purple/20 blur-[60px] rounded-full w-[120px] h-[120px] md:w-[180px] md:h-[180px] z-0"></div>
-               <img 
-                 src={roboTargetImg} 
-                 alt="Robô Alvo LAUF" 
-                 className="relative z-10 w-[10rem] md:w-[14rem] lg:w-[18rem] object-contain drop-shadow-[0_0_25px_rgba(110,64,201,0.3)] transition-transform duration-700 hover:scale-110 hover:-translate-y-3" 
-               />
+              {/* brilho de fundo opcional para combinar com os outros */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-purple/20 blur-[60px] rounded-full w-[120px] h-[120px] md:w-[180px] md:h-[180px] z-0"></div>
+              <img
+                src={roboTargetImg}
+                alt="Robô Alvo LAUF"
+                className="relative z-10 w-40 md:w-56 lg:w-[18rem] object-contain drop-shadow-[0_0_25px_rgba(110,64,201,0.3)] transition-transform duration-700 hover:scale-110 hover:-translate-y-3"
+              />
             </div>
           </div>
 
@@ -178,12 +178,12 @@ export default function Home() {
           <div className="w-full flex justify-center items-center relative min-h-[300px]">
             {/* Efeito de brilho atrás do robô */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-purple/20 blur-[80px] rounded-full w-[200px] h-[200px] md:w-[300px] md:h-[300px] z-0"></div>
-            
+
             {/* Imagem do robô chat */}
-            <img 
-              src={roboChatImg} 
-              alt="Robô de Contato LAUF" 
-              className="relative z-10 w-[14rem] md:w-[20rem] lg:w-[24rem] object-contain drop-shadow-[0_0_25px_rgba(110,64,201,0.3)] transition-transform duration-700 hover:scale-110 hover:-translate-y-3" 
+            <img
+              src={roboChatImg}
+              alt="Robô de Contato LAUF"
+              className="relative z-10 w-56 md:w-[20rem] lg:w-[24rem] object-contain drop-shadow-[0_0_25px_rgba(110,64,201,0.3)] transition-transform duration-700 hover:scale-110 hover:-translate-y-3"
             />
           </div>
         </div>

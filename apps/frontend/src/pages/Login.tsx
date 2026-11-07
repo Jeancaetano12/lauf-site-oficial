@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { FaArrowLeft, FaEnvelope, FaLock } from "react-icons/fa";
 import roboPcImg from "../assets/img-robo-pc.png";
@@ -10,19 +10,24 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from 
+    ? `${location.state.from.pathname}${location.state.from.search || ""}` 
+    : "/hub";
 
   useEffect(() => {
     if (isAuthenticated && !isAuthLoading) {
-      navigate("/hub");
+      navigate(from, { replace: true });
     }
-  }, [isAuthenticated, isAuthLoading, navigate]);
+  }, [isAuthenticated, isAuthLoading, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
       await login(matricula, senha);
-      navigate("/hub");
+      navigate(from, { replace: true });
     } catch (error) {
       // Ideal seria um Toast de erro (ex: react-toastify)
       alert("Falha no login. Verifique sua matrícula e senha.");
@@ -47,11 +52,11 @@ export default function Login() {
       <div className="w-full max-w-md z-10">
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center mb-6 relative">
-            <div className="absolute inset-0 bg-brand-purple/20 blur-[40px] rounded-full z-0"></div>
-            <img 
-              src={roboPcImg} 
-              alt="Robô de Login LAUF" 
-              className="relative z-10 w-32 md:w-40 object-contain drop-shadow-[0_0_15px_rgba(110,64,201,0.3)] transition-transform duration-700 hover:scale-110 hover:-translate-y-3" 
+            <div className="absolute inset-0 bg-brand-purple/20 blur-2x1 rounded-full z-0"></div>
+            <img
+              src={roboPcImg}
+              alt="Robô de Login LAUF"
+              className="relative z-10 w-32 md:w-40 object-contain drop-shadow-[0_0_15px_rgba(110,64,201,0.3)] transition-transform duration-700 hover:scale-110 hover:-translate-y-3"
             />
           </div>
           <h1 className="text-4xl font-bold mb-2">Bem-vindo de volta</h1>
@@ -102,7 +107,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading || isAuthLoading}
-            className="w-full bg-brand-purple hover:bg-brand-purple-hover text-white py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-brand-purple/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="cursor-pointer w-full bg-brand-purple hover:bg-brand-purple-hover text-white py-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-brand-purple/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <div className="flex items-center justify-center gap-2">
