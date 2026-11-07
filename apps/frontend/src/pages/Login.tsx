@@ -76,10 +76,14 @@ export default function Login() {
                 maxLength={9}
                 value={matricula}
                 onChange={(e) => setMatricula(e.target.value)}
+                aria-describedby="matricula-format-help"
                 className="w-full bg-brand-gray-medium/10 border border-brand-gray-medium/20 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-brand-purple transition-colors placeholder:text-brand-gray-medium/40"
                 required
               />
             </div>
+            <p id="matricula-format-help" className="text-xs text-brand-gray-medium ml-1">
+              Use 8 dígitos para aluno ou 9 dígitos para professor e coordenador.
+            </p>
           </div>
 
           <div className="space-y-2">

@@ -174,10 +174,13 @@ describe('AuthService', () => {
     it('deve retornar accessToken e refreshToken para credenciais validas', async () => {
       mockPrismaService.usuario.findUnique.mockResolvedValue({
         id: 'user-id',
-        matricula: '01548379',
+        matricula: '25047381',
         senha: 'hash',
         cargo: 'ALUNO',
-        email: 'j@t.com',
+        email: 'aluno@lauf.com',
+        nome: 'Aluno LAUF',
+        telefone: '85999990003',
+        curso: Curso.ENGENHARIA_DA_COMPUTACAO,
       });
       // Simular senha correta
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
@@ -185,8 +188,8 @@ describe('AuthService', () => {
       mockPrismaService.sessao.create.mockResolvedValue({});
 
       const resultado = await service.login({
-        matricula: '01548379',
-        senha: '01548379',
+        matricula: '25047381',
+        senha: 'senha123',
       });
 
       expect(resultado.accessToken).toBe('meu-token-jwt-falso');

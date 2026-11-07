@@ -15,6 +15,12 @@ import { LoginDto } from './dto/login.dto';
 import { ConcluirCadastroDto } from './dto/concluir-cadastro.dto';
 import { randomBytes } from 'crypto';
 
+const MATRICULA_LENGTH_BY_CARGO: Record<string, number | undefined> = {
+  ALUNO: 8,
+  PROFESSOR: 9,
+  COORDENADOR: 9,
+};
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -34,6 +40,14 @@ export class AuthService {
       this.logger.log(
         `[DEBUG] Usuario com a matricula ${dto.matricula} nao foi encontrado para login`,
       );
+      throw new UnauthorizedException('Credenciais inválidas.');
+    }
+
+    const expectedMatriculaLength = MATRICULA_LENGTH_BY_CARGO[usuario.cargo];
+    if (
+      expectedMatriculaLength !== undefined &&
+      dto.matricula.length !== expectedMatriculaLength
+    ) {
       throw new UnauthorizedException('Credenciais inválidas.');
     }
 
