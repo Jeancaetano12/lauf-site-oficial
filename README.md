@@ -1,6 +1,6 @@
 # Portal LAUF — Liga de Arduino Uninassau Fortaleza
 
-[![Node.js Version](https://img.shields.io/badge/node-22.x_LTS-339933?logo=node.js)](https://nodejs.org/)
+[![Node.js Version](https://img.shields.io/badge/node-24.x-339933?logo=node.js)](https://nodejs.org/)
 [![pnpm Version](https://img.shields.io/badge/pnpm-9%2B-F69220?logo=pnpm)](https://pnpm.io/)
 [![React Version](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
 [![NestJS Version](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs)](https://nestjs.com/)
@@ -70,7 +70,7 @@ flowchart LR
 Siga o passo a passo abaixo para clonar, configurar e rodar o projeto localmente do zero.
 
 ### Pré-requisitos Essenciais
-- **Node.js**: Versão `22.x LTS` recomendada ([Download Node.js](https://nodejs.org/)).
+- **Node.js**: Versão `24 LTS` recomendada ([Download Node.js](https://nodejs.org/)).
 - **pnpm**: Gerenciador de pacotes oficial. Ative via Corepack no terminal:
   ```bash
   corepack enable
@@ -118,20 +118,19 @@ Copy-Item apps/frontend/.env.example apps/frontend/.env
 
 ### Passo 3: Inicializar o Banco de Dados & Iniciar a Aplicação
 
-1. **Suba o banco PostgreSQL no Docker:**
-   ```bash
-   docker compose up -d
-   ```
+```bash
+# 1. Suba o banco PostgreSQL no Docker:
+docker compose up -d
 
-2. **Execute as migrations do Prisma (o script de seed rodará automaticamente):**
-   ```bash
-   pnpm --filter backend exec prisma migrate dev
-   ```
+# 2. Execute as migrations do banco:
+pnpm db:migrate
 
-3. **Inicie o Frontend e o Backend em paralelo:**
-   ```bash
-   pnpm dev
-   ```
+# 3. Popule o banco com as contas e dados iniciais de teste (seed deliberado):
+pnpm db:seed
+
+# 4. Inicie o Frontend e o Backend em paralelo:
+pnpm dev
+```
 
 🎉 **Pronto! A aplicação está disponível:**
 - 💻 **Frontend**: [http://localhost:5173](http://localhost:5173)
@@ -141,7 +140,7 @@ Copy-Item apps/frontend/.env.example apps/frontend/.env
 
 ## 🔑 Credenciais Padrão de Desenvolvimento (Seed)
 
-O comando de migração popula automaticamente contas de teste para que você possa explorar todas as áreas do sistema imediatamente:
+O comando deliberado `pnpm db:seed` popula as contas de teste para que você possa explorar todas as áreas do sistema imediatamente:
 
 | Cargo / Perfil | E-mail | Senha | Permissões no Sistema |
 |---|---|---|---|
@@ -166,12 +165,15 @@ Comandos disponíveis a partir da raiz do monorepo:
 | Comando | Descrição |
 |---|---|
 | `pnpm dev` | Compila `@lauf/shared` e sobe Frontend (`5173`) e Backend (`3000`) em paralelo |
+| `pnpm build` | Compila todo o monorepo em cadeia (`shared` -> `backend` -> `frontend`) |
+| `pnpm test` | Executa a suíte de testes unitários do monorepo (`@lauf/shared` e `backend`) |
+| `pnpm lint` | Executa a verificação estática de código (ESLint) no backend e frontend |
+| `pnpm typecheck` | Valida a integridade de tipagem TypeScript estrita nos 3 workspaces |
+| `pnpm db:seed` | Popula ou reseta de forma controlada os dados de teste no banco |
+| `pnpm db:migrate` | Aplica migrações pendentes do Prisma em desenvolvimento |
+| `pnpm db:studio` | Abre a interface visual do Prisma Studio (porta 5555) |
 | `pnpm --filter frontend dev` | Inicia apenas o servidor de desenvolvimento do Frontend (Vite) |
 | `pnpm --filter backend start:dev` | Inicia apenas a API NestJS com recarregamento a quente (*watch mode*) |
-| `pnpm test` | Executa a suíte de testes unitários do monorepo (`@lauf/shared` e `backend`) |
-| `pnpm build` | Compila todo o monorepo em cadeia (`shared` -> `backend` -> `frontend`) |
-| `pnpm --filter backend exec prisma studio` | Abre a interface gráfica do Prisma ([http://localhost:5555](http://localhost:5555)) para inspecionar o banco |
-| `pnpm --filter backend exec prisma db seed` | Recarrega sob demanda os dados iniciais de teste |
 
 ---
 

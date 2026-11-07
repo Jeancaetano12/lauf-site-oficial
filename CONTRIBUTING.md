@@ -57,7 +57,7 @@ O projeto utiliza **`pnpm workspaces`** e é estruturado em três pacotes princi
 ## 🚀 Primeiros Passos (Setup Local)
 
 1. **Pré-requisitos:**
-   - Node.js versão **22 LTS** ou superior.
+   - Node.js versão **24** ou superior.
    - Gerenciador de pacotes **pnpm** instalado (`corepack enable` ou `npm install -g pnpm@11`).
    - Docker e Docker Compose instalados (para o banco de dados).
 
@@ -68,9 +68,11 @@ O projeto utiliza **`pnpm workspaces`** e é estruturado em três pacotes princi
 
 3. **Ambiente e Banco de Dados:**
    ```bash
-   cp .env.example .env
+   cp apps/backend/.env.example apps/backend/.env
+   cp apps/frontend/.env.example apps/frontend/.env
    docker compose up -d
-   pnpm --filter backend exec prisma migrate dev
+   pnpm db:migrate
+   pnpm db:seed
    ```
 
 4. **Rodando a aplicação em desenvolvimento:**
