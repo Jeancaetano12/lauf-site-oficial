@@ -203,8 +203,8 @@ Para garantir revisões humanas de alta qualidade, reduzir o tempo de feedback e
 
 - **Limite de Linhas:** No máximo **800 linhas de diff** (somatório de linhas adicionadas e removidas).
 - **Limite de Arquivos:** No máximo **8 arquivos de código efetivo** modificados.
-  - *O que conta como código efetivo:* arquivos `.ts`, `.tsx`, `.js`, `.css`, arquivos de configuração ou controllers/services/componentes.
-  - *Exceções não contabilizadas no limite de arquivos:* arquivos de trava (`pnpm-lock.yaml`), schemas ou migrations geradas pelo Prisma, e arquivos de assets/imagens.
+  - *O que conta como código efetivo:* arquivos `.ts`, `.tsx`, `.js`, `.css`, arquivos de configuração, controllers/services/componentes e **arquivos de banco de dados (`schema.prisma` e `migration.sql`)**. Como trabalhamos com Prisma ORM, migrations afetam diretamente a integridade do banco e exigem atenção rigorosa na revisão.
+  - *Exceções não contabilizadas no limite de arquivos:* arquivos de trava (`pnpm-lock.yaml`) e assets estáticos binários/imagens.
 - **Se sua demanda exceder esses limites:** O PR **não** deve ser aberto como um monolito. Ele **deve** ser obrigatoriamente decomposto em **PRs Empilhados (Stacked PRs)**.
 
 ---

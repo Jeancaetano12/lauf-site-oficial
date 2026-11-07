@@ -52,7 +52,7 @@ Descreva resumidamente o que foi implementado neste Pull Request e a justificati
 Antes de solicitar a revisão de um mantenedor da LAUF, confirme se você realizou os seguintes passos:
 
 - [ ] Meu código segue as convenções e boas práticas estabelecidas no [CONTRIBUTING.md](../CONTRIBUTING.md).
-- [ ] **Rastreabilidade e Limites:** O PR contém no máximo **800 linhas de diff** e toca em até **8 arquivos de código efetivo** (ou está devidamente dividido em PRs Empilhados).
+- [ ] **Rastreabilidade e Limites:** O PR contém no máximo **800 linhas de diff** e toca em até **8 arquivos de código efetivo** (incluindo `schema.prisma` e migrations; exceto apenas lockfiles e assets).
 - [ ] Executei a validação de lint e tipos (`pnpm lint` e `pnpm typecheck`) sem novos erros.
 - [ ] Executei a suíte de testes unitários localmente (`pnpm test`) e todos os testes passaram com sucesso.
 - [ ] Confirmo que **NENHUM** segredo, chave privada, token de autenticação ou arquivo `.env` sensível foi incluído neste commit.
