@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "packageManager": "pnpm@11.19.0",
   "scripts": {
-    "dev": "concurrently \"pnpm --filter frontend dev\" \"pnpm --filter backend start:dev\"",
+    "dev": "pnpm --filter @lauf/shared build && concurrently \"pnpm --filter frontend dev\" \"pnpm --filter backend start:dev\"",
     "build": "pnpm --filter @lauf/shared build && pnpm --filter backend build && pnpm --filter frontend build",
     "start": "pnpm --filter backend start:prod",
     "test": "pnpm --filter @lauf/shared test && pnpm --filter backend test"
