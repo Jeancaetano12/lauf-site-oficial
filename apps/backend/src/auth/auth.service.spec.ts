@@ -152,28 +152,100 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('deve retornar accessToken e refreshToken para credenciais validas', async () => {
+    const mockUsuarioLogin = (cargo: string, matricula: string) => {
+      mockPrismaService.usuario.findUnique.mockResolvedValue({
+        id: `user-${cargo.toLowerCase()}`,
+        matricula,
+        senha: 'hash',
+        cargo,
+        email: `${cargo.toLowerCase()}@lauf.com`,
+        nome: `Usuário ${cargo}`,
+        telefone: '85999990000',
+        curso: Curso.ENGENHARIA_DA_COMPUTACAO,
+      });
+      mockPrismaService.sessao.create.mockResolvedValue({});
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    };
+
+    it('deve rejeitar aluno com matrícula de 9 dígitos antes de comparar a senha', async () => {
       mockPrismaService.usuario.findUnique.mockResolvedValue({
         id: 'user-id',
-        matricula: '01548379',
+        matricula: '250473810',
         senha: 'hash',
         cargo: 'ALUNO',
-        email: 'j@t.com',
+        email: 'aluno@lauf.com',
       });
-      // Simular senha correta
-      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      // Simular criacao de sessao
-      mockPrismaService.sessao.create.mockResolvedValue({});
+
+      await expect(
+        service.login({ matricula: '250473810', senha: 'senha123' }),
+      ).rejects.toThrow(UnauthorizedException);
+
+      expect(mockPrismaService.usuario.findUnique).toHaveBeenCalledWith({
+        where: { matricula: '250473810' },
+      });
+      expect(bcrypt.compare).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar accessToken e refreshToken para credenciais validas', async () => {
+      mockUsuarioLogin('ALUNO', '25047381');
 
       const resultado = await service.login({
-        matricula: '01548379',
-        senha: '01548379',
+        matricula: '25047381',
+        senha: 'senha123',
       });
 
       expect(resultado.accessToken).toBe('meu-token-jwt-falso');
       // expect(mockMailService.enviarEmailLogin).toHaveBeenCalled();
       expect(resultado.refreshToken).toBeDefined();
     });
+
+    it.each([
+      ['ALUNO', '25047381'],
+      ['PROFESSOR', '240694182'],
+      ['COORDENADOR', '240581739'],
+    ])(
+      'deve autenticar %s com a matrícula de comprimento esperado',
+      async (cargo, matricula) => {
+        mockUsuarioLogin(cargo, matricula);
+
+        const resultado = await service.login({ matricula, senha: 'senha123' });
+
+        expect(bcrypt.compare).toHaveBeenCalledWith('senha123', 'hash');
+        expect(resultado.accessToken).toBe('meu-token-jwt-falso');
+      },
+    );
+
+    it.each([
+      ['ALUNO', '250473810'],
+      ['PROFESSOR', '24069418'],
+      ['COORDENADOR', '24058173'],
+    ])(
+      'deve rejeitar %s com matrícula de comprimento incompatível antes do bcrypt',
+      async (cargo, matricula) => {
+        mockUsuarioLogin(cargo, matricula);
+
+        await expect(
+          service.login({ matricula, senha: 'senha123' }),
+        ).rejects.toThrow('Credenciais inválidas.');
+
+        expect(mockPrismaService.usuario.findUnique).toHaveBeenCalledWith({
+          where: { matricula },
+        });
+        expect(bcrypt.compare).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each(['25047381', '240581739'])(
+      'deve preservar a aceitação de MONITOR para matrícula de %s',
+      async (matricula) => {
+        mockUsuarioLogin('MONITOR', matricula);
+
+        const resultado = await service.login({ matricula, senha: 'senha123' });
+
+        expect(bcrypt.compare).toHaveBeenCalledWith('senha123', 'hash');
+        expect(resultado.accessToken).toBe('meu-token-jwt-falso');
+      },
+    );
 
     it('deve lançar erro se a senha estiver errada', async () => {
       mockPrismaService.usuario.findUnique.mockResolvedValue({

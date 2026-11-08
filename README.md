@@ -70,27 +70,35 @@ flowchart LR
 Siga o passo a passo abaixo para clonar, configurar e rodar o projeto localmente do zero.
 
 ### Pré-requisitos Essenciais
-- **Node.js**: Versão `24 LTS` recomendada ([Download Node.js](https://nodejs.org/)).
-- **pnpm**: Gerenciador de pacotes oficial. Ative via Corepack no terminal:
-  ```bash
-  corepack enable
-  corepack prepare pnpm@latest --activate
-  ```
-- **Docker & Docker Compose**: Para execução do banco de dados local ([Download Docker](https://www.docker.com/)).
+- **Node.js**: Versão `>= 24` (Node 24 LTS recomendada; [Download Node.js](https://nodejs.org/)).
+- **pnpm**: Gerenciador de pacotes oficial pinado em `pnpm@11.19.0` (definido no `package.json` e ativado automaticamente via Corepack pelo script de bootstrap).
+- **Docker & Docker Compose**: Pré-requisito para execução do banco de dados PostgreSQL local ([Download Docker](https://www.docker.com/)). *Nota: o bootstrap apenas verifica e diagnostica o Docker/Compose; a instalação do Docker deve ser realizada manualmente pelo usuário fora dos scripts.*
+- **Sistemas Suportados pelo Bootstrap**: Debian/Ubuntu com `apt-get` e Windows com `winget`. Ambientes sem esses gerenciadores recebem orientação clara e encerramento, devendo instalar o Node.js >= 24 manualmente.
 
 ---
 
-### Passo 1: Clonar o Repositório e Instalar Dependências
+### Passo 1: Clonar o Repositório e Executar o Bootstrap
 
 Abra o terminal e execute:
 
 ```bash
 git clone https://github.com/Jeancaetano12/lauf-site-oficial.git
 cd lauf-site-oficial
-pnpm install
 ```
 
-O `pnpm` instalará e linkará automaticamente todos os workspaces (`apps/frontend`, `apps/backend` e `packages/shared`).
+Execute o script de bootstrap multiplataforma de desenvolvimento antes de qualquer comando manual:
+
+#### No Linux (Debian / Ubuntu com Bash):
+```bash
+bash scripts/bootstrap-dev.sh
+```
+
+#### No Windows (PowerShell):
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/bootstrap-dev.ps1
+```
+
+O bootstrap verifica/provisiona o Node.js >= 24, ativa o Corepack com o pin oficial `pnpm@11.19.0`, diagnostica a presença do Docker/Compose e executa `pnpm install` para instalar e linkar todos os workspaces (`apps/frontend`, `apps/backend` e `packages/shared`).
 
 ---
 
@@ -125,8 +133,11 @@ docker compose up -d
 # 2. Execute as migrations do banco:
 pnpm db:migrate
 
-# 3. Popule o banco com as contas e dados iniciais de teste (seed deliberado):
+# 3. Popule o banco com as contas e dados iniciais de teste (seed aditivo):
 pnpm db:seed
+
+# Caso esteja atualizando uma instalação anterior com matrículas legadas, use o reset forçado:
+# pnpm db:seed --force
 
 # 4. Inicie o Frontend e o Backend em paralelo:
 pnpm dev
@@ -140,13 +151,13 @@ pnpm dev
 
 ## 🔑 Credenciais Padrão de Desenvolvimento (Seed)
 
-O comando deliberado `pnpm db:seed` popula as contas de teste para que você possa explorar todas as áreas do sistema imediatamente:
+O comando deliberado `pnpm db:seed` popula as contas de teste preservando alterações já existentes. Para restaurar as credenciais oficiais originais em bancos preexistentes, execute `pnpm db:seed --force`.
 
-| Cargo / Perfil | E-mail | Senha | Permissões no Sistema |
-|---|---|---|---|
-| **Coordenador (Admin)** | `admin@lauf.com` | `senha123` | Acesso total: gestão de membros, aprovação de inscrições, criação de aulas e certificados |
-| **Professor** | `professor@lauf.com` | `senha123` | Gestão de aulas ministradas, chamada de presença e validação de QR Code |
-| **Aluno** | `aluno@lauf.com` | `senha123` | Inscrição em aulas, registro de presença em tempo real e visualização de certificados |
+| Cargo / Perfil | E-mail | Matrícula | Senha | Permissões no Sistema |
+|---|---|---|---|---|
+| **Coordenador (Admin)** | `admin@lauf.com` | `240581739` | `senha123` | Acesso total: gestão de membros, aprovação de inscrições, criação de aulas e certificados |
+| **Professor** | `professor@lauf.com` | `240694182` | `senha123` | Gestão de aulas ministradas, chamada de presença e validação de QR Code |
+| **Aluno** | `aluno@lauf.com` | `25047381` | `senha123` | Inscrição em aulas, registro de presença em tempo real e visualização de certificados |
 
 > [!TIP]
 > **Testes Diretos de API (Postman / curl / Thunder Client):**
